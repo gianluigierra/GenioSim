@@ -147,11 +147,18 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		// Generate the topology of edge data centers from an XML file
 		generateTopologyFromXmlFile();
 
+		//MODIFICA MIA, prima era così
 		// Connect one edge data center with the cloud data center using WAN link
-		ComputingNode dc1 = getDataCenterByName("dc1");
-		infrastructureTopology.addLink(new NetworkLinkWanUp(dc1, wanNode, simulationManager, NetworkLinkTypes.WAN));
-		infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, dc1, simulationManager, NetworkLinkTypes.WAN));
+		// ComputingNode dc1 = getDataCenterByName("dc1");
+		// infrastructureTopology.addLink(new NetworkLinkWanUp(dc1, wanNode, simulationManager, NetworkLinkTypes.WAN));
+		// infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, dc1, simulationManager, NetworkLinkTypes.WAN));
 		
+		//aggiunto da me, prima era sopra
+		for(ComputingNode edgeDC : computingNodesGenerator.getEdgeOnlyList()){
+			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, wanNode, simulationManager, NetworkLinkTypes.WAN));
+			infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, edgeDC, simulationManager, NetworkLinkTypes.WAN));
+		}
+
 		
 		// Connect each edge device with the closest edge data center using LAN link (SET DEVICE_TO_DEVICE LINK)
 		double range = SimulationParameters.edgeDataCentersRange;

@@ -1,9 +1,11 @@
 package examples.ExampleMio;
 
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.apache.commons.lang3.tuple.Pair;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
@@ -185,6 +187,22 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         }
     }
 
+    private int chooseAction2(double[] state, String[] architecture, Task task) {
+        Random rand = new Random();
+        if (rand.nextDouble() < epsilon) {
+            return randChoice(architecture, task);
+        } else {
+            // Get the action index based on the Q-values
+            int k = 0;
+            while(k < nodeList.size()){
+                int choice = getKthBestQAction(state, k); // Change the 1 to 2, 3, etc., for second, third best, etc.
+                if (offloadingIsPossible(task, nodeList.get(choice), architectureLayers)) return choice;
+                k++;
+            }
+            return 0;       //non può verificarsi 
+        }
+    }
+
     /*
     private int getMaxQAction(double[] state) {
         INDArray input = Nd4j.create(state);
@@ -198,6 +216,26 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         INDArray input = Nd4j.create(state).reshape(1, state.length);
         INDArray output = qNetwork.output(input);
         return Nd4j.argMax(output).getInt(0);
+    }
+
+    private int getKthBestQAction(double[] state, int k) {
+        // Reshape the input to be a 2D array with shape [1, state.length]
+        INDArray input = Nd4j.create(state).reshape(1, state.length);
+        INDArray output = qNetwork.output(input);
+        
+        // Create a list to store Q-values with their corresponding indices
+        List<Pair<Double, Integer>> qValues = new ArrayList<>();
+        
+        // Iterate through the output and store Q-values and indices as Pair
+        for (int i = 0; i < output.length(); i++) {
+            qValues.add(Pair.of(output.getDouble(i), i)); // Using Pair.of() method
+        }
+        
+        // Sort the list based on Q-values in descending order
+        qValues.sort((pair1, pair2) -> Double.compare(pair2.getKey(), pair1.getKey()));
+        
+        // Return the index of the kth best action (0-based index)
+        return qValues.get(k).getValue();
     }
     
 
@@ -368,7 +406,9 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         double[] state = getCurrentState2(nodeList, task);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
-        int action = chooseAction(state, architecture, task);
+        int action = chooseAction2(state, architecture, task);
+
+        //System.out.println("Action: " + action);
     
         // Esegui l'azione e ottieni lo stato successivo
         PerformAction(action, task);
@@ -526,7 +566,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
             reward -= 30;
         }
 
-        System.out.println("Clock " + simulationManager.getSimulation().clock() + ", reward: " +reward);
+        //System.out.println("Clock " + simulationManager.getSimulation().clock() + ", reward: " +reward);
     
         return reward;
     }
