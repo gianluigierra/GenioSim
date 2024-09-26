@@ -245,8 +245,8 @@ public class ComputingNodesGenerator {
 			
 			//Generates ONT in accordance with the number of edge devices (except sensors).
 			
-			for(int i = 0; i < mistOnlyListSensorsExcluded.size(); i++) {
-				ComputingNode computingNode = createComputingNode(ONT_Element, type);
+			for(int i = 0; i < mistOnlyList.size(); i++) {										//MODIFICA MIA, genero gli ONT anche vicino ai sensori. Prima era: (int i = 0; i < mistOnlyListSensorsExcluded.size(); i++)
+				ComputingNode computingNode = createComputingNode(ONT_Element, type);			//appunto: nel defaultopologycreator i sensori si collegano agli ONT mediante LAN. Si potrebbe impostare collegamento WAN
 				ONT_List.add(computingNode);
 				ONTandServer_List.add(computingNode);
 				//allNodesList.add(computingNode);

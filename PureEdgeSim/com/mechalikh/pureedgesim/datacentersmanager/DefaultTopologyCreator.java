@@ -139,7 +139,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		// infrastructureTopology.addLink(new NetworkLinkWanUp(dc1, wanNode, simulationManager, NetworkLinkTypes.WAN));
 		// infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, dc1, simulationManager, NetworkLinkTypes.WAN));
 		
-		//aggiunto da me, prima era sopra
+		//MODIFICA MIA, aggiunto da me prima era come fatto sopra
 		for(ComputingNode edgeDC : computingNodesGenerator.getEdgeOnlyList()){
 			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, wanNode, simulationManager, NetworkLinkTypes.WAN));
 			infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, edgeDC, simulationManager, NetworkLinkTypes.WAN));
