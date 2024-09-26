@@ -67,9 +67,6 @@ public class Example3 {
 		// changing the simulation settings folder
 		sim.setCustomSettingsFolder(settingsPath);
 
-		//changing custom mobility model
-		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
-
 		// Start the simulation
 		sim.launchSimulation();
 	}

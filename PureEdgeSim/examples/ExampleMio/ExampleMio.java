@@ -28,7 +28,7 @@ public class ExampleMio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// To change the mobility model
-		//sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
+		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
 		
 		// To change the computing node class
 		//sim.setCustomComputingNode(Example4CustomComputingNode.class);

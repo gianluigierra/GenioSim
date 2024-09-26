@@ -86,7 +86,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		ComputingNode wanNode = createWanLink();
 		
 		
-		//Connect each edge device to the closest ONT using Ethernet Link (LAN)
+		//Connect each edge device to the closest ONT using their selected Connectivity method (LAN)
 		for (ComputingNode edgeDevice : computingNodesGenerator.getMistOnlyList()) {
 			NetworkLink DeviceUp;
 			NetworkLink DeviceDown;
@@ -102,12 +102,14 @@ public class DefaultTopologyCreator extends TopologyCreator {
 					}
 				}
 			}
-			DeviceUp = new NetworkLinkEthernet(edgeDevice, closestONT, simulationManager, NetworkLinkTypes.LAN);
-			DeviceDown = new NetworkLinkEthernet(closestONT, edgeDevice, simulationManager, NetworkLinkTypes.LAN);
-			infrastructureTopology.addLink(DeviceUp);
-			infrastructureTopology.addLink(DeviceDown);
-			edgeDevice.setCurrentLink(DeviceUp, LinkOrientation.UP_LINK);
-			edgeDevice.setCurrentLink(DeviceDown, LinkOrientation.DOWN_LINK);
+			//MODIFICA MIA, questo connect sotto non c'era. C'erano tutte le righe commentate qua sotto, invece
+			connect(edgeDevice, closestONT, NetworkLinkTypes.LAN);
+			// DeviceUp = new NetworkLinkEthernet(edgeDevice, closestONT, simulationManager, NetworkLinkTypes.LAN);
+			// DeviceDown = new NetworkLinkEthernet(closestONT, edgeDevice, simulationManager, NetworkLinkTypes.LAN);
+			// infrastructureTopology.addLink(DeviceUp);
+			// infrastructureTopology.addLink(DeviceDown);
+			// edgeDevice.setCurrentLink(DeviceUp, LinkOrientation.UP_LINK);
+			// edgeDevice.setCurrentLink(DeviceDown, LinkOrientation.DOWN_LINK);
 			edgeDevice.getCurrentLink(LinkOrientation.UP_LINK).setDst(closestONT);
 			edgeDevice.getCurrentLink(LinkOrientation.DOWN_LINK).setSrc(closestONT);
 			closestONT.setAsConnect(true);
@@ -139,7 +141,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		// infrastructureTopology.addLink(new NetworkLinkWanUp(dc1, wanNode, simulationManager, NetworkLinkTypes.WAN));
 		// infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, dc1, simulationManager, NetworkLinkTypes.WAN));
 		
-		//MODIFICA MIA, aggiunto da me prima era come fatto sopra
+		//MODIFICA MIA, aggiunto da me prima era come fatto sopra. Questa modifica impone all'architettura di realizzare una connessione da ogni EdgeDC verso il Cloud
 		for(ComputingNode edgeDC : computingNodesGenerator.getEdgeOnlyList()){
 			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, wanNode, simulationManager, NetworkLinkTypes.WAN));
 			infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, edgeDC, simulationManager, NetworkLinkTypes.WAN));

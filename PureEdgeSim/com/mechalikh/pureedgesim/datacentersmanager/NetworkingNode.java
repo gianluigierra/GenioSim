@@ -63,7 +63,7 @@ public abstract class NetworkingNode extends AbstractNode  {
 		case UP_LINK:
 			return this.currentUpLink;
 		case DOWN_LINK:
-			return this.currentUpLink;
+			return this.currentDownLink;							//MODIFICA MIA, prima era uplink....ho dovuto debuggare
 		case DEVICE_TO_DEVICE:
 			return this.currentDeviceToDeviceWifiLink;
 		default:
@@ -85,7 +85,7 @@ public abstract class NetworkingNode extends AbstractNode  {
 			this.currentUpLink = link;
 			break;
 		case DOWN_LINK:
-			this.currentUpLink = link;
+			this.currentDownLink = link;							//MODIFICA MIA, prima era uplink....ho dovuto debuggare
 			break;
 		case DEVICE_TO_DEVICE:
 			this.currentDeviceToDeviceWifiLink = link;
