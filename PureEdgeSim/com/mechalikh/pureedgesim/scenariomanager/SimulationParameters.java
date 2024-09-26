@@ -525,7 +525,7 @@ public class SimulationParameters {
 	 * destination (the node that actually executes the task).
 	 * 
 	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNode#getOrchestrator()
-	 * @see examples.Example7
+	 * @see examples.Examples_PES.Example7
 	 */
 	public static boolean enableOrchestrators;
 
@@ -534,7 +534,7 @@ public class SimulationParameters {
 	 * centers, edge device, or custom strategy.
 	 * 
 	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNode#getOrchestrator()
-	 * @see examples.Example7
+	 * @see examples.Examples_PES.Example7
 	 */
 	public static String deployOrchestrators;
 
@@ -557,14 +557,14 @@ public class SimulationParameters {
 	 * If enable, a container will be pulled from the registry before executing the
 	 * task.
 	 * 
-	 * @see examples.Example7
+	 * @see examples.Examples_PES.Example7
 	 */
 	public static boolean enableRegistry;
 
 	/**
 	 * Sets a custom strategy for downloading containers.
 	 * 
-	 * @see examples.Example7
+	 * @see examples.Examples_PES.Example7
 	 */
 	public static String registryMode;
 

@@ -519,31 +519,24 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         double reward = 100.0;
     
         // Ricompensa/penalizzazione basata sulla RAM disponibile
-        if (avgRam < nodeList.get(action).getAvailableRam()) {  // Se la RAM disponibile è abbondante (oltre l'80%)
-            reward += 20;
-        } else if (avgRam < 0.5) {  // Penalizzazione per bassa disponibilità di RAM
-            reward -= 30;
-        }
-    
+        if (avgRam < nodeList.get(action).getAvailableRam()) reward += 20;
+        else if (avgRam < nodeList.get(action).getAvailableRam()) reward -= 30;
+        
         // Penalizzazione per carico CPU elevato
-        if (cpuLoad < nodeList.get(action).getAvgCpuUtilization()) {  // Se il carico della CPU è molto alto
-            reward -= 15;
-        } else {  // Incentivo per carico CPU moderato o basso
-            reward += 15;
-        }
+        if (cpuLoad < nodeList.get(action).getAvgCpuUtilization()) reward -= 15;
+        else if (cpuLoad > nodeList.get(action).getAvgCpuUtilization()) reward += 15;
     
         // Ricompensa per disponibilità di storage
-        if (avgStorage < nodeList.get(action).getAvailableStorage()) {
-            reward += 10;  // Abbondante storage disponibile
-        } else {
-            reward -= 20;  // Penalizzazione per storage quasi pieno
-        }
+        if (avgStorage < nodeList.get(action).getAvailableStorage()) reward += 10;  // Abbondante storage disponibile
+        else if (avgStorage > nodeList.get(action).getAvailableStorage()) reward -= 20;  // Penalizzazione per storage quasi pieno
     
         // Ricompensa per nodi con potenza di calcolo elevata (MIPS)
-        if (nodeList.get(action).getTotalMipsCapacity() > avgMips) {  // Ricompensa per MIPS molto alti
-            reward += 30;
-        } else {  // Penalizzazione per MIPS troppo bassi
-            reward -= 25;
+        if (nodeList.get(action).getTotalMipsCapacity() > avgMips)  reward += 30;
+        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMips) reward -= 25;      
+
+        //penalizzo il nodo per avere i task che non sono stati ancora eseguiti
+        for(Task TaskI : nodeList.get(action).getTasksQueue()){
+            if(TaskI.getTotalDelay() > TaskI.getMaxLatency()*0.8) reward -= 10;
         }
     
         // Penalizzazione per latenza eccessiva
@@ -553,6 +546,8 @@ public class DQNOrchestrator extends DefaultOrchestrator {
             reward -= 0;
         }
     
+        /* 
+
         // Penalizzazione per dimensioni del file eccessive
         if (nodeList.get(action).getAvailableStorage() > fileSizeInBits) {  // Se il file è più grande di 1 MB
             reward += 5;
@@ -565,6 +560,8 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         } else {  // Reward altrimenti
             reward -= 30;
         }
+
+        */
 
         //System.out.println("Clock " + simulationManager.getSimulation().clock() + ", reward: " +reward);
     

@@ -60,8 +60,8 @@ public class SimLog {
 
 	// Tasks execution results
 	protected int generatedTasksCount = 0;
-	public int tasksSent = 0;								//modifica mia, era protected
-	public int tasksFailed = 0;								//modifica mia, era protected
+	public int tasksSent = 0;								//MODIFICA MIA, era protected
+	public int tasksFailed = 0;								//MODIFICA MIA, era protected
 	protected int tasksFailedLatency = 0;
 	protected int tasksFailedMobility = 0;
 	protected int tasksFailedRessourcesUnavailable = 0;
@@ -190,7 +190,7 @@ public class SimLog {
 	            .collect(Collectors.toList());
 	}
 
-	//modifica mia, era protected
+	//MODIFICA MIA, era protected
 	public double getCpuUtilization(List<ComputingNode> list) {
 		double averageCpuUtilization = 0;
 		for (ComputingNode node : list) {

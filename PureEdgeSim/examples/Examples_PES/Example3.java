@@ -18,7 +18,7 @@
  *     
  *     @author Charafeddine Mechalikh
  **/
-package examples;
+package examples.Examples_PES;
 
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 
@@ -50,10 +50,10 @@ public class Example3 {
 	 * @since PureEdgeSim 3.1
 	 */
 	// Below is the path for the settings folder of this example
-	private static String settingsPath = "PureEdgeSim/examples/Example3_settings/";
+	private static String settingsPath = "PureEdgeSim/examples/Examples_PES/Example3_settings/";
 
 	// The custom output folder is
-	private static String outputPath = "PureEdgeSim/examples/Example3_output/";
+	private static String outputPath = "PureEdgeSim/examples/Examples_PES/Example3_output/";
 
 	public Example3() {
 		// Create a PureEdgeSim simulation
@@ -66,6 +66,9 @@ public class Example3 {
 
 		// changing the simulation settings folder
 		sim.setCustomSettingsFolder(settingsPath);
+
+		//changing custom mobility model
+		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
 
 		// Start the simulation
 		sim.launchSimulation();

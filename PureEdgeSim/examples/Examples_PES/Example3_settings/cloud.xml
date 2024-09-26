@@ -4,6 +4,10 @@
 		<idleConsumption>0</idleConsumption>
 		<maxConsumption>5776</maxConsumption>
 		<isOrchestrator>false</isOrchestrator> <!-- it has a task orchestrator or not  -->
+		<location>
+			<x_pos>100</x_pos>
+			<y_pos>190</y_pos>
+		</location>
 		<cores>200</cores>
 		<mips>40000</mips>
 		<ram>16000</ram>

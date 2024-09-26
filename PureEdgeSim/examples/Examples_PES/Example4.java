@@ -18,38 +18,41 @@
  *     
  *     @author Charafeddine Mechalikh
  **/
-package examples;
+package examples.Examples_PES;
 
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 
-public class Example2 {
+public class Example4 {
 	/**
-	 * This is a simple example showing how to launch simulation using a custom
-	 * mobility model. by removing it, pureEdgeSim will use the default model.
+	 * This is a simple example showing how to launch simulation using a custom Edge
+	 * device/ data center class . by removing it, PureEdgeSim will use the default
+	 * one.
 	 * 
 	 * @author Charafeddine Mechalikh
 	 * @since PureEdgeSim 2.2
 	 */
-	public Example2() {
+	public Example4() {
+
 		// Create a PureEdgeSim simulation
 		Simulation sim = new Simulation();
 
 		/*
-		 * To use your custom mobility model, do this: The custom mobility manager class
-		 * can be found in the examples folder as well. by removing this line,
-		 * pureEdgeSim will use the default mobility model.
+		 * To use your custom class to update the computing nodes classes, do this: The
+		 * custom nodes status updater class can be found in the examples folder as
+		 * well. by removing this line, PureEdgeSim will use its default class.
 		 */
-		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
+		sim.setCustomComputingNode(Example4CustomComputingNode.class);
 
-		// To use the PureEdgeSim default Mobility Manager you can also uncomment this:
-		// setCustomMobilityModel(MobilityManager.class);
+		// To use the PureEdgeSim default edge data centers class you can also uncomment
+		// this:
+		// setCustomEdgeDataCenters(DefaultEdgeDataCenter.class);
 
 		// Start the simulation
 		sim.launchSimulation();
 	}
 
 	public static void main(String[] args) {
-		new Example2();
+		new Example4();
 	}
 
 }

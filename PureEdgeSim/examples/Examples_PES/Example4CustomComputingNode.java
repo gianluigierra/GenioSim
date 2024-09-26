@@ -18,7 +18,7 @@
  *     
  *     @author Charafeddine Mechalikh
  **/
-package examples;
+package examples.Examples_PES;
 
 import com.mechalikh.pureedgesim.datacentersmanager.DefaultComputingNode;
 import com.mechalikh.pureedgesim.simulationengine.Event; 

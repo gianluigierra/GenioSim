@@ -18,7 +18,8 @@
  *     
  *     @author Charafeddine Mechalikh
  **/
-package examples; 
+package examples.Example_1; 
+import examples.Examples_PES.*;
 import com.mechalikh.pureedgesim.datacentersmanager.DefaultTopologyCreator;
 import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
@@ -36,9 +37,22 @@ public class Example1 {
 	 * @author Charafeddine Mechalikh
 	 * @since  PureEdgeSim 2.2
 	 */
+
+	// Below is the path for the settings folder of this example
+	private static String settingsPath = "PureEdgeSim/examples/Example_1/Example1_settings/";
+
+	// The custom output folder is
+	private static String outputPath = "PureEdgeSim/examples/Example_1/Example1_output/";
+
 	public Example1() {	
 		//Create a PureEdgeSim simulation
 		Simulation sim = new Simulation();
+
+		// changing the default output folder
+		sim.setCustomOutputFolder(outputPath);
+
+		// changing the simulation settings folder
+		sim.setCustomSettingsFolder(settingsPath);
 
 		// To change the mobility model
 		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);

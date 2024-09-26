@@ -103,9 +103,7 @@ public class DefaultOrchestrator extends Orchestrator {
 		}
 		// Assign the tasks to the obtained computing node.
 		historyMap.put(selected, minTasksCount + 1);
-
 		
-        System.out.println("Clock " + simulationManager.getSimulation().clock() + ", selected: " + selected);
 		return selected;
 	}
 

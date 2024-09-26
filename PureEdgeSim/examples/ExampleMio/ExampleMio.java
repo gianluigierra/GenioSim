@@ -6,8 +6,8 @@ import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 
-import examples.Example2CustomMobilityModel;
-import examples.Example4CustomComputingNode;
+import examples.Examples_PES.Example2CustomMobilityModel;
+import examples.Examples_PES.Example4CustomComputingNode;
 
 public class ExampleMio {
 
@@ -28,10 +28,10 @@ public class ExampleMio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// To change the mobility model
-		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
+		//sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
 		
 		// To change the computing node class
-		sim.setCustomComputingNode(Example4CustomComputingNode.class);
+		//sim.setCustomComputingNode(Example4CustomComputingNode.class);
 		
 		// To change the tasks generator
 		sim.setCustomTaskGenerator(DefaultTaskGenerator.class); 
