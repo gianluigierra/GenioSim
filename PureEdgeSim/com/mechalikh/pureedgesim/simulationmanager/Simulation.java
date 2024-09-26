@@ -33,6 +33,7 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.scenariomanager.ApplicationFileParser;
 import com.mechalikh.pureedgesim.scenariomanager.DatacentersParser;
 import com.mechalikh.pureedgesim.scenariomanager.EdgeDevicesParser;
+import com.mechalikh.pureedgesim.scenariomanager.ONTParser;
 
 /**
  * The {@code Simulation} class represents the main class of PureEdgeSim. By
@@ -173,6 +174,7 @@ public class Simulation extends SimulationAbstract {
 	 */
 	protected boolean checkFiles() {
 		return (new EdgeDevicesParser(SimulationParameters.edgeDevicesFile).parse()
+				&& new ONTParser(SimulationParameters.OntFile, TYPES.ONT).parse()								//MODIFICA MIA, prima non era presente
 				&& new DatacentersParser(SimulationParameters.edgeDataCentersFile, TYPES.EDGE_DATACENTER).parse()
 				&& new DatacentersParser(SimulationParameters.cloudDataCentersFile, TYPES.CLOUD).parse()
 				&& new ParametersParser(SimulationParameters.simulationParametersFile).parse()

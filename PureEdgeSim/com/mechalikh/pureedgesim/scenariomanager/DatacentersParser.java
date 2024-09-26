@@ -37,14 +37,19 @@ public class DatacentersParser extends ComputingNodesParser {
 
 			if (type == TYPES.CLOUD) {
 				SimulationParameters.numberOfCloudDataCenters++;
-			} else {
+				Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);					//MODIFICA MIA, non erano presenti queste info sul cloud
+				isElementPresent(location, "x_pos");																			//originariamente la posizione non era necessaria sul cloud
+				isElementPresent(location, "y_pos");																			//Luciano però l'ha aggiunta, quindi la parsizzo	
+				assertDouble(location, "x_pos", value -> (value >= 0), ">= 0. Check the " + file + " file!");				//
+				assertDouble(location, "y_pos", value -> (value > 0), "> 0. Check the " + file + " file!");				//
+			} else if (type == TYPES.EDGE_DATACENTER){																				//MODIFICA MIA, qui non era presente l'if. Era solo else
 				SimulationParameters.numberOfEdgeDataCenters++;
 				Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
 				isElementPresent(location, "x_pos");
 				isElementPresent(location, "y_pos");
 				assertDouble(location, "x_pos", value -> (value >= 0), ">= 0. Check the " + file + " file!");
 				assertDouble(location, "y_pos", value -> (value > 0), "> 0. Check the " + file + " file!");
-			}
+			} 
 
 		}
 		return true;

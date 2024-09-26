@@ -82,6 +82,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 	 */
 	@Override
 	public void generateTopologyGraph() {
+
 		// Create a WAN link to connect all the edge devices to the cloud data center
 		ComputingNode wanNode = createWanLink();
 		

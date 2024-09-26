@@ -24,9 +24,9 @@ public abstract class XmlFileParser extends FileParserAbstract {
 		checkArgument("Element", key, element, value);
 	}
 
-	protected void isAttribtuePresent(Element element, String key) {
+	protected void isAttributePresent(Element element, String key) {				//MODIFICA MIA, c'era scritto attribtue...
 		String value = element.getAttribute(key);
-		checkArgument("Attribure", key, element, value);
+		checkArgument("Attribute", key, element, value);
 
 	}
 

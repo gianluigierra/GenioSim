@@ -47,7 +47,7 @@ public class ApplicationFileParser extends XmlFileParser {
 				Node appNode = appList.item(i);
 
 				Element appElement = (Element) appNode;
-				isAttribtuePresent(appElement, "name");
+				isAttributePresent(appElement, "name");				//MODIFICA MIA, c'era scritto attribtue...
 
 				for (String element : List.of("type", "latency", "usage_percentage", "container_size", "request_size",
 						"results_size", "task_length", "rate"))

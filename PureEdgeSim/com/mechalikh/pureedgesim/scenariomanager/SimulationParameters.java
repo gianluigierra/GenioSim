@@ -158,6 +158,13 @@ public class SimulationParameters {
 	public static int simulationMapWidth;
 
 	/**
+	 * The number of ONTs.
+	 * 
+	 * @see com.mechalikh.pureedgesim.scenariomanager.DatacentersParser#typeSpecificChecking(org.w3c.dom.Document)
+	 */
+	public static int numberOfONTs;
+
+	/**
 	 * The number of edge data centers.
 	 * 
 	 * @see com.mechalikh.pureedgesim.scenariomanager.DatacentersParser#typeSpecificChecking(org.w3c.dom.Document)
