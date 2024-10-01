@@ -107,6 +107,9 @@ public abstract class Orchestrator extends SimEntity {
 		architectureLayers = new String[] { "Cloud", "Mist" };
 		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
 				.getMistAndCloudListSensorsExcluded();
+		for(ComputingNode node : nodeList)
+			if(node.getType() == SimulationParameters.TYPES.CLOUD)
+				nodeList.remove(node);
 		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getCloudOnlyList()){
 			for(Host host : datacenter.getHostList()){
 				nodeList.addAll(host.getVMList());
@@ -131,6 +134,9 @@ public abstract class Orchestrator extends SimEntity {
 		architectureLayers = new String[] { "Mist", "Edge" };
 		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
 				.getMistAndEdgeListSensorsExcluded();
+		for(ComputingNode node : nodeList)
+			if(node.getType() == SimulationParameters.TYPES.EDGE_DATACENTER)
+				nodeList.remove(node);
 		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
 			for(Host host : datacenter.getHostList()){
 				nodeList.addAll(host.getVMList());
@@ -143,7 +149,16 @@ public abstract class Orchestrator extends SimEntity {
 	protected void all() {
 		architectureLayers = new String[]{ "Cloud", "Edge", "Mist" };
 		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getAllNodesListSensorsExcluded();
+				.getAllNodesListSensorsExcluded();		
+				
+		for(ComputingNode node : nodeList)
+		if(node.getType() == SimulationParameters.TYPES.CLOUD)
+			nodeList.remove(node);
+
+		for(ComputingNode node : nodeList)
+		if(node.getType() == SimulationParameters.TYPES.EDGE_DATACENTER)
+			nodeList.remove(node);
+
 		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
 			for(Host host : datacenter.getHostList()){
 				nodeList.addAll(host.getVMList());
@@ -208,9 +223,9 @@ public abstract class Orchestrator extends SimEntity {
 		SimulationParameters.TYPES nodeType = node.getType();
 		return true;}
 		/**
-		return ((arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.CLOUD) // cloud
+		return ((arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.VM_CLOUD) // cloud
 																										// computing
-				|| (arrayContains(architectureLayers, "Edge") && nodeType == SimulationParameters.TYPES.EDGE_DATACENTER // Edge
+				|| (arrayContains(architectureLayers, "Edge") && nodeType == SimulationParameters.TYPES.VM_EDGE // Edge
 																													// computing
 				// Compare destination (edge data server) and origin (edge device)
 				// locations, if they are in same area offload to this edge data server

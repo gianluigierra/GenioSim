@@ -50,7 +50,7 @@ public class NetworkLink extends SimEntity {
 	protected boolean scheduled = false;
 
 	public enum NetworkLinkTypes {
-		WAN, FIBER, MAN, LAN, IGNORE
+		WAN, FIBER, MAN, LAN, IGNORE, HYPER
 	}
 
 	protected NetworkLinkTypes type;

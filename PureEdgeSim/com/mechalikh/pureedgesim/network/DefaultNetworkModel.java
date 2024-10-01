@@ -127,9 +127,26 @@ public class DefaultNetworkModel extends NetworkModel {
 
 			if (simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id)) {
 				path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id);
+				// System.out.println("Sono qui!");
+				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				// System.out.print("[");
+				//for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				//System.out.print("]");
+				//System.out.println("");
+				if(path.getLength() == 0){
+					path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+					simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+				}
+
 			} else {
 				path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+				// System.out.println("Adesso qui!");
+				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				// System.out.print("[");
+				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				// System.out.print("]");
+				// System.out.println("");
 			}
 			vertexList.addAll(path.getVertexList());
 			edgeList.addAll(path.getEdgeList());

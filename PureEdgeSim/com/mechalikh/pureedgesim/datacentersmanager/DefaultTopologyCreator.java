@@ -22,8 +22,8 @@ package com.mechalikh.pureedgesim.datacentersmanager;
 
 import com.mechalikh.pureedgesim.network.NetworkLink.NetworkLinkTypes;
 
-
-
+import org.jgrapht.graph.DirectedWeightedMultigraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -149,19 +149,19 @@ public class DefaultTopologyCreator extends TopologyCreator {
 			infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, edgeDC, simulationManager, NetworkLinkTypes.WAN));
 		}
 
-		//Connect each EdgeDC with his Hosts and VMs via Hypervisor. Per ora ho messo WAN poichè devo ancora creare una connessione di quel tipo.
-		for(DataCenter datacenter : computingNodesGenerator.getEdgeOnlyList()){
+		//Connect each EdgeDC and CloudDC with his Hosts and VMs via Hypervisor. Per ora ho messo IGNORE poichè devo ancora creare una connessione di quel tipo.
+		for(DataCenter datacenter : computingNodesGenerator.getEdgeAndCloudList()){
 
 			for(Host host : datacenter.getHostList()){
-				infrastructureTopology.addLink(new NetworkLinkWanUp(datacenter, host, simulationManager, NetworkLinkTypes.WAN));
-				infrastructureTopology.addLink(new NetworkLinkWanDown(host, datacenter, simulationManager, NetworkLinkTypes.WAN));
+				infrastructureTopology.addLink(new NetworkLinkHyperUp(datacenter, host, simulationManager, NetworkLinkTypes.HYPER));
+				infrastructureTopology.addLink(new NetworkLinkHyperDown(host, datacenter, simulationManager, NetworkLinkTypes.HYPER));
 				
 				datacenter.getCurrentLink(LinkOrientation.UP_LINK).setDst(host);
 				datacenter.getCurrentLink(LinkOrientation.DOWN_LINK).setSrc(host);
 
 				for(VM vm : host.getVMList()){
-					infrastructureTopology.addLink(new NetworkLinkWanUp(vm, host, simulationManager, NetworkLinkTypes.WAN));
-					infrastructureTopology.addLink(new NetworkLinkWanDown(host, vm, simulationManager, NetworkLinkTypes.WAN));
+					infrastructureTopology.addLink(new NetworkLinkHyperUp(vm, host, simulationManager, NetworkLinkTypes.HYPER));
+					infrastructureTopology.addLink(new NetworkLinkHyperDown(host, vm, simulationManager, NetworkLinkTypes.HYPER));
 				
 					host.getCurrentLink(LinkOrientation.UP_LINK).setDst(vm);
 					host.getCurrentLink(LinkOrientation.DOWN_LINK).setSrc(vm);
@@ -218,27 +218,29 @@ public class DefaultTopologyCreator extends TopologyCreator {
 			simulationManager.getNetworkModel().getFiberDown().add(ONTdown);
 		}
 		
-		/**
-		DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
-		System.out.println("Nodi:");
-        for (ComputingNode node : graph.vertexSet()) {
-            System.out.println(" - " + node.getName());
-        }
+		
+		//QUESTI DUE SOTTO SERVONO PER STAMPARE LA TOPOLOGIA
+		// DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
+		// System.out.println("Nodi:");
+        // for (ComputingNode node : graph.vertexSet()) {
+        //     System.out.println(" - " + node.getName());
+        // }
 
-        // Stampa tutti gli archi
-        System.out.println("\nCollegamenti:");
-        for (NetworkLink edge : graph.edgeSet()) {
-            ComputingNode sourceNode = graph.getEdgeSource(edge);
-            ComputingNode targetNode = graph.getEdgeTarget(edge);
-            NetworkLinkTypes tipo = edge.getType();
+        // // Stampa tutti gli archi
+        // System.out.println("\nCollegamenti:");
+        // for (NetworkLink edge : graph.edgeSet()) {
+        //     ComputingNode sourceNode = graph.getEdgeSource(edge);
+        //     ComputingNode targetNode = graph.getEdgeTarget(edge);
+        //     NetworkLinkTypes tipo = edge.getType();
 
-            System.out.println(" - " + sourceNode.getName() + " -> " + targetNode.getName() + ", Rete: " + tipo);
-        }
-		*/
+        //     System.out.println(" - " + sourceNode.getName() + " -> " + targetNode.getName() + ", Rete: " + tipo);
+        // }
+		
 		
 		// Save the shortest paths between all computing nodes
 		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getEdgeAndCloudList());
 		infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandServer_List());
+		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandVM_List());
 	}
 	
 	/**

@@ -150,6 +150,11 @@ public class ComputingNodesGenerator {
 	 * A list that contains Cloud, datacenter and ONT
 	*/
 	protected List<ComputingNode> ONTandServer_List;
+
+	/**
+	 * A list that contains ONT and VMs
+	*/
+	protected List<ComputingNode> ONTandVM_List;
 	
 	/**
 	 * A list that contains ONT Devices
@@ -195,6 +200,7 @@ public class ComputingNodesGenerator {
 		this.mistOnlyList = new ArrayList<>(simulationManager.getScenario().getDevicesCount());
 		this.ONT_List = new ArrayList<>(simulationManager.getScenario().getDevicesCount());
 		this.ONTandServer_List = new ArrayList<>(SimulationParameters.numberOfEdgeDataCenters + SimulationParameters.numberOfCloudDataCenters);
+		this.ONTandVM_List = new ArrayList<>();
 		this.mistOnlyListSensorsExcluded = new ArrayList<>(simulationManager.getScenario().getDevicesCount());
 		this.mistAndCloudListSensorsExcluded = new ArrayList<>(
 				simulationManager.getScenario().getDevicesCount() + SimulationParameters.numberOfCloudDataCenters);
@@ -250,6 +256,7 @@ public class ComputingNodesGenerator {
 				ComputingNode computingNode = createComputingNode(ONT_Element, type);			//appunto: nel defaultopologycreator i sensori si collegano agli ONT mediante wifi. 
 				ONT_List.add(computingNode);
 				ONTandServer_List.add(computingNode);
+				ONTandVM_List.add(computingNode);
 				//allNodesList.add(computingNode);
 				//allNodesListSensorsExcluded.add(computingNode);
 			}
@@ -560,6 +567,8 @@ public class ComputingNodesGenerator {
 		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement, mobilityModel);
 
 		dataCenter.setMobilityModel(mobilityModel);
+		
+		dataCenter.setType(type);
 
 		dataCenter.setAsOrchestrator(Boolean
 				.parseBoolean(datacenterElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
@@ -583,7 +592,9 @@ public class ComputingNodesGenerator {
 
 		}
 		
-		dataCenter.setType(type);
+		for(Host host : dataCenter.getHostList()){
+			ONTandVM_List.addAll(host.getVMList());
+		}
 
 		return dataCenter;
 	}
@@ -728,6 +739,13 @@ public class ComputingNodesGenerator {
 	 */
 	public List<ComputingNode> getONTandServer_List(){
 		return this.ONTandServer_List;
+	}
+	
+	/**
+	 * Gets the list containing ONT and VMs
+	 */
+	public List<ComputingNode> getONTandVM_List(){
+		return this.ONTandVM_List;
 	}
 
 }

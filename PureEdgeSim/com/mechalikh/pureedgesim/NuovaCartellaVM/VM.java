@@ -235,6 +235,8 @@ public class VM extends LocationAwareNode {
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
 
+		this.Host.submitTask(task);
+
 		// If a CPU core and enough RAM are available, execute task directly
 		if (availableCores > 0 && this.getAvailableRam() > task.getContainerSizeInMBytes()) {
 			startExecution(task);
@@ -242,8 +244,6 @@ public class VM extends LocationAwareNode {
 		// Otherwise, add it to the execution queue
 		else
 			getTasksQueue().add(task);
-
-		this.Host.submitTask(task);
 	}
 
 	protected void startExecution(Task task) {
@@ -254,6 +254,9 @@ public class VM extends LocationAwareNode {
 		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
 		// Update the number of available cores.
 		availableCores--;
+
+		this.Host.startExecution(task);
+
 		// Record when the execution has started.
 		task.setExecutionStartTime(getSimulation().clock());
 
@@ -277,8 +280,6 @@ public class VM extends LocationAwareNode {
 
 		// Schedule when the execution will be finished.
 		schedule(this, (task.getLength() / mipsPerCore), EXECUTION_FINISHED, task);
-
-		this.Host.startExecution(task);
 	}
 
 	public double getMipsPerCore() {

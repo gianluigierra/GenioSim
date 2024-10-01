@@ -105,6 +105,15 @@ public class Host extends LocationAwareNode {
 	}
 
 	@Override
+	public void setName(String name){
+		this.name = name;
+		for(VM vm : VMlist){
+			if(this.getType() == SimulationParameters.TYPES.HOST_EDGE) vm.setName("VM Edge " + vm.getId());
+			else vm.setName("VM Cloud " + vm.getId());
+		}
+	}
+
+	@Override
 	public void setType(SimulationParameters.TYPES type){
 		this.nodeType = type;
 		for(VM vm : VMlist){
@@ -287,8 +296,6 @@ public class Host extends LocationAwareNode {
 		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
 		// Update the number of available cores.
 		availableCores--;
-		// Record when the execution has started.
-		task.setExecutionStartTime(getSimulation().clock());
 
 		/*
 		 * Arguably, the correct way to get energy consumption measurement is to place

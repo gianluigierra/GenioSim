@@ -98,6 +98,15 @@ public class DataCenter extends LocationAwareNode {
 	}
 
 	@Override
+	public void setName(String name){
+		this.name = name;
+		for(Host host : HostList){
+			if(this.getType() == SimulationParameters.TYPES.EDGE_DATACENTER) host.setName("Host Edge " + host.getId());
+			else host.setName("Host Cloud " + host.getId());
+		}
+	}
+
+	@Override
 	public void setType(SimulationParameters.TYPES type){
 		this.nodeType = type;
 		for(Host host : HostList){
@@ -297,8 +306,6 @@ public class DataCenter extends LocationAwareNode {
 		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
 		// Update the number of available cores.
 		availableCores--;
-		// Record when the execution has started.
-		task.setExecutionStartTime(getSimulation().clock());
 
 		/*
 		 * Arguably, the correct way to get energy consumption measurement is to place
