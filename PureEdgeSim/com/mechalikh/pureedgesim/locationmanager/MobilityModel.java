@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.NuovaCartellaVM.DataCenter;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 
@@ -170,11 +171,11 @@ public abstract class MobilityModel {
 
 	}
 
-	protected ComputingNode getDataCenter() {
-		List<ComputingNode> list = getSimulationManager().getDataCentersManager().getComputingNodesGenerator()
+	protected DataCenter getDataCenter() {
+		List<DataCenter> list = getSimulationManager().getDataCentersManager().getComputingNodesGenerator()
 				.getEdgeOnlyList();
 		double range = SimulationParameters.edgeDataCentersRange;
-		ComputingNode closestDC = ComputingNode.NULL;
+		DataCenter closestDC = null;
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).isPeripheral() && distanceTo(list.get(i)) <= range) {
 				range = distanceTo(list.get(i));

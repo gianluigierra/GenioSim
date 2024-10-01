@@ -363,6 +363,7 @@
 
 
 	<dependencies>
+
 		<!-- Deeplearning4j -->
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>

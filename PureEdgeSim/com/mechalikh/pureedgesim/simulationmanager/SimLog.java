@@ -657,9 +657,9 @@ public class SimLog {
 
 	public void taskSentFromOrchToDest(Task task) {
 		SimulationParameters.TYPES type = task.getOffloadingDestination().getType();
-		if (type == SimulationParameters.TYPES.CLOUD) {
+		if (type == SimulationParameters.TYPES.VM_CLOUD) {
 			this.tasksExecutedOnCloud++;
-		} else if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
+		} else if (type == SimulationParameters.TYPES.VM_EDGE) {
 			this.tasksExecutedOnEdge++;
 		} else if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
 			this.tasksExecutedOnMist++;

@@ -219,7 +219,7 @@ public class NetworkLink extends SimEntity {
 		if (type == NetworkLinkTypes.LAN)
 			transfer.setLanNetworkUsage(transfer.getLanNetworkUsage() + transferDelay);
 		
-		// Update MAN network usage delay
+		// Update FIBER network usage delay
 		else if (type == NetworkLinkTypes.FIBER)
 			transfer.setFiberNetworkUsage(transfer.getFiberNetworkUsage() + transferDelay);
 

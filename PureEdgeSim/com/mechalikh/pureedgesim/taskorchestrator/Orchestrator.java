@@ -19,7 +19,9 @@
  *     @author Charaf Eddine Mechalikh
  **/
 package com.mechalikh.pureedgesim.taskorchestrator;
+import java.util.ArrayList;
 import java.util.List;
+
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
@@ -27,9 +29,10 @@ import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 public abstract class Orchestrator extends SimEntity {
-	protected List<ComputingNode> nodeList;
+	protected List<ComputingNode> nodeList = new ArrayList<>();
 	protected SimulationManager simulationManager;
 	protected SimLog simLog;
 	protected String algorithmName;
@@ -44,7 +47,7 @@ public abstract class Orchestrator extends SimEntity {
 		algorithmName = simulationManager.getScenario().getStringOrchAlgorithm();
 		architectureName = simulationManager.getScenario().getStringOrchArchitecture();
 		initialize();
-	}
+	}	
 
 	// Find an offloading location for this task
 	public void orchestrate(Task task) {
@@ -80,16 +83,22 @@ public abstract class Orchestrator extends SimEntity {
 	// cloud virtual machines (vms)
 	protected void cloudOnly() {
 		architectureLayers = new String[] { "Cloud" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getCloudOnlyList();
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getCloudOnlyList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}
 	}
 
 	// If the orchestration scenario is EDGE_AND_CLOUD send Tasks only to edge data
 	// centers or cloud virtual machines (vms)
 	protected void edgeAndCloud() {
 		architectureLayers = new String[]{ "Cloud", "Edge" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getEdgeAndCloudList();
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeAndCloudList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}		
 	}
 
 	// If the orchestration scenario is MIST_AND_CLOUD send Tasks only to edge
@@ -98,14 +107,22 @@ public abstract class Orchestrator extends SimEntity {
 		architectureLayers = new String[] { "Cloud", "Mist" };
 		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
 				.getMistAndCloudListSensorsExcluded();
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getCloudOnlyList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}
 	}
 
 	// If the orchestration scenario is EDGE_ONLY send Tasks only to edge data
 	// centers
 	protected void edgeOnly() {
 		architectureLayers = new String[]{ "Edge" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getEdgeOnlyList();
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}
 	}
 
 	// If the orchestration scenario is MIST_AND_Edge send Tasks only to edge
@@ -114,6 +131,11 @@ public abstract class Orchestrator extends SimEntity {
 		architectureLayers = new String[] { "Mist", "Edge" };
 		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
 				.getMistAndEdgeListSensorsExcluded();
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}
 	}
 
 	// If the orchestration scenario is ALL send Tasks to any virtual machine (vm)
@@ -122,6 +144,16 @@ public abstract class Orchestrator extends SimEntity {
 		architectureLayers = new String[]{ "Cloud", "Edge", "Mist" };
 		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
 				.getAllNodesListSensorsExcluded();
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}
+		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getCloudOnlyList()){
+			for(Host host : datacenter.getHostList()){
+				nodeList.addAll(host.getVMList());
+			}
+		}
 	}
 
 	protected abstract int findComputingNode(String[] architectureLayers, Task task);

@@ -18,49 +18,49 @@
 				<VMs>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>3750</mips>
+						<mips>30000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM>

@@ -42,6 +42,7 @@ import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
+import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
@@ -168,25 +169,25 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			NodeList datacenterList = doc.getElementsByTagName("datacenter");
 			for (int i = 0; i < datacenterList.getLength(); i++) {
 				Element datacenterElement = (Element) datacenterList.item(i);
-				ComputingNode computingNode = createComputingNode(datacenterElement, type);
-				if (computingNode.getType() == TYPES.CLOUD) {
-					cloudOnlyList.add(computingNode);
-					mistAndCloudListSensorsExcluded.add(computingNode);
+				DataCenter DataCenterNode = createDatacenterNode(datacenterElement, type);
+				if (DataCenterNode.getType() == TYPES.CLOUD) {
+					cloudOnlyList.add(DataCenterNode);
+					mistAndCloudListSensorsExcluded.add(DataCenterNode);
 					if (SimulationParameters.enableOrchestrators
 							&& "CLOUD".equals(SimulationParameters.deployOrchestrators)) {
-						orchestratorsList.add(computingNode);
+						orchestratorsList.add(DataCenterNode);
 					}
 				} else {
-					edgeOnlyList.add(computingNode);
-					mistAndEdgeListSensorsExcluded.add(computingNode);
+					edgeOnlyList.add(DataCenterNode);
+					mistAndEdgeListSensorsExcluded.add(DataCenterNode);
 					if (SimulationParameters.enableOrchestrators
 							&& "EDGE".equals(SimulationParameters.deployOrchestrators)) {
-						orchestratorsList.add(computingNode);
+						orchestratorsList.add(DataCenterNode);
 					}
 				}
-				allNodesList.add(computingNode);
-				allNodesListSensorsExcluded.add(computingNode);
-				edgeAndCloudList.add(computingNode);
+				allNodesList.add(DataCenterNode);
+				allNodesListSensorsExcluded.add(DataCenterNode);
+				edgeAndCloudList.add(DataCenterNode);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -247,23 +248,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		computingNode.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
 
-		if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
-			String name = datacenterElement.getAttribute("name");
-			computingNode.setName(name);
-			Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
-			xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-			yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
-			datacenterLocation = new Location(xPosition, yPosition);
-
-			for (int i = 0; i < edgeOnlyList.size(); i++)
-				if (datacenterLocation.equals(edgeOnlyList.get(i).getMobilityModel().getCurrentLocation()))
-					throw new IllegalArgumentException(
-							" Each Edge Data Center must have a different location, check the \"edge_datacenters.xml\" file!");
-
-			computingNode.setPeriphery(
-					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
-
-		} else if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
+		if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
 			mobile = Boolean.parseBoolean(datacenterElement.getElementsByTagName("mobility").item(0).getTextContent());
 			speed = Double.parseDouble(datacenterElement.getElementsByTagName("speed").item(0).getTextContent());
 			minPauseDuration = Double
@@ -301,6 +286,65 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		computingNode.setMobilityModel(mobilityModel);
 
 		return computingNode;
+	}
+	
+	protected DataCenter createDatacenterNode(Element datacenterElement, SimulationParameters.TYPES type)
+			throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		// SecureRandom is preferred to generate random values.
+		Boolean mobile = false;
+		double speed = 0;
+		double minPauseDuration = 0;
+		double maxPauseDuration = 0;
+		double minMobilityDuration = 0;
+		double maxMobilityDuration = 0;
+		int xPosition = -1;
+		int yPosition = -1;
+		double idleConsumption = Double
+				.parseDouble(datacenterElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
+		double maxConsumption = Double
+				.parseDouble(datacenterElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
+
+		Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
+		xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+		yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+		Location datacenterLocation = new Location(xPosition, yPosition);
+
+		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
+		MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
+				datacenterLocation)).setMobile(mobile).setSpeed(speed).setMinPauseDuration(minPauseDuration)
+				.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
+				.setMaxMobilityDuration(maxMobilityDuration);
+
+		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement, mobilityModel);
+
+		dataCenter.setMobilityModel(mobilityModel);
+
+		dataCenter.setAsOrchestrator(Boolean
+				.parseBoolean(datacenterElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
+
+		if (dataCenter.isOrchestrator())
+			orchestratorsList.add(dataCenter);
+
+		dataCenter.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
+
+		dataCenter.setType(type);
+
+		if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
+			String name = datacenterElement.getAttribute("name");
+			dataCenter.setName(name);
+
+			for (int i = 0; i < edgeOnlyList.size(); i++)
+				if (datacenterLocation.equals(edgeOnlyList.get(i).getMobilityModel().getCurrentLocation()))
+					throw new IllegalArgumentException(
+							" Each Edge Data Center must have a different location, check the \"edge_datacenters.xml\" file!");
+
+			dataCenter.setPeriphery(
+					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
+
+		}
+
+		return dataCenter;
 	}
 
 }

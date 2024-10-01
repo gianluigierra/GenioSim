@@ -28,6 +28,7 @@ import java.util.List;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
+import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
@@ -94,7 +95,7 @@ public class CPUChart extends Chart {
 		// Only if Edge computing is used
 		if (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE")
 				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
-			List<ComputingNode> edgeOnlyList = computingNodesGenerator.getEdgeOnlyList();
+			List<DataCenter> edgeOnlyList = computingNodesGenerator.getEdgeOnlyList();
 			double edgeUsageValue = edgeOnlyList.stream().mapToDouble(ComputingNode::getAvgCpuUtilization).average()
 					.orElse(0.0);
 			edgeUsage.add(edgeUsageValue);
@@ -107,7 +108,7 @@ public class CPUChart extends Chart {
 	 * chart.
 	 */
 	protected void cloudCpuUsage() {
-		List<ComputingNode> cloudOnlyList = computingNodesGenerator.getCloudOnlyList();
+		List<DataCenter> cloudOnlyList = computingNodesGenerator.getCloudOnlyList();
 		double cloudUsageValue = cloudOnlyList.parallelStream().mapToDouble(ComputingNode::getAvgCpuUtilization).sum();
 		cloudUsage.add(cloudUsageValue);
 		updateSeries(getChart(), "Cloud", toArray(currentTime), toArray(cloudUsage), SeriesMarkers.NONE, Color.BLACK);

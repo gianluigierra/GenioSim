@@ -52,6 +52,7 @@ import com.mechalikh.pureedgesim.network.NetworkLinkWifiDown;
 import com.mechalikh.pureedgesim.network.NetworkLinkWifiUp;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
+import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 
 /**
@@ -89,8 +90,8 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		
 		//Connect each edge device to the closest ONT using their selected Connectivity method (LAN)
 		for (ComputingNode edgeDevice : computingNodesGenerator.getMistOnlyList()) {
-			NetworkLink DeviceUp;
-			NetworkLink DeviceDown;
+			//NetworkLink DeviceUp;
+			//NetworkLink DeviceDown;
 			ComputingNode closestONT = ComputingNode.NULL;
 			double shortestDistanceToONT = Double.MAX_VALUE;
 			for (ComputingNode ONTDevice : computingNodesGenerator.getONT_List()) {
@@ -146,6 +147,28 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		for(ComputingNode edgeDC : computingNodesGenerator.getEdgeOnlyList()){
 			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, wanNode, simulationManager, NetworkLinkTypes.WAN));
 			infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, edgeDC, simulationManager, NetworkLinkTypes.WAN));
+		}
+
+		//Connect each EdgeDC with his Hosts and VMs via Hypervisor. Per ora ho messo WAN poichè devo ancora creare una connessione di quel tipo.
+		for(DataCenter datacenter : computingNodesGenerator.getEdgeOnlyList()){
+
+			for(Host host : datacenter.getHostList()){
+				infrastructureTopology.addLink(new NetworkLinkWanUp(datacenter, host, simulationManager, NetworkLinkTypes.WAN));
+				infrastructureTopology.addLink(new NetworkLinkWanDown(host, datacenter, simulationManager, NetworkLinkTypes.WAN));
+				
+				datacenter.getCurrentLink(LinkOrientation.UP_LINK).setDst(host);
+				datacenter.getCurrentLink(LinkOrientation.DOWN_LINK).setSrc(host);
+
+				for(VM vm : host.getVMList()){
+					infrastructureTopology.addLink(new NetworkLinkWanUp(vm, host, simulationManager, NetworkLinkTypes.WAN));
+					infrastructureTopology.addLink(new NetworkLinkWanDown(host, vm, simulationManager, NetworkLinkTypes.WAN));
+				
+					host.getCurrentLink(LinkOrientation.UP_LINK).setDst(vm);
+					host.getCurrentLink(LinkOrientation.DOWN_LINK).setSrc(vm);
+				}
+
+			}
+
 		}
 
 		

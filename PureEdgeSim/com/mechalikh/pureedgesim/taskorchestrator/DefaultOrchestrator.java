@@ -103,7 +103,6 @@ public class DefaultOrchestrator extends Orchestrator {
 		}
 		// Assign the tasks to the obtained computing node.
 		historyMap.put(selected, minTasksCount + 1);
-		
 		return selected;
 	}
 

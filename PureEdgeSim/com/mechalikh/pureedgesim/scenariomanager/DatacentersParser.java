@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 
+//MODIFICA MIA, ho modificato praticamente tutto il file per effettuare il corretto parsing degli EdgeDC e del Cloud con le VM
 public class DatacentersParser extends ComputingNodesParser {
 
 	public DatacentersParser(String file, TYPES type) {
@@ -68,16 +69,14 @@ public class DatacentersParser extends ComputingNodesParser {
 					isElementPresent(vmElement, "storage");
 
 					cores += Double.parseDouble(vmElement.getElementsByTagName("cores").item(0).getTextContent());
-					mips += Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
+					mips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
+					if(Hostmips < mips)  throw new IllegalArgumentException( getClass().getSimpleName() + " - Error, the mips of VMs must be lower-equal than the mips of the Host!\"");
 					ram += Double.parseDouble(vmElement.getElementsByTagName("ram").item(0).getTextContent());
 					storage += Double.parseDouble(vmElement.getElementsByTagName("storage").item(0).getTextContent());
 
 				}
 
-				System.out.println(Hostcores + " " + cores);
-
 				if(Hostcores < cores) throw new IllegalArgumentException( getClass().getSimpleName() + " - Error, the sum of cores of VMs must be lower-equal than the cores of the Host!");
-				if(Hostmips < mips)  throw new IllegalArgumentException( getClass().getSimpleName() + " - Error, the sum of Mips of VMs must be lower-equal to the Mips of the Host!");
 				if(Hostram < ram)  throw new IllegalArgumentException( getClass().getSimpleName() + " - Error, the sum of ram of VMs must be lower-equal than the ram of the Host!\"");
 				if(Hoststorage < storage)  throw new IllegalArgumentException( getClass().getSimpleName() + " - Error, the sum of storage of VMs must be lower-equal than the storage of the Host!");
 

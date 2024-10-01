@@ -45,7 +45,8 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.simulationmanager.SimLog;
+import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
+import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 /**
  * This class is responsible for generating the computing resources from the
@@ -110,7 +111,7 @@ public class ComputingNodesGenerator {
 	 * @see com.mechalikh.pureedgesim.taskorchestrator.Orchestrator#edgeOnly(Task
 	 *      task)
 	 */
-	protected List<ComputingNode> edgeOnlyList = new ArrayList<>(SimulationParameters.numberOfEdgeDataCenters);
+	protected List<DataCenter> edgeOnlyList = new ArrayList<>(SimulationParameters.numberOfEdgeDataCenters);
 
 	/**
 	 * A list that contains only cloud data centers.
@@ -118,7 +119,7 @@ public class ComputingNodesGenerator {
 	 * @see com.mechalikh.pureedgesim.taskorchestrator.Orchestrator#cloudOnly(Task
 	 *      task)
 	 */
-	protected List<ComputingNode> cloudOnlyList = new ArrayList<>(SimulationParameters.numberOfCloudDataCenters);
+	protected List<DataCenter> cloudOnlyList = new ArrayList<>(SimulationParameters.numberOfCloudDataCenters);
 
 	/**
 	 * A list that contains cloud data centers and edge devices (except sensors).
@@ -134,7 +135,7 @@ public class ComputingNodesGenerator {
 	 * @see com.mechalikh.pureedgesim.taskorchestrator.Orchestrator#edgeAndCloud(Task
 	 *      task)
 	 */
-	protected List<ComputingNode> edgeAndCloudList = new ArrayList<>(
+	protected List<DataCenter> edgeAndCloudList = new ArrayList<>(
 			SimulationParameters.numberOfCloudDataCenters + SimulationParameters.numberOfEdgeDataCenters);
 
 	/**
@@ -259,7 +260,6 @@ public class ComputingNodesGenerator {
 		
 	}
 	
-	
 	/**
 	 * Generates edge devices
 	 */
@@ -368,26 +368,27 @@ public class ComputingNodesGenerator {
 			NodeList datacenterList = doc.getElementsByTagName("datacenter");
 			for (int i = 0; i < datacenterList.getLength(); i++) {
 				Element datacenterElement = (Element) datacenterList.item(i);
-				ComputingNode computingNode = createComputingNode(datacenterElement, type);
-				if (computingNode.getType() == TYPES.CLOUD) {
-					cloudOnlyList.add(computingNode);
-					mistAndCloudListSensorsExcluded.add(computingNode);
+				//ComputingNode computingNode = createComputingNode(datacenterElement, type);
+				DataCenter DC = createDatacenterNode(datacenterElement, type);
+				if (DC.getType() == TYPES.CLOUD) {
+					cloudOnlyList.add(DC);
+					mistAndCloudListSensorsExcluded.add(DC);
 					if (SimulationParameters.enableOrchestrators
 							&& SimulationParameters.deployOrchestrators == "CLOUD") {
-						orchestratorsList.add(computingNode);
+						orchestratorsList.add(DC);
 					}
 				} else {
-					edgeOnlyList.add(computingNode);
-					mistAndEdgeListSensorsExcluded.add(computingNode);
+					edgeOnlyList.add(DC);
+					mistAndEdgeListSensorsExcluded.add(DC);
 					if (SimulationParameters.enableOrchestrators
 							&& SimulationParameters.deployOrchestrators == "EDGE") {
-						orchestratorsList.add(computingNode);
+						orchestratorsList.add(DC);
 					}
 				}
-				allNodesList.add(computingNode);
-				allNodesListSensorsExcluded.add(computingNode);
-				edgeAndCloudList.add(computingNode);
-				ONTandServer_List.add(computingNode);
+				allNodesList.add(DC);
+				allNodesListSensorsExcluded.add(DC);
+				edgeAndCloudList.add(DC);
+				ONTandServer_List.add(DC);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -397,7 +398,6 @@ public class ComputingNodesGenerator {
 	/**
 	 * Creates the computing nodes.
 	 * 
-	 * @see #generateDataCenters(String, TYPES)
 	 * @see #generateDevicesInstances(Element)
 	 * 
 	 * @param datacenterElement The configuration file.
@@ -446,32 +446,8 @@ public class ComputingNodesGenerator {
 			orchestratorsList.add(computingNode);
 
 		computingNode.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
-		
-		if (type == SimulationParameters.TYPES.CLOUD) {
-			
-			Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
-			xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-			yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
-			datacenterLocation = new Location(xPosition, yPosition);
-		}
-		
-		if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
-			String name = datacenterElement.getAttribute("name");
-			computingNode.setName(name);
-			Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
-			xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-			yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
-			datacenterLocation = new Location(xPosition, yPosition);
 
-			for (int i = 0; i < edgeOnlyList.size(); i++)
-				if (datacenterLocation.equals(edgeOnlyList.get(i).getMobilityModel().getCurrentLocation()))
-					throw new IllegalArgumentException(
-							" Each Edge Data Center must have a different location, check the \"edge_datacenters.xml\" file!");
-
-			computingNode.setPeriphery(
-					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
-
-		} else if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
+	 	if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
 			computingNode.setName("Edge Device id " + DeviceCount);
 			DeviceCount ++;
 			mobile = Boolean.parseBoolean(datacenterElement.getElementsByTagName("mobility").item(0).getTextContent());
@@ -515,14 +491,14 @@ public class ComputingNodesGenerator {
 			ONTcount++;
 			
 		}
-		
+
 		/**
 		//Generates the ONT like a data center
 		if (type == SimulationParameters.TYPES.ONT) {
 			type = SimulationParameters.TYPES.EDGE_DATACENTER;
 		}
 		*/
-		
+
 		computingNode.setType(type);
 		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
 		MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
@@ -533,6 +509,83 @@ public class ComputingNodesGenerator {
 		computingNode.setMobilityModel(mobilityModel);
 
 		return computingNode;
+	}
+	
+
+	/**
+	 * Creates the Datacenter nodes.
+	 * 
+	 * @see #generateDataCenters(String, TYPES)
+	 * @see #generateDevicesInstances(Element)
+	 * 
+	 * @param datacenterElement The configuration file.
+	 * @param type              The type, whether an MIST (edge) device, an EDGE
+	 *                          data center, or a CLOUD one.
+	 * @throws NoSuchAlgorithmException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 */
+	protected DataCenter createDatacenterNode(Element datacenterElement, SimulationParameters.TYPES type)
+			throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		// SecureRandom is preferred to generate random values.
+		Boolean mobile = false;
+		double speed = 0;
+		double minPauseDuration = 0;
+		double maxPauseDuration = 0;
+		double minMobilityDuration = 0;
+		double maxMobilityDuration = 0;
+		int xPosition = -1;
+		int yPosition = -1;
+		double idleConsumption = Double
+				.parseDouble(datacenterElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
+		double maxConsumption = Double
+				.parseDouble(datacenterElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
+
+		Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
+		xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+		yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+		Location datacenterLocation = new Location(xPosition, yPosition);
+
+		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
+		MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
+				datacenterLocation)).setMobile(mobile).setSpeed(speed).setMinPauseDuration(minPauseDuration)
+				.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
+				.setMaxMobilityDuration(maxMobilityDuration);
+
+		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement, mobilityModel);
+
+		dataCenter.setMobilityModel(mobilityModel);
+
+		dataCenter.setAsOrchestrator(Boolean
+				.parseBoolean(datacenterElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
+
+		if (dataCenter.isOrchestrator())
+			orchestratorsList.add(dataCenter);
+
+		dataCenter.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
+
+		if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
+			String name = datacenterElement.getAttribute("name");
+			dataCenter.setName(name);
+
+			for (int i = 0; i < edgeOnlyList.size(); i++)
+				if (datacenterLocation.equals(edgeOnlyList.get(i).getMobilityModel().getCurrentLocation()))
+					throw new IllegalArgumentException(
+							" Each Edge Data Center must have a different location, check the \"edge_datacenters.xml\" file!");
+
+			dataCenter.setPeriphery(
+					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
+
+		}
+		
+		dataCenter.setType(type);
+
+		return dataCenter;
 	}
 
 	/**
@@ -584,7 +637,7 @@ public class ComputingNodesGenerator {
 	 * 
 	 * @return the list containing all edge data centers and servers.
 	 */
-	public List<ComputingNode> getEdgeOnlyList() {
+	public List<DataCenter> getEdgeOnlyList() {
 		return this.edgeOnlyList;
 	}
 
@@ -595,7 +648,7 @@ public class ComputingNodesGenerator {
 	 * 
 	 * @return the list containing all generated cloud data centers.
 	 */
-	public List<ComputingNode> getCloudOnlyList() {
+	public List<DataCenter> getCloudOnlyList() {
 		return this.cloudOnlyList;
 	}
 
@@ -619,7 +672,7 @@ public class ComputingNodesGenerator {
 	 * 
 	 * @return the list containing cloud and edge data centers.
 	 */
-	public List<ComputingNode> getEdgeAndCloudList() {
+	public List<DataCenter> getEdgeAndCloudList() {
 		return this.edgeAndCloudList;
 	}
 
