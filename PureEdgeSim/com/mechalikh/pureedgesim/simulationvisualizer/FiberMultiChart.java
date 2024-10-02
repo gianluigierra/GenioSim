@@ -32,7 +32,8 @@ public class FiberMultiChart extends Chart {
         super(title, xAxisTitle, yAxisTitle, simulationManager);
         getChart().getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
         // We can use the constant directly instead of computing it every time.
-        updateSize(0.0, 0.0, 0.0, SimulationParameters.FiberBandwidthBitsPerSecond / 1000000.0);
+        //updateSize(0.0, 0.0, 0.0, SimulationParameters.FiberBandwidthBitsPerSecond / 1000000.0);
+        updateSize(0.0, 0.0, 0.0, null);
     }
 
     /**
@@ -76,7 +77,8 @@ public class FiberMultiChart extends Chart {
         }
 
         // Update the chart with the new data.
-        updateSize(currentTime - 200, currentTime, 0.0, SimulationParameters.FiberBandwidthBitsPerSecond / 1000000.0);
+        //updateSize(currentTime - 200, currentTime, 0.0, SimulationParameters.FiberBandwidthBitsPerSecond / 1000000.0);
+        updateSize(currentTime - 200, currentTime, 0.0, null);
 
         // Update the series for each element in the map.
         for (Map.Entry<String, Double> entry : fiberUpUsage.entrySet()) {

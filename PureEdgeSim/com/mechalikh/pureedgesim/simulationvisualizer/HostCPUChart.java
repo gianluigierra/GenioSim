@@ -42,8 +42,6 @@ public class HostCPUChart extends Chart {
         
     protected ArrayList<Map<String, Double>> HostEdgeCpuUsageData = new ArrayList<>();
     protected ArrayList<Map<String, Double>> HostCloudCpuUsageData = new ArrayList<>();
-	protected List<Double> currentTime = new ArrayList<>(
-			(int) (SimulationParameters.simulationDuration / SimulationParameters.updateInterval));
 
 	/**
 	 * Constructs a CPUChart object.
@@ -63,8 +61,6 @@ public class HostCPUChart extends Chart {
 	 * Updates the chart with the latest CPU usage data.
 	 */
 	public void update() {
-		int currentTimeValue = (int) simulationManager.getSimulation().clock();
-		currentTime.add((double) currentTimeValue);
 
         Map<String, Double> HostEdgeCpuUsage = new HashMap<>();
         Map<String, Double> HostCloudCpuUsage = new HashMap<>();
@@ -89,11 +85,12 @@ public class HostCPUChart extends Chart {
 
             HostEdgeCpuUsageData.add(HostEdgeCpuUsage);
 
+            //Se decommento questo devo decommentare anche sotto "update the chart with new data" in quanto questi mi visualizzano solo le percentuali recenti di Cpu
             // Remove old data points.
-            int maxDataPoints = (int) (300 / SimulationParameters.chartsUpdateInterval);
-            while (HostEdgeCpuUsageData.size() > maxDataPoints) {
-                HostEdgeCpuUsageData.remove(0);
-            }
+            // int maxDataPoints = (int) (300 / SimulationParameters.chartsUpdateInterval);
+            // while (HostEdgeCpuUsageData.size() > maxDataPoints) {
+            //     HostEdgeCpuUsageData.remove(0);
+            // }
 
             // Compute the time values for the data points.
             double[] time = new double[HostEdgeCpuUsageData.size()];
@@ -103,7 +100,7 @@ public class HostCPUChart extends Chart {
             }
 
             // Update the chart with the new data.
-            updateSize(currentTime - 200, currentTime, 0.0, null);
+            //updateSize(currentTime - 200, currentTime, 0.0, null);
 
             // Update the series for each element in the map.
             for (Map.Entry<String, Double> entry : HostEdgeCpuUsage.entrySet()) {
@@ -128,11 +125,12 @@ public class HostCPUChart extends Chart {
 
             HostCloudCpuUsageData.add(HostCloudCpuUsage);
 
+            //Se decommento questo devo decommentare anche sotto "update the chart with new data" in quanto questi mi visualizzano solo le percentuali recenti di Cpu
             // Remove old data points.
-            int maxDataPoints = (int) (300 / SimulationParameters.chartsUpdateInterval);
-            while (HostCloudCpuUsageData.size() > maxDataPoints) {
-                HostCloudCpuUsageData.remove(0);
-            }
+            // int maxDataPoints = (int) (300 / SimulationParameters.chartsUpdateInterval);
+            // while (HostCloudCpuUsageData.size() > maxDataPoints) {
+            //     HostCloudCpuUsageData.remove(0);
+            // }
 
             // Compute the time values for the data points.
             double[] time = new double[HostCloudCpuUsageData.size()];
@@ -142,7 +140,7 @@ public class HostCPUChart extends Chart {
             }
 
             // Update the chart with the new data.
-            updateSize(currentTime - 200, currentTime, 0.0, null);
+            //updateSize(currentTime - 200, currentTime, 0.0, null);
 
             // Update the series for each element in the map.
             for (Map.Entry<String, Double> entry : HostCloudCpuUsage.entrySet()) {
