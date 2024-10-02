@@ -299,6 +299,15 @@ public class ComputingNodeNull implements ComputingNode {
 	 * Does nothing since this Computing Node is supposed to be null.
 	 */
 	@Override
+	public int getAvailableCores() {
+		return -1;
+	}
+
+	/**
+	 * 
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	@Override
 	public void setApplicationType(int applicationType) {
 	}
 

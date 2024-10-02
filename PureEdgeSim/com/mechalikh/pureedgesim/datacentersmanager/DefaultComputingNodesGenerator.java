@@ -316,9 +316,11 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 				.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
 				.setMaxMobilityDuration(maxMobilityDuration);
 
-		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement, mobilityModel);
+		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement);
 
 		dataCenter.setMobilityModel(mobilityModel);
+		
+		dataCenter.setType(type);
 
 		dataCenter.setAsOrchestrator(Boolean
 				.parseBoolean(datacenterElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
@@ -327,8 +329,6 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			orchestratorsList.add(dataCenter);
 
 		dataCenter.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
-
-		dataCenter.setType(type);
 
 		if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
 			String name = datacenterElement.getAttribute("name");
@@ -342,6 +342,10 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			dataCenter.setPeriphery(
 					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
 
+		}
+		
+		for(Host host : dataCenter.getHostList()){
+			ONTandVM_List.addAll(host.getVMList());
 		}
 
 		return dataCenter;

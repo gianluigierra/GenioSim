@@ -133,6 +133,8 @@ public class DefaultNetworkModel extends NetworkModel {
 				//for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
 				//System.out.print("]");
 				//System.out.println("");
+
+				//it happened that the path had length 0 so it caused an error. In this case we establish a new path
 				if(path.getLength() == 0){
 					path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 					simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);

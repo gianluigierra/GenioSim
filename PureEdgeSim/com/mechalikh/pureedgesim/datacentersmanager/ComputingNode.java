@@ -354,6 +354,14 @@ public interface ComputingNode {
 	double getAvailableStorage();
 
 	/**
+	 * Gets available cores on this computing
+	 * node.
+	 * 
+	 * @return the available storage.
+	 */
+	int getAvailableCores();
+
+	/**
 	 * Sets the amount storage (in Megabytes) that is available on this computing
 	 * node.
 	 * 

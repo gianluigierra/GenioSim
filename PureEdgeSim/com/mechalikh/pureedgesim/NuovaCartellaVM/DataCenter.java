@@ -1,23 +1,3 @@
-/**
- *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
- *
- *     This file is part of PureEdgeSim Project.
- *
- *     PureEdgeSim is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     PureEdgeSim is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with PureEdgeSim. If not, see <http://www.gnu.org/licenses/>.
- *     
- *     @author Charafeddine Mechalikh
- **/
 package com.mechalikh.pureedgesim.NuovaCartellaVM;
 
 import java.util.ArrayList;
@@ -36,15 +16,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/**
- * This computing node class used by the simulator by default. PureEdgeSim's
- * users can extend it and use their custom class (@see
- * com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomComputingNode(Class))
- * 
- * 
- * @author Charafeddine Mechalikh
- * @since PureEdgeSim 5.0
- */
 public class DataCenter extends LocationAwareNode {
 
 	protected int applicationType;
@@ -65,13 +36,13 @@ public class DataCenter extends LocationAwareNode {
 
 	protected List<Host> HostList = new ArrayList<>();
 
-	public DataCenter(SimulationManager simulationManager, Element datacenterElement, MobilityModel mobilityModel) {
+	public DataCenter(SimulationManager simulationManager, Element datacenterElement) {
 		super(simulationManager);
-		createHosts(datacenterElement, simulationManager, mobilityModel);
+		createHosts(datacenterElement, simulationManager);
 		setDataCenterInfo();
 	}
 
-	private void createHosts(Element datacenterElement, SimulationManager simulationManager, MobilityModel mobilityModel) {
+	private void createHosts(Element datacenterElement, SimulationManager simulationManager) {
 
 		NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
 		for (int j = 0; j < hostNodeList.getLength(); j++) {
@@ -84,23 +55,41 @@ public class DataCenter extends LocationAwareNode {
 			double ram = Integer.parseInt(hostElement.getElementsByTagName("ram").item(0).getTextContent());
 
 			// Create Hosts
-			Host host = new Host(simulationManager, mips, numOfCores, storage, ram, this, hostElement, mobilityModel);
-			
-			host.setEnergyModel(new EnergyModelComputingNode(0, 0));
-
-			host.setAsOrchestrator(false);
-
+			Host host = new Host(simulationManager, mips, numOfCores, storage, ram, this, hostElement);
 			HostList.add(host);
 
-			host.setMobilityModel(mobilityModel);
 		}
 
+	}
+	
+	@Override 
+	public void setEnergyModel(EnergyModelComputingNode emcn){
+		this.energyModel = emcn;
+		for(Host host : this.HostList){
+			host.setEnergyModel(new EnergyModelComputingNode(0, 0));
+		}
+	}
+
+	@Override 
+	public void setAsOrchestrator(boolean isOrchestrator){
+		this.isOrchestrator = isOrchestrator;
+		for(Host host : this.HostList){
+			host.setAsOrchestrator(false);
+		}
+	}
+
+	@Override 
+	public void setMobilityModel(MobilityModel mobilityModel){
+		this.mobilityModel = mobilityModel;
+		for(Host host : this.HostList){
+			host.setMobilityModel(mobilityModel);
+		}
 	}
 
 	@Override
 	public void setName(String name){
 		this.name = name;
-		for(Host host : HostList){
+		for(Host host : this.HostList){
 			if(this.getType() == SimulationParameters.TYPES.EDGE_DATACENTER) host.setName("Host Edge " + host.getId());
 			else host.setName("Host Cloud " + host.getId());
 		}
@@ -109,7 +98,7 @@ public class DataCenter extends LocationAwareNode {
 	@Override
 	public void setType(SimulationParameters.TYPES type){
 		this.nodeType = type;
-		for(Host host : HostList){
+		for(Host host : this.HostList){
 			if(this.getType() == SimulationParameters.TYPES.EDGE_DATACENTER) host.setType(SimulationParameters.TYPES.HOST_EDGE);
 			else host.setType(SimulationParameters.TYPES.HOST_CLOUD);
 		}
@@ -143,6 +132,10 @@ public class DataCenter extends LocationAwareNode {
 		super.processEvent(e);
 		if (e.getTag() == EXECUTION_FINISHED)
 			executionFinished(e);
+	}
+
+	public int getAvailableCores(){
+		return availableCores;
 	}
 
 	public double getNumberOfCPUCores() {
@@ -214,13 +207,7 @@ public class DataCenter extends LocationAwareNode {
 	}
 
 	public List<Task> getTasksQueue() {
-		List <Task> tasksList = new ArrayList<>();
-
-		for(Host host : HostList){
-			tasksList.addAll(host.getTasksQueue());
-		}
-
-		return tasksList;
+		return tasksQueue;
 	}
 
 	public double getTotalStorage() {

@@ -254,7 +254,6 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		// To do so, first let's get the cloud data center.
 		// If you have more than one data center, you will need to link them all
 		ComputingNode cloud = computingNodesGenerator.getCloudOnlyList().get(0);
-		cloud.setName("CLOUD");
 
 		// If we want all data to be sent over the same wan network.
 		if (SimulationParameters.useOneSharedWanLink) {

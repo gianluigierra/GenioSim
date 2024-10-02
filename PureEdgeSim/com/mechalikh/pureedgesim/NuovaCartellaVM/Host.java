@@ -1,23 +1,3 @@
-/**
- *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
- *
- *     This file is part of PureEdgeSim Project.
- *
- *     PureEdgeSim is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     PureEdgeSim is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with PureEdgeSim. If not, see <http://www.gnu.org/licenses/>.
- *     
- *     @author Charafeddine Mechalikh
- **/
 package com.mechalikh.pureedgesim.NuovaCartellaVM;
 
 import java.util.ArrayList;
@@ -36,15 +16,6 @@ import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
 import com.mechalikh.pureedgesim.energy.EnergyModelComputingNode;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 
-/**
- * This computing node class used by the simulator by default. PureEdgeSim's
- * users can extend it and use their custom class (@see
- * com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomComputingNode(Class))
- * 
- * 
- * @author Charafeddine Mechalikh
- * @since PureEdgeSim 5.0
- */
 public class Host extends LocationAwareNode {
 	protected int applicationType;
 	protected boolean isSensor = false;
@@ -66,7 +37,7 @@ public class Host extends LocationAwareNode {
 	protected List<VM> VMlist = new ArrayList<>();
 
 	public Host(SimulationManager simulationManager, double mipsPerCore, int numberOfCPUCores,
-			double storage, double ram, DataCenter datacenter, Element hostElement,  MobilityModel mobilityModel) {
+			double storage, double ram, DataCenter datacenter, Element hostElement) {
 		super(simulationManager);
 		setStorage(storage);
 		setAvailableStorage(storage);
@@ -78,10 +49,10 @@ public class Host extends LocationAwareNode {
 		this.availableCores = numberOfCPUCores;
 
 		this.DataCenter = datacenter;
-		this.createVms(simulationManager, this, hostElement, mobilityModel);
+		this.createVms(simulationManager, this, hostElement);
 	}
 
-	private void createVms(SimulationManager simulationManager, Host host, Element hostElement,  MobilityModel mobilityModel) {
+	private void createVms(SimulationManager simulationManager, Host host, Element hostElement) {
 		NodeList vmNodeList = hostElement.getElementsByTagName("VM");
 		for (int k = 0; k < vmNodeList.getLength(); k++) {
 			Node vmNode = vmNodeList.item(k);
@@ -92,14 +63,34 @@ public class Host extends LocationAwareNode {
 			double vmStorage = Double.parseDouble(vmElement.getElementsByTagName("storage").item(0).getTextContent());
 			double vmRam = Double.parseDouble(vmElement.getElementsByTagName("ram").item(0).getTextContent());
 
+			//Create Vms
 			VM vm = new VM(simulationManager, vmMips, vmNumOfCores, vmStorage, vmRam, this);
-			
-			vm.setEnergyModel(new EnergyModelComputingNode(0, 0));
-
-			vm.setAsOrchestrator(false);
-
 			VMlist.add(vm);
 
+		}
+	}
+
+	@Override 
+	public void setEnergyModel(EnergyModelComputingNode emcn){
+		this.energyModel = emcn;
+		for(VM vm : this.VMlist){
+			vm.setEnergyModel(new EnergyModelComputingNode(emcn.getMaxActiveConsumption()/VMlist.size(), emcn.getIdleConsumption()/VMlist.size()));
+		}
+	}
+
+	@Override 
+	public void setAsOrchestrator(boolean isOrchestrator){
+		this.isOrchestrator = isOrchestrator;
+		for(VM vm : this.VMlist){
+			vm.setAsOrchestrator(isOrchestrator);
+		}
+	}
+
+
+	@Override 
+	public void setMobilityModel(MobilityModel mobilityModel){
+		this.mobilityModel = mobilityModel;
+		for(VM vm : this.VMlist){
 			vm.setMobilityModel(mobilityModel);
 		}
 	}
@@ -137,6 +128,10 @@ public class Host extends LocationAwareNode {
 			this.DataCenter.processEvent(e);
 			executionFinished(e);
 		}
+	}
+
+	public int getAvailableCores(){
+		return availableCores;
 	}
 
 	public double getNumberOfCPUCores() {
@@ -297,6 +292,8 @@ public class Host extends LocationAwareNode {
 		// Update the number of available cores.
 		availableCores--;
 
+		this.DataCenter.startExecution(task);
+
 		/*
 		 * Arguably, the correct way to get energy consumption measurement is to place
 		 * the following line of code within the processEvent(Event e) method of the
@@ -314,8 +311,6 @@ public class Host extends LocationAwareNode {
 		 * the static one there.
 		 */
 		getEnergyModel().updateDynamicEnergyConsumption(task.getLength(), this.getTotalMipsCapacity());
-
-		this.DataCenter.startExecution(task);
 	}
 
 	public double getMipsPerCore() {
@@ -332,8 +327,6 @@ public class Host extends LocationAwareNode {
 		setAvailableStorage(this.getAvailableStorage() + ((Task) e.getData()).getContainerSizeInMBytes());
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
-
-		this.DataCenter.executionFinished(e);
 
 	}
 

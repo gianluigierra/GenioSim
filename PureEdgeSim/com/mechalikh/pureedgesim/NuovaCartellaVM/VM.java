@@ -1,23 +1,3 @@
-/**
- *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
- *
- *     This file is part of PureEdgeSim Project.
- *
- *     PureEdgeSim is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     PureEdgeSim is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with PureEdgeSim. If not, see <http://www.gnu.org/licenses/>.
- *     
- *     @author Charafeddine Mechalikh
- **/
 package com.mechalikh.pureedgesim.NuovaCartellaVM;
 
 import java.util.ArrayList;
@@ -30,15 +10,6 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
 
-/**
- * This computing node class used by the simulator by default. PureEdgeSim's
- * users can extend it and use their custom class (@see
- * com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomComputingNode(Class))
- * 
- * 
- * @author Charafeddine Mechalikh
- * @since PureEdgeSim 5.0
- */
 public class VM extends LocationAwareNode {
 	protected int applicationType;
 	protected boolean isSensor = false;
@@ -56,7 +27,10 @@ public class VM extends LocationAwareNode {
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
 
-	protected Host Host;
+	//variabile booleana per fare condividere la queue dei task tra tutte le VM del dato datacenter
+	private static boolean sharedQueue = true;
+
+	protected Host Host;	//the host of this VM
 
 	public VM(SimulationManager simulationManager, double mipsPerCore, int numberOfCPUCores,
 			double storage, double ram, Host host) {
@@ -70,6 +44,8 @@ public class VM extends LocationAwareNode {
 		setNumberOfCPUCores(numberOfCPUCores);
 		this.availableCores = numberOfCPUCores;
 		this.Host = host;
+
+		if(sharedQueue) tasksQueue = this.getHost().getDataCenter().getTasksQueue();
 	}
 
 	public Host getHost(){
@@ -83,6 +59,10 @@ public class VM extends LocationAwareNode {
 			this.Host.processEvent(e);
 			executionFinished(e);
 		}
+	}
+
+	public int getAvailableCores(){
+		return availableCores;
 	}
 
 	public double getNumberOfCPUCores() {
@@ -317,7 +297,6 @@ public class VM extends LocationAwareNode {
 			startExecution(task);
 		}
 
-		this.Host.executionFinished(e);
 	}
 
 	@Override

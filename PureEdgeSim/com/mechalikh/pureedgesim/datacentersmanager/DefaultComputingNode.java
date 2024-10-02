@@ -76,6 +76,10 @@ public class DefaultComputingNode extends LocationAwareNode {
 			executionFinished(e);
 	}
 
+	public int getAvailableCores(){
+		return availableCores;
+	}
+
 	public double getNumberOfCPUCores() {
 		return numberOfCPUCores;
 	}

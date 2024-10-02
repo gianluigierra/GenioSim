@@ -564,7 +564,7 @@ public class ComputingNodesGenerator {
 				.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
 				.setMaxMobilityDuration(maxMobilityDuration);
 
-		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement, mobilityModel);
+		DataCenter dataCenter = new DataCenter(simulationManager, datacenterElement);
 
 		dataCenter.setMobilityModel(mobilityModel);
 		
@@ -590,6 +590,10 @@ public class ComputingNodesGenerator {
 			dataCenter.setPeriphery(
 					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
 
+		}
+		else {
+			//Imposto il nome del Cloud
+			dataCenter.setName("CloudDC");
 		}
 		
 		for(Host host : dataCenter.getHostList()){

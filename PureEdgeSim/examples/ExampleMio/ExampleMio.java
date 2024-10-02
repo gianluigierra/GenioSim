@@ -13,6 +13,7 @@ public class ExampleMio {
 
 	// Below is the path for the settings folder of this example
 	private static String settingsPath = "PureEdgeSim/examples/ExampleMio/ExampleMio_settings/";
+	//private static String settingsPath = "PureEdgeSim/examples/Example_1/Example1_settings/";
 
 	// The custom output folder is
 	private static String outputPath = "PureEdgeSim/examples/ExampleMio/ExampleMio_output/";
@@ -28,7 +29,7 @@ public class ExampleMio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// To change the mobility model
-		sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
+		//sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
 		
 		// To change the computing node class
 		//sim.setCustomComputingNode(Example4CustomComputingNode.class);
@@ -46,7 +47,7 @@ public class ExampleMio {
 		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
 		
         //cambio l'orchestratore con quello creatto da me
-	    sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+	    //sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
 		
 		/* to use the default one you can simply delete or comment those lines */
 

@@ -8,9 +8,21 @@
 			<x_pos>100</x_pos>
 			<y_pos>190</y_pos>
 		</location>
-		<cores>10</cores>
-		<mips>165000</mips>
-		<ram>32000</ram>
-		<storage>1000000</storage>
+		<hosts>
+		    <host>
+				<cores>8</cores>
+				<mips>165000</mips>
+				<ram>64000</ram>
+				<storage>1000000</storage>
+				<VMs>
+					<VM>
+						<cores>8</cores>
+						<mips>165000</mips>
+						<ram>64000</ram>
+						<storage>1000000</storage>
+					</VM> 
+				</VMs>
+			</host> 
+		</hosts>
 	</datacenter>
 </cloud_data_centers>
