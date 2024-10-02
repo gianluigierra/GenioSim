@@ -26,6 +26,7 @@ import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.style.Styler.ChartTheme;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.Marker;
+import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNodesGenerator;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
@@ -51,12 +52,12 @@ public abstract class Chart {
 	/**
 	 * The height of the chart.
 	 */
-	protected static int height = 270;
+	protected static int height = 370;
 
 	/**
 	 * The width of the chart.
 	 */
-	protected static int width = 450;
+	protected static int width = 550;
 
 	/**
 	 * The clock used to track the simulation time.
@@ -124,6 +125,10 @@ public abstract class Chart {
 			series.setMarker(marker); // Marker type: circle, rectangle, diamond..
 			series.setMarkerColor(color); // The color: blue, red, green, yellow, gray..
 			series.setLineStyle(new BasicStroke());
+			if (marker == SeriesMarkers.NONE && color != Color.BLACK) {
+				// Se il marker è NONE, imposta la linea dello stesso colore del marker
+				series.setLineColor(color); // Imposta il colore della linea
+			}
 		}
 	}
 

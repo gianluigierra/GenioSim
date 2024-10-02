@@ -103,7 +103,12 @@ public class VmCPUChart extends Chart {
 
             // Update the series for each element in the map.
             for (Map.Entry<String, Double> entry : VmEdgeCpuUsage.entrySet()) {
-                updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, Color.BLACK);
+                char lastChar = entry.getKey().charAt(entry.getKey().length() - 1);
+                int identifier = Character.getNumericValue(lastChar);
+
+                // Genera un colore basato sull'ultimo carattere (numero identificatore)
+                Color color = getColorBasedOnIdentifier(identifier, Color.BLUE);
+                updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, color);
             }
 		}
 	}
@@ -143,7 +148,12 @@ public class VmCPUChart extends Chart {
 
             // Update the series for each element in the map.
             for (Map.Entry<String, Double> entry : VmCloudCpuUsage.entrySet()) {
-                updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmCloudCpuUsageData)), SeriesMarkers.NONE, Color.BLACK);
+                char lastChar = entry.getKey().charAt(entry.getKey().length() - 1);
+                int identifier = Character.getNumericValue(lastChar);
+
+                // Genera un colore basato sull'ultimo carattere (numero identificatore)
+                Color color = getColorBasedOnIdentifier(identifier, Color.GREEN);
+                updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmCloudCpuUsageData)), SeriesMarkers.NONE, color);
             }
 		}
 	}
@@ -156,6 +166,19 @@ public class VmCPUChart extends Chart {
             data.add(value);
         }
         return data;
+    }
+
+    // Metodo per generare un colore basato sull'ultimo carattere della stringa
+    private Color getColorBasedOnIdentifier(int identifier, Color baseColor) {
+        // Controllo per evitare valori fuori dal range
+        if (identifier < 0 || identifier > 9) {
+            identifier = 0;  // Valore di default
+        }
+
+        // Modifica della tonalità del colore in base all'identificatore
+        float[] hsbValues = Color.RGBtoHSB(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), null);
+        float brightness = 0.5f + (identifier * 0.05f); // Modifica la luminosità basandoti sul numero
+        return Color.getHSBColor(hsbValues[0], hsbValues[1], Math.min(1.0f, brightness));
     }
     
 
