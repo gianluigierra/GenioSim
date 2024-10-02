@@ -8,7 +8,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
-import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 
 //MODIFICA MIA, ho modificato praticamente tutto il file per effettuare il corretto parsing degli EdgeDC e del Cloud con le VM
 public class DatacentersParser extends ComputingNodesParser {

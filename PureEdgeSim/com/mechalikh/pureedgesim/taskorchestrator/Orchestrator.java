@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
-import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
@@ -220,7 +219,7 @@ public abstract class Orchestrator extends SimEntity {
 	}
 
 	protected boolean offloadingIsPossible(Task task, ComputingNode node, String[] architectureLayers) {
-		SimulationParameters.TYPES nodeType = node.getType();
+		//SimulationParameters.TYPES nodeType = node.getType();
 		return true;}
 		/**
 		return ((arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.VM_CLOUD) // cloud

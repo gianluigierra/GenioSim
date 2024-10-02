@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
-import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;

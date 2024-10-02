@@ -29,7 +29,6 @@ import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-import com.mechalikh.pureedgesim.network.Bandwidth;
 
 /**
  * The main class of the Network module, that handles all network events, and

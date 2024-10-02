@@ -22,7 +22,6 @@ package com.mechalikh.pureedgesim.NuovaCartellaVM;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink;
-import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters; 
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.network.*;
 

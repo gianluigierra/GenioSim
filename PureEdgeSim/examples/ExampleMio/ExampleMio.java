@@ -6,9 +6,6 @@ import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 
-import examples.Examples_PES.Example2CustomMobilityModel;
-import examples.Examples_PES.Example4CustomComputingNode;
-
 public class ExampleMio {
 
 	// Below is the path for the settings folder of this example

@@ -27,9 +27,7 @@ public class VM extends LocationAwareNode {
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
 
-	//variabile booleana per fare condividere la queue dei task tra tutte le VM del dato datacenter
-	private static boolean sharedQueue = true;
-
+	private static boolean sharedQueue = true;	//variabile booleana per fare condividere la queue dei task tra tutte le VM del dato datacenter
 	protected Host Host;	//the host of this VM
 
 	public VM(SimulationManager simulationManager, double mipsPerCore, int numberOfCPUCores,

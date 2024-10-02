@@ -29,7 +29,6 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-import com.mechalikh.pureedgesim.network.Bandwidth;
 
 
 /**
