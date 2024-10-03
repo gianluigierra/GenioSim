@@ -62,10 +62,12 @@ public class DefaultOrchestrator extends Orchestrator {
 			if (offloadingIsPossible(task, node, architecture)) {
 				// the weight below represent the priority, the less it is, the more it is //
 				// suitable for offlaoding, you can change it as you want
-				double weight = 1.2;
-				// // this is an
-				// edge server 'cloudlet', the latency is slightly high then edge // devices
-				if (node.getType() == SimulationParameters.TYPES.CLOUD) {
+				double weight = 0.0;
+				if(node.getType() == SimulationParameters.TYPES.VM_EDGE){
+					weight = 1.2;
+					// // this is an
+					// edge server 'cloudlet', the latency is slightly high then edge // devices
+				}else if (node.getType() == SimulationParameters.TYPES.VM_CLOUD) {
 					weight = 1.8; // this
 					// is the cloud, it consumes more energy and results in high latency, so //
 					// better to avoid it

@@ -18,49 +18,49 @@
 					<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 
 						<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 	<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 
 						<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
 						<ram>6400</ram>
-						<storage>100000</storage>
+						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
 						<mips>165000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>8000</ram>
+						<storage>125000</storage>
 					</VM> 
 				</VMs>
 			</host> 

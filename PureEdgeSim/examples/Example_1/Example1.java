@@ -19,6 +19,8 @@
  *     @author Charafeddine Mechalikh
  **/
 package examples.Example_1; 
+import examples.ExampleMio.DQNOrchestrator;
+import examples.ExampleMio.ExampleMio;
 import examples.Examples_PES.*;
 import com.mechalikh.pureedgesim.datacentersmanager.DefaultTopologyCreator;
 import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
@@ -75,6 +77,9 @@ public class Example1 {
 		// To change the topology
 		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
 		
+		// To change the taskOrchestrator
+	    sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+
 		/* to use the default one you can simply delete or comment those lines */
 
 		// Finally, you can launch the simulation

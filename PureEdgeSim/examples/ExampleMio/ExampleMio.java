@@ -44,7 +44,7 @@ public class ExampleMio {
 		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
 		
         //cambio l'orchestratore con quello creatto da me
-	    //sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+	    sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
 		
 		/* to use the default one you can simply delete or comment those lines */
 

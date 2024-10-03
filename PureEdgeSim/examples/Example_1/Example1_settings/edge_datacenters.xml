@@ -33,7 +33,7 @@
 			<host>
 				<cores>3</cores>
 				<mips>30000</mips>
-				<ram>24000</ram>
+				<ram>19200</ram>
 				<storage>300000</storage>
 				<VMs>
 					<VM>

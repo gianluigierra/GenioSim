@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
@@ -219,29 +220,46 @@ public abstract class Orchestrator extends SimEntity {
 	}
 
 	protected boolean offloadingIsPossible(Task task, ComputingNode node, String[] architectureLayers) {
-		//SimulationParameters.TYPES nodeType = node.getType();
-		return true;}
-		/**
-		return ((arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.VM_CLOUD) // cloud
-																										// computing
-				|| (arrayContains(architectureLayers, "Edge") && nodeType == SimulationParameters.TYPES.VM_EDGE // Edge
-																													// computing
-				// Compare destination (edge data server) and origin (edge device)
-				// locations, if they are in same area offload to this edge data server
-						&& (node == task.getEdgeDevice().getCurrentLink(LinkOrientation.UP_LINK).getDst()
-								// or compare the location of the orchestrator
-								|| (node == task.getOrchestrator().getCurrentLink(LinkOrientation.UP_LINK).getDst())))
+		boolean offloadingpossible = true;
+		if(!offloadingpossible){
+			SimulationParameters.TYPES nodeType = node.getType();
+			return (
+				
+					(arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.VM_CLOUD) // cloud computing
+																
+																|| 
+					
+					(
+						arrayContains(architectureLayers, "Edge") && nodeType == SimulationParameters.TYPES.VM_EDGE // Edge computing. Compare destination (edge data server) and origin (edge device) locations, if they are in same area offload to this edge data server
+																	&& 
+						(
+							(node == task.getEdgeDevice().getCurrentLink(LinkOrientation.UP_LINK).getDst()) // or compare the location of the orchestrator
+																		|| 
+							(node == task.getOrchestrator().getCurrentLink(LinkOrientation.UP_LINK).getDst())
+						)
+					)
 
-				|| (arrayContains(architectureLayers, "Mist") && nodeType == SimulationParameters.TYPES.EDGE_DEVICE // Mist
-																												// computing
-				// compare destination (edge device) location and origin (edge device) location,
-				// if they are in same area offload to this device
-						&& (sameLocation(node, task.getEdgeDevice(), SimulationParameters.edgeDevicesRange)
-								// or compare the location of their orchestrators
-								|| (SimulationParameters.enableOrchestrators && sameLocation(node,
-										task.getOrchestrator(), SimulationParameters.edgeDevicesRange)))
-						&& !node.isDead() && !node.isSensor()));
-	}*/
+																|| 
+
+					//Non prendiamo in considerazione scenari Mist quindi questo non si verifica mai.
+					(
+						arrayContains(architectureLayers, "Mist") && nodeType == SimulationParameters.TYPES.EDGE_DEVICE // Mist computing. Compare destination (edge device) location and origin (edge device) location, if they are in same area offload to this device
+																	&& 
+						(
+							sameLocation(node, task.getEdgeDevice(), SimulationParameters.edgeDevicesRange) // or compare the location of their orchestrators
+																		|| 
+							(SimulationParameters.enableOrchestrators && sameLocation(node, task.getOrchestrator(), SimulationParameters.edgeDevicesRange))
+						)
+																	&& 
+																!node.isDead() 
+																	&& 
+																!node.isSensor()
+					)
+				
+				);
+		}
+		else return offloadingpossible;
+	}
 
 	public abstract void resultsReturned(Task task);
 
