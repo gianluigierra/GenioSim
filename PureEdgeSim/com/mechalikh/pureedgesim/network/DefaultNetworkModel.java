@@ -126,12 +126,11 @@ public class DefaultNetworkModel extends NetworkModel {
 
 			if (simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id)) {
 				path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id);
-				// System.out.println("Sono qui!");
 				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
 				// System.out.print("[");
-				//for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
-				//System.out.print("]");
-				//System.out.println("");
+				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				// System.out.print("]");
+				// System.out.println("");
 
 				//it happened that the path had length 0 so it caused an error. In this case we establish a new path
 				if(path.getLength() == 0){
@@ -142,7 +141,6 @@ public class DefaultNetworkModel extends NetworkModel {
 			} else {
 				path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
-				// System.out.println("Adesso qui!");
 				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
 				// System.out.print("[");
 				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");

@@ -115,8 +115,8 @@ public class DataCenter extends LocationAwareNode {
 		}
 		setStorage(storage);
 		setAvailableStorage(storage);
-		setTotalMipsCapacity(mipsPerCore * numberOfCPUCores);
-		this.mipsPerCore = mipsPerCore;
+		this.mipsPerCore = mipsPerCore/HostList.size();
+		setTotalMipsCapacity(this.mipsPerCore * numberOfCPUCores);
 		setRam(ram);
 		setAvailableRam(ram);
 		setNumberOfCPUCores(numberOfCPUCores);

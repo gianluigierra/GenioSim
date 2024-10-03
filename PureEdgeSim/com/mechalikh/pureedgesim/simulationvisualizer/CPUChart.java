@@ -108,10 +108,13 @@ public class CPUChart extends Chart {
 	 * chart.
 	 */
 	protected void cloudCpuUsage() {
-		List<DataCenter> cloudOnlyList = computingNodesGenerator.getCloudOnlyList();
-		double cloudUsageValue = cloudOnlyList.parallelStream().mapToDouble(ComputingNode::getAvgCpuUtilization).sum();
-		cloudUsage.add(cloudUsageValue);
-		updateSeries(getChart(), "Cloud", toArray(currentTime), toArray(cloudUsage), SeriesMarkers.NONE, Color.BLACK);
+		if (simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD")
+				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+			List<DataCenter> cloudOnlyList = computingNodesGenerator.getCloudOnlyList();
+			double cloudUsageValue = cloudOnlyList.parallelStream().mapToDouble(ComputingNode::getAvgCpuUtilization).sum();
+			cloudUsage.add(cloudUsageValue);
+			updateSeries(getChart(), "Cloud", toArray(currentTime), toArray(cloudUsage), SeriesMarkers.NONE, Color.BLACK);
+		}
 	}
 
 }
