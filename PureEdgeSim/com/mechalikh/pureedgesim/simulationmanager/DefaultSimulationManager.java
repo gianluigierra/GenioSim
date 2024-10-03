@@ -453,7 +453,6 @@ public class DefaultSimulationManager extends SimulationManager {
 				&& (!sameLocation(task.getEdgeDevice(), task.getOrchestrator())											//i task failures per la mobility. Prima era CLOUD anzichè VM_CLOUD
 						|| !sameLocation(task.getOrchestrator(), task.getOffloadingDestination()))) {
 			task.setFailureReason(Task.FailureReason.FAILED_DUE_TO_DEVICE_MOBILITY);
-			System.out.println("Sono qui!");
 			simLog.incrementTasksFailedMobility(task);
 			return setFailed(task, phase);
 		}

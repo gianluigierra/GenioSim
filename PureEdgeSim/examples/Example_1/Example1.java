@@ -19,14 +19,13 @@
  *     @author Charafeddine Mechalikh
  **/
 package examples.Example_1; 
-import examples.ExampleMio.DQNOrchestrator;
-import examples.ExampleMio.ExampleMio;
 import examples.Examples_PES.*;
 import com.mechalikh.pureedgesim.datacentersmanager.DefaultTopologyCreator;
 import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
+import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator;
 import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator; 
 
 public class Example1 {

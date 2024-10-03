@@ -190,7 +190,7 @@ public class SimLog {
 	            .collect(Collectors.toList());
 	}
 
-	//MODIFICA MIA, era protected
+	//this was protected, changed to test
 	public double getCpuUtilization(List<ComputingNode> list) {
 		double averageCpuUtilization = 0;
 		for (ComputingNode node : list) {

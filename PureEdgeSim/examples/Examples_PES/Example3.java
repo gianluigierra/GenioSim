@@ -21,6 +21,7 @@
 package examples.Examples_PES;
 
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
+import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator;
 
 public class Example3 {
 	/**
@@ -66,6 +67,9 @@ public class Example3 {
 
 		// changing the simulation settings folder
 		sim.setCustomSettingsFolder(settingsPath);
+
+		sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+
 
 		// Start the simulation
 		sim.launchSimulation();

@@ -9,10 +9,18 @@
 			<x_pos>500</x_pos>
 			<y_pos>500</y_pos>
 		</location>
-		<cores>10</cores>
-		<mips>40000</mips>
-		<ram>16000</ram>
-		<storage>200000</storage>
+		<hosts>
+			<host>
+				<VMs>
+					<VM>
+						<cores>10</cores>
+						<mips>40000</mips>
+						<ram>16000</ram>
+						<storage>200000</storage>
+					</VM>
+				</VMs>
+			</host>
+		</hosts>
 	</datacenter>
 	<datacenter name="dc2">
 		<periphery>true</periphery>
@@ -23,10 +31,18 @@
 			<x_pos>500</x_pos>
 			<y_pos>1500</y_pos>
 		</location>
-		<cores>10</cores>
-		<mips>40000</mips>
-		<ram>16000</ram>
-		<storage>200000</storage>
+		<hosts>
+			<host>
+				<VMs>
+					<VM>
+						<cores>10</cores>
+						<mips>40000</mips>
+						<ram>16000</ram>
+						<storage>200000</storage>
+					</VM>
+				</VMs>
+			</host>
+		</hosts>
 	</datacenter>
 	<datacenter name="dc3">
 		<periphery>true</periphery>
@@ -37,10 +53,18 @@
 			<x_pos>1500</x_pos>
 			<y_pos>500</y_pos>
 		</location>
-		<cores>10</cores>
-		<mips>40000</mips>
-		<ram>16000</ram>
-		<storage>200000</storage>
+		<hosts>
+			<host>
+				<VMs>
+					<VM>
+						<cores>10</cores>
+						<mips>40000</mips>
+						<ram>16000</ram>
+						<storage>200000</storage>
+					</VM>
+				</VMs>
+			</host>
+		</hosts>
 	</datacenter>
 	<datacenter name="dc4">
 		<periphery>true</periphery>
@@ -51,10 +75,18 @@
 			<x_pos>1500</x_pos>
 			<y_pos>1500</y_pos>
 		</location>
-		<cores>10</cores>
-		<mips>40000</mips>
-		<ram>16000</ram>
-		<storage>200000</storage>
+		<hosts>
+			<host>
+				<VMs>
+					<VM>
+						<cores>10</cores>
+						<mips>40000</mips>
+						<ram>16000</ram>
+						<storage>200000</storage>
+					</VM>
+				</VMs>
+			</host>
+		</hosts>
 	</datacenter>
 	<network_links>
 		<link>
