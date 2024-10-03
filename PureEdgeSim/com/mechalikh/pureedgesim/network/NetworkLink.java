@@ -82,15 +82,6 @@ public class NetworkLink extends SimEntity {
 		return this;
 	}
 
-	/**
-	 * Defines the logic to be performed by the network link when the simulation
-	 * starts.
-	 */
-	@Override
-	public void startInternal() {
-		// Do nothing for now.
-	}
-
 	public ComputingNode getSrc() {
 		return src;
 	}
@@ -241,7 +232,7 @@ public class NetworkLink extends SimEntity {
 		this.transferProgressList.remove(transfer);
 
 		// Add the network link latency to the task network delay
-		transfer.getTask().addActualNetworkTime(0);
+		transfer.getTask().addActualNetworkTime(latency);
 
 		// Remove the previous hop (data has been transferred one hop)
 		transfer.getVertexList().remove(0);
@@ -262,7 +253,6 @@ public class NetworkLink extends SimEntity {
 
 	public double getUsedBandwidth() {
 		// Return bandwidth usage in bits per second
-		//System.out.println("VALORE RESTITUITO DALLA GETUSEDBAND: " + Math.min(bandwidth, usedBandwidth));
 		return Math.min(bandwidth, usedBandwidth);
 	}
 
@@ -302,12 +292,4 @@ public class NetworkLink extends SimEntity {
 		return this.UsedBandwidthList;
 	}
 
-	/**
-	 * Defines the logic to be performed by the network link when the simulation
-	 * ends.
-	 */
-	@Override
-	public void onSimulationEnd() {
-		// Do something when the simulation finishes.
-	}
 }

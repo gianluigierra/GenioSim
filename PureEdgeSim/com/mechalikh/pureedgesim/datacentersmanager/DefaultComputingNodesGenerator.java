@@ -52,25 +52,64 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	}
 	
 	@Override
+		/**
+	 * Generates all computing nodes, including the Cloud data centers, the edge
+	 * ones, and the edge devices.
+	 */
 	public void generateDatacentersAndDevices() {
 
 		// Generate Edge and Cloud data centers.
-		generateDataCenters(SimulationParameters.cloudDataCentersFile, SimulationParameters.TYPES.CLOUD); 
+		generateDataCenters(SimulationParameters.cloudDataCentersFile, SimulationParameters.TYPES.CLOUD);
 
-		generateDataCenters(SimulationParameters.edgeDataCentersFile, SimulationParameters.TYPES.EDGE_DATACENTER); 
+		generateDataCenters(SimulationParameters.edgeDataCentersFile, SimulationParameters.TYPES.EDGE_DATACENTER);
 
 		// Generate edge devices.
 		generateEdgeDevices();
+		
+		//Generate ONT devices
+		generateONTDevices(SimulationParameters.OntFile, SimulationParameters.TYPES.ONT);
 
-		getSimulationManager().getSimulationLogger()
-				.print("%s - Datacenters and devices were generated", getClass().getSimpleName());
+		getSimulationManager().getSimulationLogger().print("%s - Datacenters and devices were generated",
+				getClass().getSimpleName());
 
 	}
 
 	/**
+	 * Generates ONT devices
+	 */
+	public void generateONTDevices(String file, TYPES type) {
+		
+		try(InputStream ONT_File = new FileInputStream(file)) {
+			
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(ONT_File);
+			NodeList ONT_nodeList = doc.getElementsByTagName("ONTDevice");
+			Element ONT_Element = (Element) ONT_nodeList.item(0);
+			
+			//Generates ONT in accordance with the number of edge devices (except sensors).
+			
+			for(int i = 0; i < mistOnlyList.size(); i++) {										//MODIFICA MIA, genero gli ONT anche vicino ai sensori. Prima era: (int i = 0; i < mistOnlyListSensorsExcluded.size(); i++)
+				ComputingNode computingNode = createComputingNode(ONT_Element, type);			//appunto: nel defaultopologycreator i sensori si collegano agli ONT mediante wifi. 
+				ONT_List.add(computingNode);
+				ONTandServer_List.add(computingNode);
+				ONTandVM_List.add(computingNode);
+				//allNodesList.add(computingNode);
+				//allNodesListSensorsExcluded.add(computingNode);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
+	}
+	
+	/**
 	 * Generates edge devices
 	 */
 	public void generateEdgeDevices() {
+
 		// Generate edge devices instances from edge devices types in xml file.
 		try (InputStream devicesFile = new FileInputStream(SimulationParameters.edgeDevicesFile)) {
 
@@ -93,7 +132,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 			// if percentage of generated devices is < 100%.
 			if (mistOnlyList.size() < getSimulationManager().getScenario().getDevicesCount())
-				getSimulationManager().getSimulationLogger().print("%s - Wrong percentages values (the sum is inferior than 100%), check edge_devices.xml file !", getClass().getSimpleName());
+				getSimulationManager().getSimulationLogger().print(
+						"%s - Wrong percentages values (the sum is inferior than 100%), check edge_devices.xml file !",
+						getClass().getSimpleName());
 			// Add more devices.
 			if (edgeElement != null) {
 				int missingInstances = getSimulationManager().getScenario().getDevicesCount() - mistOnlyList.size();
@@ -121,7 +162,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			allNodesListSensorsExcluded.add(newDevice);
 		}
 	}
-	
+
 	/**
 	 * Generates the required number of instances for each type of edge devices.
 	 * 
@@ -136,7 +177,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		for (int j = 0; j < devicesInstances; j++) {
 			if (mistOnlyList.size() > getSimulationManager().getScenario().getDevicesCount()) {
-				getSimulationManager().getSimulationLogger().print("%s - Wrong percentages values (the sum is superior than 100%), check edge_devices.xml file !",getClass().getSimpleName());
+				getSimulationManager().getSimulationLogger().print(
+						"%s - Wrong percentages values (the sum is superior than 100%%), check edge_devices.xml file !",
+						getClass().getSimpleName());
 				break;
 			}
 
@@ -149,7 +192,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		}
 	}
-	
+
 	/**
 	 * Generates the Cloud and Edge data centers.
 	 * 
@@ -157,6 +200,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	 * @param type The type, whether a CLOUD data center or an EDGE one.
 	 */
 	protected void generateDataCenters(String file, TYPES type) {
+
 		// Fill list with edge data centers
 		try (InputStream serversFile = new FileInputStream(file)) {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -169,36 +213,36 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			NodeList datacenterList = doc.getElementsByTagName("datacenter");
 			for (int i = 0; i < datacenterList.getLength(); i++) {
 				Element datacenterElement = (Element) datacenterList.item(i);
-				DataCenter DataCenterNode = createDatacenterNode(datacenterElement, type);
-				if (DataCenterNode.getType() == TYPES.CLOUD) {
-					cloudOnlyList.add(DataCenterNode);
-					mistAndCloudListSensorsExcluded.add(DataCenterNode);
+				//ComputingNode computingNode = createComputingNode(datacenterElement, type);
+				DataCenter DC = createDatacenterNode(datacenterElement, type);
+				if (DC.getType() == TYPES.CLOUD) {
+					cloudOnlyList.add(DC);
+					mistAndCloudListSensorsExcluded.add(DC);
 					if (SimulationParameters.enableOrchestrators
-							&& "CLOUD".equals(SimulationParameters.deployOrchestrators)) {
-						orchestratorsList.add(DataCenterNode);
+							&& SimulationParameters.deployOrchestrators == "CLOUD") {
+						orchestratorsList.add(DC);
 					}
 				} else {
-					edgeOnlyList.add(DataCenterNode);
-					mistAndEdgeListSensorsExcluded.add(DataCenterNode);
+					edgeOnlyList.add(DC);
+					mistAndEdgeListSensorsExcluded.add(DC);
 					if (SimulationParameters.enableOrchestrators
-							&& "EDGE".equals(SimulationParameters.deployOrchestrators)) {
-						orchestratorsList.add(DataCenterNode);
+							&& SimulationParameters.deployOrchestrators == "EDGE") {
+						orchestratorsList.add(DC);
 					}
 				}
-				allNodesList.add(DataCenterNode);
-				allNodesListSensorsExcluded.add(DataCenterNode);
-				edgeAndCloudList.add(DataCenterNode);
+				allNodesList.add(DC);
+				allNodesListSensorsExcluded.add(DC);
+				edgeAndCloudList.add(DC);
+				ONTandServer_List.add(DC);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
-	
+
 	/**
 	 * Creates the computing nodes.
 	 * 
-	 * @see #generateDataCenters(String, TYPES)
 	 * @see #generateDevicesInstances(Element)
 	 * 
 	 * @param datacenterElement The configuration file.
@@ -248,7 +292,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		computingNode.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
 
-		if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
+	 	if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
+			computingNode.setName("Edge Device id " + DeviceCount);
+			DeviceCount ++;
 			mobile = Boolean.parseBoolean(datacenterElement.getElementsByTagName("mobility").item(0).getTextContent());
 			speed = Double.parseDouble(datacenterElement.getElementsByTagName("speed").item(0).getTextContent());
 			minPauseDuration = Double
@@ -270,12 +316,34 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			computingNode.enableTaskGeneration(Boolean
 					.parseBoolean(datacenterElement.getElementsByTagName("generateTasks").item(0).getTextContent()));
 			// Generate random location for edge devices
-			datacenterLocation = new Location(random.nextInt(SimulationParameters.simulationMapWidth),
+			datacenterLocation = new Location(random.nextInt(SimulationParameters.simulationMapLength),
 					random.nextInt(SimulationParameters.simulationMapLength));
 			getSimulationManager().getSimulationLogger()
-					.deepLog("DefaultComputingNodesGenerator- Edge device:" + mistOnlyList.size() + "    location: ( "
+					.deepLog("ComputingNodesGenerator- Edge device:" + mistOnlyList.size() + "    location: ( "
 							+ datacenterLocation.getXPos() + "," + datacenterLocation.getYPos() + " )");
+			//SimLog.println(computingNode.getName() + " Location: (" + datacenterLocation.getXPos() + "," + datacenterLocation.getYPos() + " )");
+			
+		} else if (type == SimulationParameters.TYPES.ONT){
+			String name = datacenterElement.getAttribute("name");
+			computingNode.setName(name + "id " + ONTcount);
+			
+			//set ONT location near the edge device 
+			double xPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getXPos() + random.nextInt(2)+1;
+			double yPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getYPos() + random.nextInt(2)+1;
+			datacenterLocation = new Location(xPos, yPos); 
+			
+			//SimLog.println(computingNode.getName() + " Location: (" + xPos + "," + yPos + ")");
+			ONTcount++;
+			
 		}
+
+		/**
+		//Generates the ONT like a data center
+		if (type == SimulationParameters.TYPES.ONT) {
+			type = SimulationParameters.TYPES.EDGE_DATACENTER;
+		}
+		*/
+
 		computingNode.setType(type);
 		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
 		MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
@@ -288,6 +356,24 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		return computingNode;
 	}
 	
+
+	/**
+	 * Creates the Datacenter nodes.
+	 * 
+	 * @see #generateDataCenters(String, TYPES)
+	 * @see #generateDevicesInstances(Element)
+	 * 
+	 * @param datacenterElement The configuration file.
+	 * @param type              The type, whether an MIST (edge) device, an EDGE
+	 *                          data center, or a CLOUD one.
+	 * @throws NoSuchAlgorithmException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 */
 	protected DataCenter createDatacenterNode(Element datacenterElement, SimulationParameters.TYPES type)
 			throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -342,6 +428,10 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			dataCenter.setPeriphery(
 					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
 
+		}
+		else {
+			//Imposto il nome del Cloud
+			dataCenter.setName("CloudDC");
 		}
 		
 		for(Host host : dataCenter.getHostList()){

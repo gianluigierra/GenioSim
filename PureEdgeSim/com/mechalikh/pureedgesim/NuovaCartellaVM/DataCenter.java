@@ -342,9 +342,4 @@ public class DataCenter extends LocationAwareNode {
 
 	}
 
-	@Override
-	protected void onSimulationEnd() {
-		// Do something when the simulation finishes.
-	}
-
 }

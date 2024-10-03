@@ -68,7 +68,7 @@ public class Example3 {
 		// changing the simulation settings folder
 		sim.setCustomSettingsFolder(settingsPath);
 
-		sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+		//sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
 
 
 		// Start the simulation

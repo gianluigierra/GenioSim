@@ -51,11 +51,10 @@ public class Example4CustomComputingNode extends DefaultComputingNode {
 	 * history.
 	 */
 	@Override
-	public void startInternal() {
-		super.startInternal();
-		scheduleNow(this, DO_SOMETHING);
-
-	}
+    public void onSimulationStart() {
+		super.onSimulationStart();
+        scheduleNow(this, UPDATE_STATUS);
+    }
 
 	/*
 	 * The events sent, are handled via the following method. in this example, the

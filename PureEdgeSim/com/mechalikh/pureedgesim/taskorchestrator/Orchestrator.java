@@ -21,7 +21,6 @@
 package com.mechalikh.pureedgesim.taskorchestrator;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
@@ -187,7 +186,6 @@ public abstract class Orchestrator extends SimEntity {
 
 			// Send this task to this computing node
 			task.setOffloadingDestination(node);
-			//System.out.println("Nome della destinazione di offload: " + node.getName());
 
 			// Application has been deployed
 			task.getEdgeDevice().setApplicationPlacementLocation(node);

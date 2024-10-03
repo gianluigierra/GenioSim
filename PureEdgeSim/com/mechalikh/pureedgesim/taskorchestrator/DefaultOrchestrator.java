@@ -31,6 +31,7 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public class DefaultOrchestrator extends Orchestrator {
 	protected Map<Integer, Integer> historyMap = new LinkedHashMap<>();
+	private int tsk = 1;
 
 	public DefaultOrchestrator(SimulationManager simulationManager) {
 		super(simulationManager);
@@ -41,8 +42,10 @@ public class DefaultOrchestrator extends Orchestrator {
 
 	protected int findComputingNode(String[] architecture, Task task) {
 		if ("ROUND_ROBIN".equals(algorithmName)) {
+			System.out.println(tsk); tsk++;
 			return roundRobin(architecture, task);
 		} else if ("TRADE_OFF".equals(algorithmName)) {
+			System.out.println(tsk); tsk++;
 			return tradeOff(architecture, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
@@ -57,8 +60,6 @@ public class DefaultOrchestrator extends Orchestrator {
 		ComputingNode node; // get best computing node for this task
 		for (int i = 0; i < nodeList.size(); i++) {
 			node = nodeList.get(i);
-			//System.out.println("Numero di edge datacenter: " + nodeList.size());
-			//System.out.println(offloadingIsPossible(task, node, architecture));
 			if (offloadingIsPossible(task, node, architecture)) {
 				// the weight below represent the priority, the less it is, the more it is //
 				// suitable for offlaoding, you can change it as you want
@@ -105,6 +106,7 @@ public class DefaultOrchestrator extends Orchestrator {
 		}
 		// Assign the tasks to the obtained computing node.
 		historyMap.put(selected, minTasksCount + 1);
+
 		return selected;
 	}
 
@@ -113,18 +115,7 @@ public class DefaultOrchestrator extends Orchestrator {
 		// Do something with the task that has been finished
 
 	}
-
-	@Override
-	public void startInternal() {
-		// Do something when the simulation starts. e.g., schedule some events
-	}
-
-	@Override
-	public void onSimulationEnd() {
-		// Do something when the simulation finishes. e.g., print some results.
-		
-	}
-
+ 
 	@Override
 	public void processEvent(Event e) {
 		// Process the scheduled events, if any.

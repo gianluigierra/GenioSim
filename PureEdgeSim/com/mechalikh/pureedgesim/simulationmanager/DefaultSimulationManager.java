@@ -32,6 +32,7 @@ import com.mechalikh.pureedgesim.scenariomanager.Scenario;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationengine.Event;
+import com.mechalikh.pureedgesim.simulationengine.OnSimulationStartListener;
 import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
@@ -54,7 +55,7 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
  * @author Charafeddine Mechalikh
  * @since PureEdgeSim 4.2
  */
-public class DefaultSimulationManager extends SimulationManager {
+public class DefaultSimulationManager extends SimulationManager implements OnSimulationStartListener {
 
 	/**
 	 * Simulation progress parameters.
@@ -115,7 +116,7 @@ public class DefaultSimulationManager extends SimulationManager {
 	 * simulation starts.
 	 */
 	@Override
-	public void startInternal() {
+	public void onSimulationStart() {
 		// Initialize logger variables.
 		simLog.setGeneratedTasks(taskList.size());
 		simLog.setCurrentOrchPolicy(scenario.getStringOrchArchitecture());
@@ -367,7 +368,6 @@ public class DefaultSimulationManager extends SimulationManager {
 			// The application has already been placed, so send the task directly to that
 			// computing node.
 			task.setOffloadingDestination(task.getEdgeDevice().getApplicationPlacementLocation());
-			//System.out.println("Nome della destinazione di offload: " + task.getOffloadingDestination().getName());
 
 		simLog.taskSentFromOrchToDest(task);
 
@@ -505,13 +505,6 @@ public class DefaultSimulationManager extends SimulationManager {
 		return (distance < RANGE);
 	}
 
-	/**
-	 * Defines the logic to be performed by the simulation manager when the
-	 * simulation starts.
-	 */
-	@Override
-	public void onSimulationEnd() {
-		// Do something when the simulation finishes.
-	}
+	
 
 }

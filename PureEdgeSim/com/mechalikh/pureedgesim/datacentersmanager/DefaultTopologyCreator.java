@@ -41,6 +41,7 @@ import org.xml.sax.SAXException;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.network.InfrastructureGraph;
 import com.mechalikh.pureedgesim.network.NetworkLink;
+import com.mechalikh.pureedgesim.network.NetworkLink.NetworkLinkTypes;
 import com.mechalikh.pureedgesim.network.NetworkLinkCellularDown;
 import com.mechalikh.pureedgesim.network.NetworkLinkCellularUp;
 import com.mechalikh.pureedgesim.network.NetworkLinkEthernet;
@@ -48,6 +49,7 @@ import com.mechalikh.pureedgesim.network.NetworkLinkMan;
 import com.mechalikh.pureedgesim.network.NetworkLinkFiber;
 import com.mechalikh.pureedgesim.network.NetworkLinkWanDown;
 import com.mechalikh.pureedgesim.network.NetworkLinkWanUp;
+import com.mechalikh.pureedgesim.network.NetworkLinkWifiDeviceToDevice;
 import com.mechalikh.pureedgesim.network.NetworkLinkWifiDown;
 import com.mechalikh.pureedgesim.network.NetworkLinkWifiUp;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
@@ -83,7 +85,6 @@ public class DefaultTopologyCreator extends TopologyCreator {
 	 */
 	@Override
 	public void generateTopologyGraph() {
-
 		// Create a WAN link to connect all the edge devices to the cloud data center
 		ComputingNode wanNode = createWanLink();
 		
@@ -242,7 +243,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandServer_List());
 		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandVM_List());
 	}
-	
+
 	/**
 	 * This function creates a WAN link between the cloud data center and the
 	 * infrastructure node.

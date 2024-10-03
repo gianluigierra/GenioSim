@@ -90,12 +90,11 @@ public class Example7ClusteringDevice extends DefaultComputingNode {
 	 * The clusters update will be done by scheduling events, the first event has to
 	 * be scheduled within the startInternal() method:
 	 */
-
 	@Override
-	public void startInternal() {
-		super.startInternal();
-		schedule(this, 1, UPDATE_CLUSTERS);
-	}
+    public void onSimulationStart() {
+		super.onSimulationStart();
+        schedule(this, 1, UPDATE_STATUS);
+    }
 
 	/**
 	 * The scheduled event will be processed in processEvent(). To update the

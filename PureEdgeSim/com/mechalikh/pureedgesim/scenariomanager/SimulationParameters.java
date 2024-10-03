@@ -94,7 +94,7 @@ public class SimulationParameters {
 	/**
 	 * Simualtion time in seconds.
 	 * 
-	 * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#startInternal()
+	 * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#onSimulationStart()
 	 */
 	public static double simulationDuration;
 
@@ -202,7 +202,7 @@ public class SimulationParameters {
 	/**
 	 * The types of computing nodes.
 	 * 
-	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNodesGenerator#generateDatacentersAndDevices()
+	 * @see com.mechalikh.pureedgesim.datacentersmanager.DefaultComputingNodesGenerator#generateDatacentersAndDevices()
 	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNode#setType(TYPES)
 	 */
 	public enum TYPES {
@@ -513,7 +513,7 @@ public class SimulationParameters {
 	/**
 	 * The network model update interval.
 	 * 
-	 * @see com.mechalikh.pureedgesim.network.NetworkLink#startInternal()
+	 * @see com.mechalikh.pureedgesim.network.NetworkLink#onSimulationStart()
 	 */
 	public static double networkUpdateInterval;
 
@@ -532,7 +532,7 @@ public class SimulationParameters {
 	 * destination (the node that actually executes the task).
 	 * 
 	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNode#getOrchestrator()
-	 * @see examples.Examples_PES.Example7
+	 * @see examples.Example7
 	 */
 	public static boolean enableOrchestrators;
 
@@ -541,7 +541,7 @@ public class SimulationParameters {
 	 * centers, edge device, or custom strategy.
 	 * 
 	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNode#getOrchestrator()
-	 * @see examples.Examples_PES.Example7
+	 * @see examples.Example7
 	 */
 	public static String deployOrchestrators;
 
@@ -564,14 +564,14 @@ public class SimulationParameters {
 	 * If enable, a container will be pulled from the registry before executing the
 	 * task.
 	 * 
-	 * @see examples.Examples_PES.Example7
+	 * @see examples.Example7
 	 */
 	public static boolean enableRegistry;
 
 	/**
 	 * Sets a custom strategy for downloading containers.
 	 * 
-	 * @see examples.Examples_PES.Example7
+	 * @see examples.Example7
 	 */
 	public static String registryMode;
 

@@ -320,9 +320,6 @@ public class DefaultComputingNode extends LocationAwareNode {
 
 	}
 
-	@Override
-	protected void onSimulationEnd() {
-		// Do something when the simulation finishes.
-	}
+	
 
 }

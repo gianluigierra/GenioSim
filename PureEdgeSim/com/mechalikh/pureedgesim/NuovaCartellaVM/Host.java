@@ -343,9 +343,4 @@ public class Host extends LocationAwareNode {
 		this.DataCenter.setApplicationPlacementLocation(node);
 	}
 
-	@Override
-	protected void onSimulationEnd() {
-		// Do something when the simulation finishes.
-	}
-
 }

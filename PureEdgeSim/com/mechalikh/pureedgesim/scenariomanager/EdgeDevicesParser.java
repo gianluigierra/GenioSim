@@ -1,5 +1,6 @@
 package com.mechalikh.pureedgesim.scenariomanager;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.w3c.dom.Document;

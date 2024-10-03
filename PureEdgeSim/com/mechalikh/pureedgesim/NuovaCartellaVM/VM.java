@@ -310,9 +310,4 @@ public class VM extends LocationAwareNode {
 		this.Host.setApplicationPlacementLocation(node);
 	}
 
-	@Override
-	protected void onSimulationEnd() {
-		// Do something when the simulation finishes.
-	}
-
 }
