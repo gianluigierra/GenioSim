@@ -207,10 +207,8 @@ public class DQNOrchestrator extends DefaultOrchestrator {
 
     private int chooseAction2(double[] state, String[] architecture, Task task) {
         Random rand = new Random();
-        if(simulationManager.getSimulation().clock() <= 300){
-            if (!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY"))
-                return tradeOff(architecture, task);
-        }
+        if (!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY") && simulationManager.getSimulation().clock() <= 300)
+            return tradeOff(architecture, task);
         if (rand.nextDouble() < epsilon) {
             System.out.println("Scelta random, epsilon = " + epsilon);
             return randChoice(architecture, task);
@@ -368,7 +366,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         }
     
         // Aggiorna epsilon per ridurre gradualmente l'esplorazione
-        if (epsilon > epsilonMin && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed==0) {
+        if (epsilon > epsilonMin && simulationManager.getSimulation().clock() > 300 && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed==0) {
             epsilon *= epsilonDecay;
         }
     
