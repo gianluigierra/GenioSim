@@ -46,7 +46,7 @@ public abstract class Orchestrator extends SimEntity {
 		algorithmName = simulationManager.getScenario().getStringOrchAlgorithm();
 		architectureName = simulationManager.getScenario().getStringOrchArchitecture();
 		initialize();
-	}	
+	}
 
 	// Find an offloading location for this task
 	public void orchestrate(Task task) {

@@ -12,19 +12,19 @@
 		<hosts>
 			<host>
 				<cores>7</cores>
-				<mips>30000</mips>
+				<mips>3000</mips>
 				<ram>44800</ram>
 				<storage>700000</storage>
 				<VMs>
 					<VM>
 						<cores>4</cores>
-						<mips>30000</mips>
+						<mips>3000</mips>
 						<ram>25600</ram>
 						<storage>400000</storage>
 					</VM>
 					<VM>
 						<cores>3</cores>
-						<mips>30000</mips>
+						<mips>3000</mips>
 						<ram>19200</ram>
 						<storage>300000</storage>
 					</VM>
@@ -32,19 +32,19 @@
 			</host>
 			<host>
 				<cores>3</cores>
-				<mips>30000</mips>
+				<mips>3000</mips>
 				<ram>19200</ram>
 				<storage>300000</storage>
 				<VMs>
 					<VM>
 						<cores>2</cores>
-						<mips>30000</mips>
+						<mips>3000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
-						<mips>30000</mips>
+						<mips>3000</mips>
 						<ram>6400</ram>
 						<storage>100000</storage>
 					</VM>

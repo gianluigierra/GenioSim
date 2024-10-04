@@ -159,6 +159,16 @@ public class ParametersParser extends FileParserAbstract {
 					.split(",");
 			SimulationParameters.orchestrationAlgorithms = prop.getProperty("orchestration_algorithms").split(",");
 
+			SimulationParameters.neuralNetworkLearningSpeed = (int) assertDouble(prop, "neural_network_learning_speed", value -> (value > 0), "> 0");
+
+			SimulationParameters.epsilon = assertDouble(prop, "epsilon", value -> (value > 0), "> 0");
+
+			SimulationParameters.epsilonMin = assertDouble(prop, "epsilon_min", value -> (value > 0), "> 0");
+
+			SimulationParameters.epsilonDecay = assertDouble(prop, "epsilon_decay", value -> (value > 0), "> 0");
+
+			SimulationParameters.learningRate = assertDouble(prop, "learning_rate", value -> (value > 0), "> 0");
+
 			result = true;
 			SimLog.println("%s - Properties file successfully Loaded propoerties file!",getClass().getSimpleName());
 		} catch (IOException ex) {

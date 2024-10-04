@@ -399,8 +399,8 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	 */
 	public double getFailureRate() {
 		double result = ((double) failedTasksCount * 100) / Math.max(1, sentTasks);
-		failedTasksCount = 0;
-		sentTasks = 0;
+		//failedTasksCount = 0;															//MODIFICA MIA
+		//sentTasks = 0;																//MODIFICA MIA
 		return result;
 	}
 

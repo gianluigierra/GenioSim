@@ -23,6 +23,7 @@ package com.mechalikh.pureedgesim.simulationvisualizer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.markers.SeriesMarkers;
@@ -137,8 +138,8 @@ public class MapChart extends Chart {
 			List<Double> y_activeCloudDataCentersList = new ArrayList<>();
 			
 
-			for (ComputingNode node : computingNodesGenerator.getEdgeOnlyList()) {
-				ComputingNode edgeDataCenter = node;
+			for (DataCenter node : computingNodesGenerator.getEdgeOnlyList()) {
+				DataCenter edgeDataCenter = node;
 				double Xpos = edgeDataCenter.getMobilityModel().getCurrentLocation().getXPos();
 				double Ypos = edgeDataCenter.getMobilityModel().getCurrentLocation().getYPos();
 				if (edgeDataCenter.isIdle()) {
@@ -148,11 +149,11 @@ public class MapChart extends Chart {
 					x_activeEdgeDataCentersList.add(Xpos);
 					y_activeEdgeDataCentersList.add(Ypos);
 
-				}
+				}					
 			}
 			
-			for (ComputingNode node : computingNodesGenerator.getCloudOnlyList()) {
-				ComputingNode CloudDataCenter = node;
+			for (DataCenter node : computingNodesGenerator.getCloudOnlyList()) {
+				DataCenter CloudDataCenter = node;
 				double Xpos = CloudDataCenter.getMobilityModel().getCurrentLocation().getXPos();
 				double Ypos = CloudDataCenter.getMobilityModel().getCurrentLocation().getYPos();
 				/*
@@ -173,13 +174,13 @@ public class MapChart extends Chart {
 					toArray(y_idleEdgeDataCentersList), SeriesMarkers.CROSS, Color.BLACK);
 
 			updateSeries(getChart(), "Active Edge data centers", toArray(x_activeEdgeDataCentersList),
-					toArray(y_activeEdgeDataCentersList), SeriesMarkers.CROSS, Color.red);
+					toArray(y_activeEdgeDataCentersList), SeriesMarkers.CROSS, Color.RED);
 			
 			updateSeries(getChart(), "Idle Cloud data centers", toArray(x_idleCloudDataCentersList),
 					toArray(y_idleCloudDataCentersList), SeriesMarkers.DIAMOND, Color.BLACK);
 
 			updateSeries(getChart(), "Active Cloud data centers", toArray(x_activeCloudDataCentersList),
-					toArray(y_activeCloudDataCentersList), SeriesMarkers.DIAMOND, Color.red);
+					toArray(y_activeCloudDataCentersList), SeriesMarkers.DIAMOND, Color.RED);
 
 		}
 	}

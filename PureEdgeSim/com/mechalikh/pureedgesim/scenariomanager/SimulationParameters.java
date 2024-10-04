@@ -595,6 +595,31 @@ public class SimulationParameters {
 	public static int batchSize;
 
 	/**
+	 * The speed at which the neural network learns.
+	 */
+	public static int neuralNetworkLearningSpeed;
+
+	/**
+	 * The epsilon of the neural network learns.
+	 */
+	public static double epsilon;
+	
+	/**
+	* The minimal value of epsilon in the neural network learns.
+	*/
+   public static double epsilonMin;
+
+	/**
+	 * The speed at which epsilon decays in the neural network learns.
+	 */
+	public static double epsilonDecay;
+
+	/**
+	 * The rate at which the neural network learns.
+	 */
+	public static double learningRate;
+
+	/**
 	 * A private constructor to prevent this class from being instantiated.
 	 * 
 	 */

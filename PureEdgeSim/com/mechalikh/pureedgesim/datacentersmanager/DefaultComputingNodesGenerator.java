@@ -59,9 +59,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	public void generateDatacentersAndDevices() {
 
 		// Generate Edge and Cloud data centers.
-		generateDataCenters(SimulationParameters.cloudDataCentersFile, SimulationParameters.TYPES.CLOUD);
+		generateDataCenters(SimulationParameters.cloudDataCentersFile, SimulationParameters.TYPES.CLOUD); 
 
-		generateDataCenters(SimulationParameters.edgeDataCentersFile, SimulationParameters.TYPES.EDGE_DATACENTER);
+		generateDataCenters(SimulationParameters.edgeDataCentersFile, SimulationParameters.TYPES.EDGE_DATACENTER); 
 
 		// Generate edge devices.
 		generateEdgeDevices();
@@ -69,9 +69,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		//Generate ONT devices
 		generateONTDevices(SimulationParameters.OntFile, SimulationParameters.TYPES.ONT);
 
-		getSimulationManager().getSimulationLogger().print("%s - Datacenters and devices were generated",
-				getClass().getSimpleName());
-
+		getSimulationManager().getSimulationLogger()
+				.print("%s - Datacenters and devices were generated", getClass().getSimpleName());
+				
 	}
 
 	/**
@@ -104,12 +104,11 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		}	
 		
 	}
-	
+
 	/**
 	 * Generates edge devices
 	 */
 	public void generateEdgeDevices() {
-
 		// Generate edge devices instances from edge devices types in xml file.
 		try (InputStream devicesFile = new FileInputStream(SimulationParameters.edgeDevicesFile)) {
 
@@ -132,9 +131,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 			// if percentage of generated devices is < 100%.
 			if (mistOnlyList.size() < getSimulationManager().getScenario().getDevicesCount())
-				getSimulationManager().getSimulationLogger().print(
-						"%s - Wrong percentages values (the sum is inferior than 100%), check edge_devices.xml file !",
-						getClass().getSimpleName());
+				getSimulationManager().getSimulationLogger().print("%s - Wrong percentages values (the sum is inferior than 100%), check edge_devices.xml file !", getClass().getSimpleName());
 			// Add more devices.
 			if (edgeElement != null) {
 				int missingInstances = getSimulationManager().getScenario().getDevicesCount() - mistOnlyList.size();
@@ -162,7 +159,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			allNodesListSensorsExcluded.add(newDevice);
 		}
 	}
-
+	
 	/**
 	 * Generates the required number of instances for each type of edge devices.
 	 * 
@@ -177,9 +174,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		for (int j = 0; j < devicesInstances; j++) {
 			if (mistOnlyList.size() > getSimulationManager().getScenario().getDevicesCount()) {
-				getSimulationManager().getSimulationLogger().print(
-						"%s - Wrong percentages values (the sum is superior than 100%%), check edge_devices.xml file !",
-						getClass().getSimpleName());
+				getSimulationManager().getSimulationLogger().print("%s - Wrong percentages values (the sum is superior than 100%), check edge_devices.xml file !",getClass().getSimpleName());
 				break;
 			}
 
@@ -192,7 +187,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		}
 	}
-
+	
 	/**
 	 * Generates the Cloud and Edge data centers.
 	 * 
@@ -200,7 +195,6 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	 * @param type The type, whether a CLOUD data center or an EDGE one.
 	 */
 	protected void generateDataCenters(String file, TYPES type) {
-
 		// Fill list with edge data centers
 		try (InputStream serversFile = new FileInputStream(file)) {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -239,10 +233,11 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Creates the computing nodes.
 	 * 
+	 * @see #generateDataCenters(String, TYPES)
 	 * @see #generateDevicesInstances(Element)
 	 * 
 	 * @param datacenterElement The configuration file.
@@ -316,10 +311,10 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			computingNode.enableTaskGeneration(Boolean
 					.parseBoolean(datacenterElement.getElementsByTagName("generateTasks").item(0).getTextContent()));
 			// Generate random location for edge devices
-			datacenterLocation = new Location(random.nextInt(SimulationParameters.simulationMapLength),
+			datacenterLocation = new Location(random.nextInt(SimulationParameters.simulationMapWidth),
 					random.nextInt(SimulationParameters.simulationMapLength));
 			getSimulationManager().getSimulationLogger()
-					.deepLog("ComputingNodesGenerator- Edge device:" + mistOnlyList.size() + "    location: ( "
+					.deepLog("DefaultComputingNodesGenerator- Edge device:" + mistOnlyList.size() + "    location: ( "
 							+ datacenterLocation.getXPos() + "," + datacenterLocation.getYPos() + " )");
 			//SimLog.println(computingNode.getName() + " Location: (" + datacenterLocation.getXPos() + "," + datacenterLocation.getYPos() + " )");
 			
