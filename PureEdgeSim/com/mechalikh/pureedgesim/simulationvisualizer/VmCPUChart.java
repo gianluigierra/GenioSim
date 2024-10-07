@@ -108,7 +108,9 @@ public class VmCPUChart extends Chart {
 
                 // Genera un colore basato sull'ultimo carattere (numero identificatore)
                 Color color = getColorBasedOnIdentifier(identifier, Color.BLUE);
-                updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, color);
+                if(simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY"))
+                    updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, Color.BLACK);
+                else updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, color);
             }
 		}
 	}

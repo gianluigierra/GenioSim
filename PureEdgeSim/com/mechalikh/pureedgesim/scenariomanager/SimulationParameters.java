@@ -600,6 +600,12 @@ public class SimulationParameters {
 	public static int neuralNetworkLearningSpeed;
 
 	/**
+	 * The gamma of the DQN algorithm.
+	 */
+	public static double gamma;
+
+
+	/**
 	 * The epsilon of the neural network learns.
 	 */
 	public static double epsilon;

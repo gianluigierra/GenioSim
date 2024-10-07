@@ -161,6 +161,10 @@ public class ParametersParser extends FileParserAbstract {
 
 			SimulationParameters.neuralNetworkLearningSpeed = (int) assertDouble(prop, "neural_network_learning_speed", value -> (value > 0), "> 0");
 
+			SimulationParameters.batchSize = (int) assertDouble(prop, "batch_size", value -> (value > 0), "> 0");
+
+			SimulationParameters.gamma = assertDouble(prop, "gamma", value -> (value > 0), "> 0");
+
 			SimulationParameters.epsilon = assertDouble(prop, "epsilon", value -> (value > 0), "> 0");
 
 			SimulationParameters.epsilonMin = assertDouble(prop, "epsilon_min", value -> (value > 0), "> 0");

@@ -27,16 +27,12 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     private ReplayBuffer replayBuffer;
 
     // Parametri DQN
-    // private double epsilon = 0.75;
-    // private double epsilonMin = 0.1;
-    // private double epsilonDecay = 0.999;
     private double epsilon = SimulationParameters.epsilon;
     private double epsilonMin = SimulationParameters.epsilonMin;
     private double epsilonDecay = SimulationParameters.epsilonDecay;
-    private double gamma = 0.99;
-    //private double learningRate = 0.001;
+    private double gamma = SimulationParameters.gamma;
     private double learningRate = SimulationParameters.learningRate;
-    private int batchSize = 64;
+    private int batchSize = SimulationParameters.batchSize;
     private int replayMemory = 10000;
 
     public DQNOrchestrator(SimulationManager simulationManager) {
@@ -207,7 +203,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
 
     private int chooseAction2(double[] state, String[] architecture, Task task) {
         Random rand = new Random();
-        if (!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY") && simulationManager.getSimulation().clock() <= 300)
+        if (!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY") && simulationManager.getSimulation().clock() <= SimulationParameters.neuralNetworkLearningSpeed * 3)
             return tradeOff(architecture, task);
         if (rand.nextDouble() < epsilon) {
             System.out.println("Scelta random, epsilon = " + epsilon);
@@ -366,7 +362,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         }
     
         // Aggiorna epsilon per ridurre gradualmente l'esplorazione
-        if (epsilon > epsilonMin && simulationManager.getSimulation().clock() > 300 && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed==0) {
+        if (epsilon > epsilonMin && simulationManager.getSimulation().clock() > (SimulationParameters.neuralNetworkLearningSpeed * 3) && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed==0) {
             epsilon *= epsilonDecay;
         }
     

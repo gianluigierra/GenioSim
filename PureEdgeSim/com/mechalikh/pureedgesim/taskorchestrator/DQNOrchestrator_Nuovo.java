@@ -21,22 +21,32 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNOrchestratorBackup extends DefaultOrchestrator {
+public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
     private MultiLayerNetwork qNetwork;
     private MultiLayerNetwork targetNetwork;
     private ReplayBuffer replayBuffer;
 
     // Parametri DQN
-    private double epsilon = 0.75;
-    private double epsilonMin = 0.1;
-    private double epsilonDecay = 0.999;
-    private double gamma = 0.99;
-    private double learningRate = 0.0005;
-    private int batchSize = 64;
+    //private double epsilon = 0.75;
+    //private double epsilonMin = 0.1;
+    //private double epsilonDecay = 0.999;
+    //private double gamma = 0.99;
+    //private double learningRate = 0.001;
+    //private int batchSize = 128;
+    private double epsilon = SimulationParameters.epsilon;
+    private double epsilonMin = SimulationParameters.epsilonMin;
+    private double epsilonDecay = SimulationParameters.epsilonDecay;
+    private double gamma = SimulationParameters.gamma;
+    private double learningRate = SimulationParameters.learningRate;
+    private int batchSize = SimulationParameters.batchSize;
     private int replayMemory = 10000;
-    private int tsk = 0;
 
-    public DQNOrchestratorBackup(SimulationManager simulationManager) {
+    private int replayBufferUpdateCounter = 0;
+    private int epsilonUpdateCounter = 0;
+    private int targetUpdateCounter = 0;
+
+
+    public DQNOrchestrator_Nuovo(SimulationManager simulationManager) {
         super(simulationManager);
         qNetwork = createNetwork();
         targetNetwork = createNetwork();
@@ -71,12 +81,8 @@ public class DQNOrchestratorBackup extends DefaultOrchestrator {
     @Override
     protected int findComputingNode(String[] architecture, Task task) {
         if ("ROUND_ROBIN".equals(algorithmName)) {
-            System.out.println("Task num " + tsk);
-            tsk++;
             return super.roundRobin(architecture, task);
 		} else if ("TRADE_OFF".equals(algorithmName)) {
-            System.out.println("Task num " + tsk);
-            tsk++;
             return super.tradeOff(architecture, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
@@ -208,6 +214,8 @@ public class DQNOrchestratorBackup extends DefaultOrchestrator {
 
     private int chooseAction2(double[] state, String[] architecture, Task task) {
         Random rand = new Random();
+        if (simulationManager.getSimulation().clock() <= (SimulationParameters.neuralNetworkLearningSpeed * 3))
+            return tradeOff(architecture, task);
         if (rand.nextDouble() < epsilon) {
             System.out.println("Scelta random, epsilon = " + epsilon);
             return randChoice(architecture, task);
@@ -244,6 +252,15 @@ public class DQNOrchestratorBackup extends DefaultOrchestrator {
         qValues.sort((pair1, pair2) -> Double.compare(pair2.getKey(), pair1.getKey()));
         
         // Return the index of the kth best action (0-based index)
+        //return qValues.get(k).getValue();
+
+
+        //Sopra è l'implementazione corretta, questa effettua una scelta pseudo-randomica basata sui migliore 3 nodi.
+        int exploreTopK = 3; // Esplora tra i primi nodeList.size()/3 migliori Q-values. Analogamente si potrebbe mettere: = nodeList.size()/3
+        Random rand = new Random();
+        if (rand.nextDouble() < epsilon) {
+            k = rand.nextInt(Math.min(exploreTopK, qValues.size()));
+        }
         return qValues.get(k).getValue();
     }
 
@@ -316,7 +333,11 @@ public class DQNOrchestratorBackup extends DefaultOrchestrator {
     
         // Ricompensa per nodi con potenza di calcolo elevata (MIPS)
         if (nodeList.get(action).getTotalMipsCapacity() > avgMipsPerCore)  reward += 10;
-        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsPerCore) reward -= 10;      
+        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsPerCore) reward -= 10;    
+        
+        //penalizzo il nodo se il task viene messo in coda
+        if(nodeList.get(action).getAvailableCores() == 0) reward -= 15;
+        else reward += 10;
 
         //penalizzo il nodo per avere i task che non sono stati ancora eseguiti
         for(Task TaskI : nodeList.get(action).getTasksQueue()){
@@ -346,17 +367,23 @@ public class DQNOrchestratorBackup extends DefaultOrchestrator {
         PerformAction(action, task);
         double reward = grantReward(action, task);
         double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
-    
+
+        //update variabili DQN
+        if(simulationManager.getSimulation().clock() > (SimulationParameters.neuralNetworkLearningSpeed * 3)) epsilonUpdateCounter++;
+        replayBufferUpdateCounter++;
+
         // Aggiungi l'esperienza nel replay buffer
         replayBuffer.add(new Experience(state, action, reward, nextState, isDone()));
     
         // Aggiorna la rete neurale se il replay buffer ha abbastanza esperienze
-        if (replayBuffer.size() > batchSize && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed ==0) {
+        if (replayBuffer.size() > batchSize && (replayBufferUpdateCounter == (SimulationParameters.neuralNetworkLearningSpeed / 2))){
+            replayBufferUpdateCounter = 0;
             updateNetwork(batchSize);
         }
     
         // Aggiorna epsilon per ridurre gradualmente l'esplorazione
-        if (epsilon > epsilonMin && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed==0) {
+        if (epsilon > epsilonMin && (epsilonUpdateCounter == SimulationParameters.neuralNetworkLearningSpeed)){
+            epsilonUpdateCounter = 0;
             epsilon *= epsilonDecay;
         }
     
@@ -373,11 +400,11 @@ public class DQNOrchestratorBackup extends DefaultOrchestrator {
         return false;
     }
 
-    private int targetUpdateCounter = 0;
-
     private boolean shouldUpdateTargetNetwork() {
+        // Definire la logica per determinare quando aggiornare la rete target
         targetUpdateCounter++;
-        return targetUpdateCounter % 1000 == 0;  // Aggiorna ogni 1000 iterazioni
+        return targetUpdateCounter %  (SimulationParameters.neuralNetworkLearningSpeed * 10)== 0;  // (neuralNetworkLearningSpeed * 10) iterazioni
+        //return true;  
     }
 
 }
