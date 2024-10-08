@@ -32,7 +32,9 @@ public class Host extends LocationAwareNode {
 	protected double availableRam; // in Megabytes
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
-
+	private int tasksFailed = 0;
+	private double failureRate = 0;
+	private int sentTasks = 0;
 	protected DataCenter DataCenter;
 	protected List<VM> VMlist = new ArrayList<>();
 
@@ -128,6 +130,16 @@ public class Host extends LocationAwareNode {
 			this.DataCenter.processEvent(e);
 			executionFinished(e);
 		}
+	}
+
+	public void incrementTasksFailed(){
+		this.tasksFailed++;
+		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);
+		this.DataCenter.incrementTasksFailed();
+	}
+
+	public double getFailureRate(){
+		return failureRate;
 	}
 
 	public int getAvailableCores(){
@@ -278,6 +290,8 @@ public class Host extends LocationAwareNode {
 
 	@Override
 	public void submitTask(Task task) {
+		//incremento i sentTasks per calcolare il failureRate
+		this.sentTasks++;
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
 

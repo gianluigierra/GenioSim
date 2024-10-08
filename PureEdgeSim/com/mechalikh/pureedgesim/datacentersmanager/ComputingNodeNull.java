@@ -266,6 +266,25 @@ public class ComputingNodeNull implements ComputingNode {
 		// Do nothing.
 	}
 
+	
+	/**
+	 * empty
+	 */
+	@Override
+	public void incrementTasksFailed(){	
+	}
+
+	/**
+	 * 
+	 * Returns 0 since there are no tasksfailed on this Computing Node.
+	 * 
+	 * @return 0.
+	 */
+	@Override
+	public double getFailureRate(){
+		return 0;
+	}
+
 	/**
 	 * 
 	 * Returns 0 since there are no CPU cores available on this Computing Node.

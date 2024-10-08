@@ -89,7 +89,9 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
     protected int findComputingNode(String[] architecture, Task task) {
         if ("ROUND_ROBIN".equals(algorithmName)) {
             return super.roundRobin(architecture, task);
-		} else if ("TRADE_OFF".equals(algorithmName)) {
+		} else if ("GREEDY".equals(algorithmName)) {
+            return greedyChoice(architecture, task);
+		}  else if ("TRADE_OFF".equals(algorithmName)) {
             return super.tradeOff(architecture, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
@@ -114,6 +116,7 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
     protected void assignTaskToComputingNode(Task task, String[] architectureLayers) {
 
 		int nodeIndex = findComputingNode(architectureLayers, task);
+        System.out.println("Nodo: " + nodeList.get(nodeIndex).getName());
 
 		if (nodeIndex != -1) {
             PerformAction(nodeIndex, task);
@@ -223,7 +226,7 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
                 selected = i;
             }
             //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
-            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores())){
+            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
                 bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
                 bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
                 selected = i;
@@ -358,8 +361,8 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
         else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsPerCore) reward -= 10;    
         
         //penalizzo il nodo se il task viene messo in coda
-        //if(nodeList.get(action).getAvailableCores() == 0) reward -= 15;
-        //else reward += 10;
+        if(nodeList.get(action).getAvailableCores() == 0) reward -= 15;
+        else reward += 10;
 
         //penalizzo il nodo per avere i task che non sono stati ancora eseguiti
         for(Task TaskI : nodeList.get(action).getTasksQueue()){
@@ -433,7 +436,7 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
     private boolean shouldUpdateTargetNetwork() {
         // Definire la logica per determinare quando aggiornare la rete target
         targetUpdateCounter++;
-        return targetUpdateCounter %  (SimulationParameters.neuralNetworkLearningSpeed * 10)== 0;  // (neuralNetworkLearningSpeed * 10) iterazioni
+        return targetUpdateCounter%(SimulationParameters.neuralNetworkLearningSpeed * 10) == 0;  // (neuralNetworkLearningSpeed * 10) iterazioni
         //return true;  
     }
 

@@ -26,7 +26,9 @@ public class VM extends LocationAwareNode {
 	protected double availableRam; // in Megabytes
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
-
+	private int tasksFailed = 0;
+	private double failureRate = 0;
+	private int sentTasks = 0;
 	private static boolean sharedQueue = false;	//variabile booleana per fare condividere la queue dei task tra tutte le VM del dato datacenter
 	protected Host Host;	//the host of this VM
 
@@ -57,6 +59,16 @@ public class VM extends LocationAwareNode {
 			this.Host.processEvent(e);
 			executionFinished(e);
 		}
+	}
+
+	public void incrementTasksFailed(){
+		this.tasksFailed++;
+		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);
+		this.Host.incrementTasksFailed();
+	}
+
+	public double getFailureRate(){
+		return failureRate;
 	}
 
 	public int getAvailableCores(){
@@ -207,6 +219,10 @@ public class VM extends LocationAwareNode {
 
 	@Override
 	public void submitTask(Task task) {
+
+		//incremento i sentTasks per calcolare il failureRate
+		this.sentTasks++;
+
 		// The task to be executed has been received, save the arrival time
 		task.setArrivalTime(getSimulation().clock());
 

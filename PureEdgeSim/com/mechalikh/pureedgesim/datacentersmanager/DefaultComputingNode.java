@@ -53,6 +53,9 @@ public class DefaultComputingNode extends LocationAwareNode {
 	protected double availableRam; // in Megabytes
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
+	private int tasksFailed = 0;
+	private double failureRate = 0;
+	private int sentTasks = 0;
 
 	public DefaultComputingNode(SimulationManager simulationManager, double mipsPerCore, int numberOfCPUCores,
 			double storage, double ram) {
@@ -74,6 +77,15 @@ public class DefaultComputingNode extends LocationAwareNode {
 		super.processEvent(e);
 		if (e.getTag() == EXECUTION_FINISHED)
 			executionFinished(e);
+	}
+
+	public void incrementTasksFailed(){
+		this.tasksFailed++;
+		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);
+	}
+
+	public double getFailureRate(){
+		return failureRate;
 	}
 
 	public int getAvailableCores(){
@@ -224,6 +236,10 @@ public class DefaultComputingNode extends LocationAwareNode {
 
 	@Override
 	public void submitTask(Task task) {
+
+		//incremento i sentTasks per calcolare il failureRate
+		this.sentTasks++;
+		
 		// The task to be executed has been received, save the arrival time
 		task.setArrivalTime(getSimulation().clock());
 

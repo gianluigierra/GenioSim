@@ -72,7 +72,8 @@ public class SimulationVisualizer {
         Chart networkUtilizationChart = new FiberMultiChart("Fiber network utilization", "Time (s)", "Utilization (Mbps)", simulationManager);
         Chart VmCPUChart = new VmCPUChart("VmCPU", "Time (s)", "Utilization (%)", simulationManager);
         Chart HostCPUChart = new HostCPUChart("HostCPU", "Time (s)", "Utilization (%)", simulationManager);
-        charts.addAll(List.of(mapChart, tasksSuccessChart, networkUtilizationChart, cpuUtilizationChart, HostCPUChart, VmCPUChart));
+        Chart VmTasksChart = new VmTasksChart("VM Tasks success rate", "Time (s)", "Success rate (%)", simulationManager);
+        charts.addAll(List.of(mapChart, tasksSuccessChart, VmTasksChart, networkUtilizationChart, cpuUtilizationChart, VmCPUChart));
 
         /**
         // Add network utilization chart if the useOneSharedWanLink parameter is true

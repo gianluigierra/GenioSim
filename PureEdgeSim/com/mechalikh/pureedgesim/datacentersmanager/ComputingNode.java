@@ -357,7 +357,23 @@ public interface ComputingNode {
 	 * Gets available cores on this computing
 	 * node.
 	 * 
-	 * @return the available storage.
+	 * @return the tasksfailed.
+	 */
+	public double getFailureRate();
+
+	/**
+	 * Gets available cores on this computing
+	 * node.
+	 * 
+	 * increments the tasks failed.
+	 */
+	public void incrementTasksFailed();
+
+	/**
+	 * Gets available cores on this computing
+	 * node.
+	 * 
+	 * @return the available cpuCores.
 	 */
 	int getAvailableCores();
 
