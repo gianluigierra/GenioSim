@@ -41,9 +41,13 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
     private int batchSize = SimulationParameters.batchSize;
     private int replayMemory = 10000;
 
-    private int replayBufferUpdateCounter = 0;
+    private int replayBufferfUpdateCounter = 0;
     private int epsilonUpdateCounter = 0;
     private int targetUpdateCounter = 0;
+
+    private int numberofreplayupdates = 0;
+    private int numberofepsilonupdates = 0;
+    private int numberoftasksorchestrated = 0;
 
 
     public DQNOrchestrator_Nuovo(SimulationManager simulationManager) {
@@ -214,7 +218,7 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
 
     private int chooseAction2(double[] state, String[] architecture, Task task) {
         Random rand = new Random();
-        if (simulationManager.getSimulation().clock() <= (SimulationParameters.neuralNetworkLearningSpeed * 3))
+        if (simulationManager.getSimulation().clock() <= 300)
             return tradeOff(architecture, task);
         if (rand.nextDouble() < epsilon) {
             System.out.println("Scelta random, epsilon = " + epsilon);
@@ -369,20 +373,22 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
         double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
 
         //update variabili DQN
-        if(simulationManager.getSimulation().clock() > (SimulationParameters.neuralNetworkLearningSpeed * 3)) epsilonUpdateCounter++;
-        replayBufferUpdateCounter++;
+        if(simulationManager.getSimulation().clock() > 300) epsilonUpdateCounter++;
+        if(replayBufferfUpdateCounter < Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)) replayBufferfUpdateCounter++;
 
         // Aggiungi l'esperienza nel replay buffer
         replayBuffer.add(new Experience(state, action, reward, nextState, isDone()));
     
         // Aggiorna la rete neurale se il replay buffer ha abbastanza esperienze
-        if (replayBuffer.size() > batchSize && (replayBufferUpdateCounter == (SimulationParameters.neuralNetworkLearningSpeed / 2))){
-            replayBufferUpdateCounter = 0;
+        if (replayBuffer.size() > batchSize && replayBufferfUpdateCounter == Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)){
+            numberofreplayupdates++;
+            replayBufferfUpdateCounter = 0;
             updateNetwork(batchSize);
         }
     
         // Aggiorna epsilon per ridurre gradualmente l'esplorazione
-        if (epsilon > epsilonMin && (epsilonUpdateCounter == SimulationParameters.neuralNetworkLearningSpeed)){
+        if (epsilonUpdateCounter == SimulationParameters.neuralNetworkLearningSpeed){
+            numberofepsilonupdates++;
             epsilonUpdateCounter = 0;
             epsilon *= epsilonDecay;
         }
@@ -392,6 +398,10 @@ public class DQNOrchestrator_Nuovo extends DefaultOrchestrator {
             System.out.println("----------------------------------------------UPDATE FATTO----------------------------------------------");
             targetNetwork.setParams(qNetwork.params());
         }
+
+        numberoftasksorchestrated++;
+        if(simulationManager.getSimulation().clock() > 17000 ) {System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);}
+
     }
 
 

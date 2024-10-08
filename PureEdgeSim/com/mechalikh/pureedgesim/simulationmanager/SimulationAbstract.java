@@ -211,6 +211,33 @@ public abstract class SimulationAbstract {
 	}
 
 	/**
+	 * Allows to specifically set the simulation_paramters.properties file.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setSimulationParameterProperties(String settingsFolder, String simulationParametersProperties){
+		setCustomFilePath(settingsFolder + simulationParametersProperties, Files.SIMULATION_PARAMETERS);
+	}
+
+	/**
+	 * Allows to specifically set the applications.xml file.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setApplicationsXML(String settingsFolder, String ApplicationsXML){
+		setCustomFilePath(settingsFolder + ApplicationsXML, Files.APPLICATIONS_FILE);
+	}
+
+	/**
+	 * Allows to specifically set the edge_datacenters.xml file.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setEdgeDatacentersXML(String settingsFolder, String EdgeDatacentersXML){
+		setCustomFilePath(settingsFolder + EdgeDatacentersXML, Files.EDGE_DATACENTERS_FILE);
+	}
+
+	/**
 	 * Allows to set a custom path of each configuration file individually.
 	 * 
 	 * @param path the path from which the file will be loaded

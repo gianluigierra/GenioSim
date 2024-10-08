@@ -6,6 +6,7 @@ import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator_Nuovo;
 
 public class ExampleMio {
 
@@ -45,7 +46,7 @@ public class ExampleMio {
 		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
 		
         //cambio l'orchestratore con quello creatto da me
-	    sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+	    sim.setCustomEdgeOrchestrator(DQNOrchestrator_Nuovo.class);
 		//sim.setCustomEdgeOrchestrator(examples.ExampleMio.DQNOrchestrator.class);
 		
 		/* to use the default one you can simply delete or comment those lines */
