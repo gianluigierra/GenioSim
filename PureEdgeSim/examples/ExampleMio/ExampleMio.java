@@ -5,7 +5,7 @@ import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
-import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator_backup;
 import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator_Nuovo;
 
 public class ExampleMio {

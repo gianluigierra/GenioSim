@@ -21,7 +21,7 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNOrchestrator extends DefaultOrchestrator {
+public class DQNOrchestrator_backup extends DefaultOrchestrator {
     private MultiLayerNetwork qNetwork;
     private MultiLayerNetwork targetNetwork;
     private ReplayBuffer replayBuffer;
@@ -39,7 +39,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     private int numberofepsilonupdates = 0;
     private int numberoftasksorchestrated = 0;
 
-    public DQNOrchestrator(SimulationManager simulationManager) {
+    public DQNOrchestrator_backup(SimulationManager simulationManager) {
         super(simulationManager);
         qNetwork = createNetwork();
         targetNetwork = createNetwork();

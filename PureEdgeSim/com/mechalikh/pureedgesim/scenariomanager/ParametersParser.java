@@ -161,6 +161,11 @@ public class ParametersParser extends FileParserAbstract {
 
 			SimulationParameters.neuralNetworkLearningSpeed = (int) assertDouble(prop, "neural_network_learning_speed", value -> (value > 0), "> 0");
 
+			SimulationParameters.greedyTraining = Boolean
+			.parseBoolean(prop.getProperty("greedy_learning").trim());
+
+			SimulationParameters.tasksForGreedyTraining = (int) assertDouble(prop, "tasks_for_greedy_learning", value -> (value > 0), "> 0");
+
 			SimulationParameters.batchSize = (int) assertDouble(prop, "batch_size", value -> (value > 0), "> 0");
 
 			SimulationParameters.gamma = assertDouble(prop, "gamma", value -> (value > 0), "> 0");

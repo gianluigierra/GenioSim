@@ -590,6 +590,16 @@ public class SimulationParameters {
 	public static boolean waitForAllTasksToFinish;
 
 	/**
+	 * wether the neuralnetwork needs training or not with greedy function.
+	 */
+	public static boolean greedyTraining;
+
+	/**
+	 * wether the neuralnetwork needs training or not with greedy function.
+	 */
+	public static int tasksForGreedyTraining;
+
+	/**
 	 * How many tasks are scheduled each time (used to avoid scheduling all tasks from the beginning of the simulation).
 	 */
 	public static int batchSize;
