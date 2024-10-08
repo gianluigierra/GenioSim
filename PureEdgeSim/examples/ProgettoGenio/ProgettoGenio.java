@@ -40,6 +40,12 @@ public class ProgettoGenio {
 				sim.setApplicationsXML(settingsPath, "applications_E_Health.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "edge_datacenters_E_Health.xml");
 				break;
+		
+			case "Video_Surveillance":
+				sim.setSimulationParameterProperties(settingsPath, "simulation_parameters_Video_Surveillance.properties");
+				sim.setApplicationsXML(settingsPath, "applications_Video_Surveillance.xml");
+				sim.setEdgeDatacentersXML(settingsPath, "edge_datacenters_Video_Surveillance.xml");
+				break;
 		}
 
 		// To change the mobility model

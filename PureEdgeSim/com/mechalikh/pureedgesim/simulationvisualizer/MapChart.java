@@ -110,6 +110,8 @@ public class MapChart extends Chart {
 		updateEdgeDevices();
 		// Add edge data centers to the map and display their CPU utilization
 		updateEdgeDataCenters();
+		// Add cloud data centers to the map and display their CPU utilization
+		updateCloudDataCenters();
 	}
 	
 
@@ -119,8 +121,7 @@ public class MapChart extends Chart {
 	protected void updateEdgeDataCenters() {
 		// Only if Edge computing is used
 		if (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE")
-				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")
-				|| simulationManager.getScenario().getStringOrchArchitecture().equals("CLOUD")) {
+				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 			
 			// List of idle servers
 			List<Double> x_idleEdgeDataCentersList = new ArrayList<>();
@@ -128,15 +129,6 @@ public class MapChart extends Chart {
 			// List of active servers
 			List<Double> x_activeEdgeDataCentersList = new ArrayList<>();
 			List<Double> y_activeEdgeDataCentersList = new ArrayList<>();
-			
-			
-			// List of idle cloud servers
-			List<Double> x_idleCloudDataCentersList = new ArrayList<>();
-			List<Double> y_idleCloudDataCentersList = new ArrayList<>();
-			// List of active cloud servers
-			List<Double> x_activeCloudDataCentersList = new ArrayList<>();
-			List<Double> y_activeCloudDataCentersList = new ArrayList<>();
-			
 
 			for (DataCenter node : computingNodesGenerator.getEdgeOnlyList()) {
 				DataCenter edgeDataCenter = node;
@@ -151,6 +143,30 @@ public class MapChart extends Chart {
 
 				}					
 			}
+			
+			updateSeries(getChart(), "Idle Edge data centers", toArray(x_idleEdgeDataCentersList),
+					toArray(y_idleEdgeDataCentersList), SeriesMarkers.CROSS, Color.BLACK);
+
+			updateSeries(getChart(), "Active Edge data centers", toArray(x_activeEdgeDataCentersList),
+					toArray(y_activeEdgeDataCentersList), SeriesMarkers.CROSS, Color.RED);
+
+		}
+	}
+
+	/**
+	 * Updates the map with the current edge data centers and their status.
+	 */
+	protected void updateCloudDataCenters() {
+		// Only if Edge computing is used
+		if (simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")
+				|| simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD")) {
+
+			// List of idle cloud servers
+			List<Double> x_idleCloudDataCentersList = new ArrayList<>();
+			List<Double> y_idleCloudDataCentersList = new ArrayList<>();
+			// List of active cloud servers
+			List<Double> x_activeCloudDataCentersList = new ArrayList<>();
+			List<Double> y_activeCloudDataCentersList = new ArrayList<>();
 			
 			for (DataCenter node : computingNodesGenerator.getCloudOnlyList()) {
 				DataCenter CloudDataCenter = node;
@@ -169,12 +185,6 @@ public class MapChart extends Chart {
 
 				}
 			}
-			
-			updateSeries(getChart(), "Idle Edge data centers", toArray(x_idleEdgeDataCentersList),
-					toArray(y_idleEdgeDataCentersList), SeriesMarkers.CROSS, Color.BLACK);
-
-			updateSeries(getChart(), "Active Edge data centers", toArray(x_activeEdgeDataCentersList),
-					toArray(y_activeEdgeDataCentersList), SeriesMarkers.CROSS, Color.RED);
 			
 			updateSeries(getChart(), "Idle Cloud data centers", toArray(x_idleCloudDataCentersList),
 					toArray(y_idleCloudDataCentersList), SeriesMarkers.DIAMOND, Color.BLACK);
