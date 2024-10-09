@@ -2,7 +2,9 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,12 +23,18 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNOrchestrator_backup extends DefaultOrchestrator {
+public class DQNOrchestrator extends DefaultOrchestrator {
     private MultiLayerNetwork qNetwork;
     private MultiLayerNetwork targetNetwork;
     private ReplayBuffer replayBuffer;
 
     // Parametri DQN
+    //private double epsilon = 0.75;
+    //private double epsilonMin = 0.1;
+    //private double epsilonDecay = 0.999;
+    //private double gamma = 0.99;
+    //private double learningRate = 0.001;
+    //private int batchSize = 128;
     private double epsilon = SimulationParameters.epsilon;
     private double epsilonMin = SimulationParameters.epsilonMin;
     private double epsilonDecay = SimulationParameters.epsilonDecay;
@@ -35,35 +43,44 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     private int batchSize = SimulationParameters.batchSize;
     private int replayMemory = 10000;
 
+    private int replayBufferfUpdateCounter = 0;
+    private int epsilonUpdateCounter = 0;
+    private int targetUpdateCounter = 0;
+
     private int numberofreplayupdates = 0;
     private int numberofepsilonupdates = 0;
     private int numberoftasksorchestrated = 0;
 
-    public DQNOrchestrator_backup(SimulationManager simulationManager) {
+
+    public DQNOrchestrator(SimulationManager simulationManager) {
         super(simulationManager);
         qNetwork = createNetwork();
         targetNetwork = createNetwork();
         replayBuffer = new ReplayBuffer(replayMemory);  // Memoria di replay
+        this.startMap();
     }
     
     private MultiLayerNetwork createNetwork() {
         int inputSize = getStateSize();
         int outputSize = getActionSize();
 
+        int size = 64;
+
         MultiLayerNetwork network = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
             .updater(new Adam(learningRate))
+            .seed(1234)
             .list()
-            .layer(new DenseLayer.Builder().nIn(inputSize).nOut(128)
+            .layer(new DenseLayer.Builder().nIn(inputSize).nOut(size)
                     .activation(Activation.RELU)
                     .weightInit(WeightInit.XAVIER)
                     .build())
-            .layer(new DenseLayer.Builder().nIn(128).nOut(128)
+            .layer(new DenseLayer.Builder().nIn(size).nOut(size)
                     .activation(Activation.RELU)
                     .weightInit(WeightInit.XAVIER)
                     .build())
             .layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                     .activation(Activation.IDENTITY)
-                    .nIn(128).nOut(outputSize)
+                    .nIn(size).nOut(outputSize)
                     .build())
             .build());
 
@@ -75,7 +92,9 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     protected int findComputingNode(String[] architecture, Task task) {
         if ("ROUND_ROBIN".equals(algorithmName)) {
             return super.roundRobin(architecture, task);
-		} else if ("TRADE_OFF".equals(algorithmName)) {
+		} else if ("GREEDY".equals(algorithmName)) {
+            return greedyChoice(architecture, task);
+		}  else if ("TRADE_OFF".equals(algorithmName)) {
             return super.tradeOff(architecture, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
@@ -86,7 +105,7 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     @Override
     // Find an offloading location for this task
 	public void orchestrate(Task task) {
-        if ("ROUND_ROBIN".equals(algorithmName) || "TRADE_OFF".equals(algorithmName)) {
+        if ("ROUND_ROBIN".equals(algorithmName) || "TRADE_OFF".equals(algorithmName) || "GREEDY".equals(algorithmName)) {
 			assignTaskToComputingNode(task, architectureLayers);
 		} else if ("DQN".equals(algorithmName)) {
 			DoDQN(architectureLayers, task);
@@ -100,6 +119,7 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     protected void assignTaskToComputingNode(Task task, String[] architectureLayers) {
 
 		int nodeIndex = findComputingNode(architectureLayers, task);
+        System.out.println("Nodo: " + nodeList.get(nodeIndex).getName());
 
 		if (nodeIndex != -1) {
             PerformAction(nodeIndex, task);
@@ -112,7 +132,7 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     } 
 
     private int getStateSize() {
-        return 4;  // Stato con 6 variabili
+        return 5;  // Stato con 6 variabili
     }
   
     private double[] getCurrentState(List<ComputingNode> nodeList, Task task) {
@@ -120,9 +140,10 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
 		double avgAvailableStorage = getAvgAvailableStorage(nodeList);
         double avgMipsPerCore = getAverageMipsPerCore(nodeList);
         double avgcpuLoad = getAvgCpuLoad(nodeList);
+        double avgfailurerate = getAvgFailureRate(nodeList);
         //double tasksFailed = simulationManager.getSimulationLogger().tasksFailed;
     
-        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgMipsPerCore};
+        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgMipsPerCore, avgfailurerate};
     }
 
     private double[] getNextState(int nodeIndex, Task task) {
@@ -131,11 +152,20 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     
         double nodeRam = node.getAvailableRam();
         double nodeStorage = node.getAvailableStorage();
-        double nodeMips = node.getTotalMipsCapacity();
+        double nodeMips = node.getMipsPerCore();
         double nodecpuLoad = node.getAvgCpuUtilization();
+        double nodefailurerate = node.getFailureRate();
         //double tasksFailed = simulationManager.getSimulationLogger().tasksFailed;
     
-        return new double[]{nodeRam, nodeStorage, nodeMips, nodecpuLoad};
+        return new double[]{nodeRam, nodeStorage, nodeMips, nodecpuLoad, nodefailurerate};
+    }
+
+    private double getAvgFailureRate(List<ComputingNode> nodeList) {
+        double AvgFailureRate = 0;
+        for(ComputingNode cn : nodeList){
+            AvgFailureRate += cn.getFailureRate();
+        }
+        return AvgFailureRate/nodeList.size();
     }
 
     private double getAvgTasksQueue(List<ComputingNode> nodeList) {
@@ -187,28 +217,43 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
         }
     }
 
-    private int chooseAction(double[] state, String[] architecture, Task task) {
-        Random rand = new Random();
-        if (rand.nextDouble() < epsilon) {
-            return randChoice(architecture, task);
-        } else {
-            int choice = getMaxQAction(state);
-            if(offloadingIsPossible(task, nodeList.get(choice), architectureLayers)) return choice;
-            else return randChoice(architecture, task);
+    //node/tasksoffloaded
+    protected Map<Integer, Integer> historyMap = new LinkedHashMap<>(nodeList.size());
+
+    protected void startMap(){
+        for(int i = 0; i < nodeList.size(); i++){
+            historyMap.put(i, 0);
         }
     }
- 
-    private int getMaxQAction(double[] state) {
-        // Reshape the input to be a 2D array with shape [1, state.length]
-        INDArray input = Nd4j.create(state).reshape(1, state.length);
-        INDArray output = qNetwork.output(input);
-        return Nd4j.argMax(output).getInt(0);
+
+    //funzione greedy per iniziare il DQN
+    private int greedyChoice(String[] architecture, Task task){
+        int selected = 0;
+        double bestfit = Double.MAX_VALUE;
+        double bestnumberofcores = 0;
+        for(int i = 0; i < nodeList.size(); i++){
+            //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
+            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
+                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
+                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
+                selected = i;
+            }
+            //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
+            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
+                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
+                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
+                selected = i;
+            }
+        }
+        historyMap.put(selected, historyMap.get(selected) + 1);
+        return selected;
     }
 
-    private int chooseAction2(double[] state, String[] architecture, Task task) {
+    private int chooseAction(double[] state, String[] architecture, Task task) {
         Random rand = new Random();
-        if (!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY") && simulationManager.getSimulation().clock() <= SimulationParameters.neuralNetworkLearningSpeed * 3)
-            return tradeOff(architecture, task);
+        if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
+            if(!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")) return super.tradeOff(architecture, task);
+            else return greedyChoice(architecture, task);
         if (rand.nextDouble() < epsilon) {
             System.out.println("Scelta random, epsilon = " + epsilon);
             return randChoice(architecture, task);
@@ -249,7 +294,7 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
 
 
         //Sopra è l'implementazione corretta, questa effettua una scelta pseudo-randomica basata sui migliore 3 nodi.
-        int exploreTopK = 3; // Esplora tra i primi 3 migliori Q-values
+        int exploreTopK = 3; // Esplora tra i primi nodeList.size()/3 migliori Q-values. Analogamente si potrebbe mettere: = nodeList.size()/3
         Random rand = new Random();
         if (rand.nextDouble() < epsilon) {
             k = rand.nextInt(Math.min(exploreTopK, qValues.size()));
@@ -303,11 +348,12 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     private double grantReward(int action, Task task) {
         // Ottieni lo stato corrente basato su stato2
         double[] state = getCurrentState(nodeList, task);
-        //{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgTotalMips, maxLatency, fileSizeInBits};
+        //{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgMipsPerCore, avgfailurerate};
         double avgAvailableRam = state[0];
         double avgcpuLoad = state[1];
         double avgAvailableStorage = state[2];
         double avgMipsPerCore = state[3];
+        double avgfailurerate = state[4];
     
         // Inizializza la ricompensa
         double reward = 0.0;
@@ -326,7 +372,11 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
     
         // Ricompensa per nodi con potenza di calcolo elevata (MIPS)
         if (nodeList.get(action).getTotalMipsCapacity() > avgMipsPerCore)  reward += 10;
-        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsPerCore) reward -= 10;      
+        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsPerCore) reward -= 10;    
+        
+        //penalizzo il nodo se il task viene messo in coda
+        if(nodeList.get(action).getAvailableCores() == 0) reward -= 15;
+        else reward += 10;
 
         //penalizzo il nodo per avere i task che non sono stati ancora eseguiti
         for(Task TaskI : nodeList.get(action).getTasksQueue()){
@@ -339,6 +389,10 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
         if(nodeList.get(action).getTasksQueue().size() > getAvgTasksQueue(nodeList)) reward -= (20 + (nodeList.get(action).getTasksQueue().size() - getAvgTasksQueue(nodeList)) * 5);
         else reward += 20;
 
+        //penalizzo il nodo per avere un failure-rate più alto dei suoi vicini
+        if(nodeList.get(action).getFailureRate() > avgfailurerate) reward -= (nodeList.get(action).getFailureRate() - avgfailurerate)*nodeList.get(action).getNumberOfCPUCores()*2;
+        else reward += (10 + (nodeList.get(action).getFailureRate() - avgfailurerate)*nodeList.get(action).getNumberOfCPUCores()*2);
+
         System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
         return reward;
     }
@@ -348,7 +402,7 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
         double[] state = getCurrentState(nodeList, task);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
-        int action = chooseAction2(state, architecture, task);
+        int action = chooseAction(state, architecture, task);
 
         //System.out.println("Action: " + action);
     
@@ -356,19 +410,27 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
         PerformAction(action, task);
         double reward = grantReward(action, task);
         double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
-    
+
+        //update variabili DQN
+        if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
+        else if(numberoftasksorchestrated > SimulationParameters.tasksForGreedyTraining) epsilonUpdateCounter++;
+
+        if(replayBufferfUpdateCounter < Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)) replayBufferfUpdateCounter++;
+
         // Aggiungi l'esperienza nel replay buffer
         replayBuffer.add(new Experience(state, action, reward, nextState, isDone()));
     
         // Aggiorna la rete neurale se il replay buffer ha abbastanza esperienze
-        if (replayBuffer.size() > batchSize && simulationManager.getSimulation().clock() % (SimulationParameters.neuralNetworkLearningSpeed / 2) ==0) {
+        if (replayBuffer.size() > batchSize && replayBufferfUpdateCounter == Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)){
             numberofreplayupdates++;
+            replayBufferfUpdateCounter = 0;
             updateNetwork(batchSize);
         }
     
         // Aggiorna epsilon per ridurre gradualmente l'esplorazione
-        if (epsilon > epsilonMin && simulationManager.getSimulation().clock() > (SimulationParameters.neuralNetworkLearningSpeed * 3) && simulationManager.getSimulation().clock() % SimulationParameters.neuralNetworkLearningSpeed==0) {
+        if (epsilonUpdateCounter == SimulationParameters.neuralNetworkLearningSpeed && epsilon > epsilonMin){
             numberofepsilonupdates++;
+            epsilonUpdateCounter = 0;
             epsilon *= epsilonDecay;
         }
     
@@ -379,8 +441,8 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
         }
 
         numberoftasksorchestrated++;
-
         if(simulationManager.getSimulation().clock() > 17000 ) {System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);}
+
     }
 
 
@@ -389,12 +451,10 @@ public class DQNOrchestrator_backup extends DefaultOrchestrator {
         return false;
     }
 
-    private int targetUpdateCounter = 0;
-
     private boolean shouldUpdateTargetNetwork() {
         // Definire la logica per determinare quando aggiornare la rete target
         targetUpdateCounter++;
-        return targetUpdateCounter %  (SimulationParameters.neuralNetworkLearningSpeed * 10)== 0;  // (neuralNetworkLearningSpeed * 10) iterazioni
+        return targetUpdateCounter%(SimulationParameters.neuralNetworkLearningSpeed * 10) == 0;  // (neuralNetworkLearningSpeed * 10) iterazioni
         //return true;  
     }
 
