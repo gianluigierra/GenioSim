@@ -1,8 +1,11 @@
 package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.Random;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,21 +21,16 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
+import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNOrchestrator extends DefaultOrchestrator {
+public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulationEndListener{
     private MultiLayerNetwork qNetwork;
     private MultiLayerNetwork targetNetwork;
     private ReplayBuffer replayBuffer;
 
     // Parametri DQN
-    //private double epsilon = 0.75;
-    //private double epsilonMin = 0.1;
-    //private double epsilonDecay = 0.999;
-    //private double gamma = 0.99;
-    //private double learningRate = 0.001;
-    //private int batchSize = 128;
     private double epsilon = SimulationParameters.epsilon;
     private double epsilonMin = SimulationParameters.epsilonMin;
     private double epsilonDecay = SimulationParameters.epsilonDecay;
@@ -41,30 +39,41 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     private int batchSize = SimulationParameters.batchSize;
     private int replayMemory = 10000;
 
+    //variabili per esecuzione
     private int replayBufferfUpdateCounter = 0;
     private int epsilonUpdateCounter = 0;
     private int targetUpdateCounter = 0;
     private int numberoftasksorchestrated = 0;
+    private boolean usePreviousModel = true;
+    private boolean saveThisModel = true;
 
     //questi servono solo per printare debug
     private int numberofreplayupdates = 0;
     private int numberofepsilonupdates = 0;
-    private boolean printNodeDestination = false;
+    private boolean printNodeDestination = true;
     private boolean printVMtaskUsage = true;
 
 
     public DQNOrchestrator(SimulationManager simulationManager) {
         super(simulationManager);
-        qNetwork = createNetwork();
+
+        // Prova a caricare un modello esistente, se esiste
+        String modelPath = SimulationParameters.settingspath+"dqn_model_"+ SimulationParameters.simName +".zip";
+        File modelFile = new File(modelPath);
+        if(usePreviousModel && modelFile.exists()){
+            loadModel(modelPath);
+        }
+        else qNetwork = createNetwork();
         targetNetwork = createNetwork();
-        replayBuffer = new ReplayBuffer(replayMemory);  // Memoria di replay
+
+        replayBuffer = new ReplayBuffer(replayMemory);
     }
     
     private MultiLayerNetwork createNetwork() {
         int inputSize = getStateSize();
         int outputSize = getActionSize();
 
-        int size = 64;
+        int size = 28;
 
         MultiLayerNetwork network = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
             .updater(new Adam(learningRate))
@@ -120,14 +129,6 @@ public class DQNOrchestrator extends DefaultOrchestrator {
 
 		int nodeIndex = findComputingNode(architectureLayers, task);
         if(printNodeDestination) System.out.println("Nodo: " + nodeList.get(nodeIndex).getName());
-        if(simulationManager.getSimulation().clock() > SimulationParameters.simulationDuration*0.98 && printVMtaskUsage) {
-            printVMtaskUsage = false;    
-            for(int i = 0; i < nodeList.size(); i++){
-                System.out.println("Nodo " + nodeList.get(i).getName());
-                System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
-                System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
-            }
-        }
 
 		if (nodeIndex != -1) {
             PerformAction(nodeIndex, task);
@@ -249,14 +250,20 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     }
 
     private int chooseAction(double[] state, String[] architecture, Task task) {
-        Random rand = new Random();
+
+        //i primi task vengono eseguiti con un algoritmo greedy, per fornire i pesi iniziali alla rete neurale
         if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
-            if(!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")) return super.tradeOff(architecture, task);
-            else return greedyChoice(architecture, task);
+            //if(!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")) return greedyChoice(architecture, task);
+            //else return greedyChoice(architecture, task);
+            return greedyChoice(architecture, task);
+     
+        Random rand = new Random();
         if (rand.nextDouble() < epsilon) {
+            //esplorazione
             if(printNodeDestination) System.out.println("Scelta random, epsilon = " + epsilon);
             return randChoice(architecture, task);
         } else {
+            //exploitation
             if(printNodeDestination) System.out.print("Scelta dalla rete neurale, ");
             // Get the action index based on the Q-values
             int k = 0;
@@ -276,7 +283,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         // Reshape the input to be a 2D array with shape [1, state.length]
         INDArray input = Nd4j.create(state).reshape(1, state.length);
         INDArray output = qNetwork.output(input);
-        
+
         // Create a list to store Q-values with their corresponding indices
         List<Pair<Double, Integer>> qValues = new ArrayList<>();
         
@@ -446,18 +453,6 @@ public class DQNOrchestrator extends DefaultOrchestrator {
 
         numberoftasksorchestrated++;
 
-        if(simulationManager.getSimulation().clock() > SimulationParameters.simulationDuration*0.99 && printVMtaskUsage) {
-            printVMtaskUsage = false;
-            for(int i = 0; i < nodeList.size(); i++){
-                System.out.println("Nodo " + nodeList.get(i).getName());
-                System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
-                System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
-            }
-            System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
-        }
-
-
-
     }
 
 
@@ -472,5 +467,44 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         return targetUpdateCounter%(SimulationParameters.neuralNetworkLearningSpeed * 10) == 0;  // (neuralNetworkLearningSpeed * 10) iterazioni
         //return true;  
     }
+
+    public void saveModel(String filePath) {
+        try {
+            File file = new File(filePath);
+            qNetwork.save(file, true); // true per includere anche l'updater, come Adam
+            System.out.println("Modello salvato con successo in: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Errore nel salvataggio del modello.");
+        }
+    }
+
+    public void loadModel(String filePath) {
+        try {
+            File file = new File(filePath);
+            qNetwork = MultiLayerNetwork.load(file, true); // true per caricare anche l'updater
+            System.out.println("Modello caricato con successo da: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Errore nel caricamento del modello.");
+        }
+    }
+
+    @Override
+    public void onSimulationEnd() {
+        if(simulationManager.getSimulation().clock() > SimulationParameters.simulationDuration*0.99 && printVMtaskUsage) {
+            for(int i = 0; i < nodeList.size(); i++){
+                System.out.println("Nodo " + nodeList.get(i).getName());
+                System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
+                System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
+            }
+            //System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
+            
+            String modelPath = SimulationParameters.settingspath+"dqn_model_"+ SimulationParameters.simName +".zip";
+            if ("DQN".equals(algorithmName) && saveThisModel) saveModel(modelPath);
+        }
+    }
+
+    
 
 }

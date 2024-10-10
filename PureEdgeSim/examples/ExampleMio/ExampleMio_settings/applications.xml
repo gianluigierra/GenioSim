@@ -2,7 +2,7 @@
 	<application name="Smart Lights">
 		<type>Normal</type>
 		<rate>10</rate>
-		<usage_percentage>85</usage_percentage>
+		<usage_percentage>70</usage_percentage>
 		<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
 		<container_size>10</container_size>
 		<request_size>1</request_size>
@@ -12,13 +12,13 @@
 
 	<application name="E-Health">
 		<type>Normal</type>
-		<rate>60</rate>
-		<usage_percentage>10</usage_percentage>
+		<rate>20</rate>
+		<usage_percentage>25</usage_percentage>
 		<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
 		<container_size>10</container_size>
-		<request_size>10</request_size>
+		<request_size>1</request_size>
 		<results_size>10</results_size>
-		<task_length>1000</task_length>
+		<task_length>500</task_length>
 	</application>
 	
 	<application name="Video Surveillance">

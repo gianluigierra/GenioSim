@@ -208,6 +208,16 @@ public abstract class SimulationAbstract {
 		setCustomFilePath(settingsFolder + "edge_devices.xml", Files.EDGE_DEVICES_FILE);
 		setCustomFilePath(settingsFolder + "ONT.xml", Files.ONT_FILE);							//MODIFICA MIA, aggiunto 
 		setCustomFilePath(settingsFolder + "cloud.xml", Files.CLOUD_FILE);
+		SimulationParameters.settingspath = settingsFolder;
+	}
+	
+	/**
+	 * changes the simulation name.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setSimulationName(String simName){
+		SimulationParameters.simName = simName;
 	}
 
 	/**

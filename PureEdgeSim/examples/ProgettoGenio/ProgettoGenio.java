@@ -33,18 +33,21 @@ public class ProgettoGenio {
 				sim.setSimulationParameterProperties(settingsPath, "simulation_parameters_Smart_Lights.properties");
 				sim.setApplicationsXML(settingsPath, "applications_Smart_Lights.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "edge_datacenters_Smart_Lights.xml");
+				sim.setSimulationName(exampleMode);
 				break;
 		
 			case "E_Health":
 				sim.setSimulationParameterProperties(settingsPath, "simulation_parameters_E_Health.properties");
 				sim.setApplicationsXML(settingsPath, "applications_E_Health.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "edge_datacenters_E_Health.xml");
+				sim.setSimulationName(exampleMode);
 				break;
 		
 			case "Video_Surveillance":
 				sim.setSimulationParameterProperties(settingsPath, "simulation_parameters_Video_Surveillance.properties");
 				sim.setApplicationsXML(settingsPath, "applications_Video_Surveillance.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "edge_datacenters_Video_Surveillance.xml");
+				sim.setSimulationName(exampleMode);
 				break;
 		}
 

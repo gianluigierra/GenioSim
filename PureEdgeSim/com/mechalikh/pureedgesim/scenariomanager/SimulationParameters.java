@@ -76,6 +76,22 @@ public class SimulationParameters {
 	 *      Files)
 	 */
 	public static String OntFile = "PureEdgeSim/settings/ONT.xml";
+
+	/**
+	 * The path to the current used setting
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomFilePath(String,
+	 *      Files)
+	 */
+	public static String settingspath = "PureEdgeSim/settings/";
+
+	/**
+	 * The current simulation name
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomFilePath(String,
+	 *      Files)
+	 */
+	public static String simName = "";
 	
 	/**
 	 * The output folder path.
