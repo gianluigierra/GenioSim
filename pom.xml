@@ -377,6 +377,32 @@
 			<version>1.0.0-M1.1</version>
 		</dependency>
 
+		 <!-- CUDA backend -->
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-cuda-11.6</artifactId>
+			<version>1.0.0-M2.1</version>
+			<classifier>windows-x86_64-cudnn</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacpp</artifactId>
+			<version>1.5.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>cuda</artifactId>
+			<version>11.6-8.3-1.5.7</version>
+		</dependency>
+
+        <!-- JUnit (optional, for testing) -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
 		<!-- Pair -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

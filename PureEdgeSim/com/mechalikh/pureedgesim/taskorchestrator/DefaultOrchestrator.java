@@ -30,7 +30,7 @@ import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public class DefaultOrchestrator extends Orchestrator {
-	protected Map<Integer, Integer> historyMap = new LinkedHashMap<>();
+	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();
 	private int tsk = 1;
 
 	public DefaultOrchestrator(SimulationManager simulationManager) {

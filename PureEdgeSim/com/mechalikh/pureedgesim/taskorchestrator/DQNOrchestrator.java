@@ -2,9 +2,7 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.Random;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,10 +44,13 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     private int replayBufferfUpdateCounter = 0;
     private int epsilonUpdateCounter = 0;
     private int targetUpdateCounter = 0;
+    private int numberoftasksorchestrated = 0;
 
+    //questi servono solo per printare debug
     private int numberofreplayupdates = 0;
     private int numberofepsilonupdates = 0;
-    private int numberoftasksorchestrated = 0;
+    private boolean printNodeDestination = false;
+    private boolean printVMtaskUsage = true;
 
 
     public DQNOrchestrator(SimulationManager simulationManager) {
@@ -57,7 +58,6 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         qNetwork = createNetwork();
         targetNetwork = createNetwork();
         replayBuffer = new ReplayBuffer(replayMemory);  // Memoria di replay
-        this.startMap();
     }
     
     private MultiLayerNetwork createNetwork() {
@@ -119,7 +119,15 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     protected void assignTaskToComputingNode(Task task, String[] architectureLayers) {
 
 		int nodeIndex = findComputingNode(architectureLayers, task);
-        System.out.println("Nodo: " + nodeList.get(nodeIndex).getName());
+        if(printNodeDestination) System.out.println("Nodo: " + nodeList.get(nodeIndex).getName());
+        if(simulationManager.getSimulation().clock() > SimulationParameters.simulationDuration*0.98 && printVMtaskUsage) {
+            printVMtaskUsage = false;    
+            for(int i = 0; i < nodeList.size(); i++){
+                System.out.println("Nodo " + nodeList.get(i).getName());
+                System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
+                System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
+            }
+        }
 
 		if (nodeIndex != -1) {
             PerformAction(nodeIndex, task);
@@ -138,12 +146,12 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     private double[] getCurrentState(List<ComputingNode> nodeList, Task task) {
 		double avgAvailableRam = getAvgAvailableRam(nodeList);
 		double avgAvailableStorage = getAvgAvailableStorage(nodeList);
-        double avgMipsPerCore = getAverageMipsPerCore(nodeList);
+        double avgMipsTotal = getAverageMipsTotal(nodeList);
         double avgcpuLoad = getAvgCpuLoad(nodeList);
         double avgfailurerate = getAvgFailureRate(nodeList);
         //double tasksFailed = simulationManager.getSimulationLogger().tasksFailed;
     
-        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgMipsPerCore, avgfailurerate};
+        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgMipsTotal, avgfailurerate};
     }
 
     private double[] getNextState(int nodeIndex, Task task) {
@@ -176,10 +184,10 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         return AvgTasks/nodeList.size();
     }
 
-    private double getAverageMipsPerCore(List<ComputingNode> nodeList) {
+    private double getAverageMipsTotal(List<ComputingNode> nodeList) {
         int AvgMips = 0;
         for(int i = 0; i < nodeList.size(); i++){
-            AvgMips += nodeList.get(i).getMipsPerCore();
+            AvgMips += nodeList.get(i).getTotalMipsCapacity();
         }
         return AvgMips/nodeList.size();
     }
@@ -217,15 +225,6 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         }
     }
 
-    //node/tasksoffloaded
-    protected Map<Integer, Integer> historyMap = new LinkedHashMap<>(nodeList.size());
-
-    protected void startMap(){
-        for(int i = 0; i < nodeList.size(); i++){
-            historyMap.put(i, 0);
-        }
-    }
-
     //funzione greedy per iniziare il DQN
     private int greedyChoice(String[] architecture, Task task){
         int selected = 0;
@@ -233,19 +232,19 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         double bestnumberofcores = 0;
         for(int i = 0; i < nodeList.size(); i++){
             //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
-            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
+            if( (super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
                 bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
+                bestfit = super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
                 selected = i;
             }
             //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
-            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
+            else if((super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
                 bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
+                bestfit = super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
                 selected = i;
             }
         }
-        historyMap.put(selected, historyMap.get(selected) + 1);
+        super.historyMap.put(selected, super.historyMap.get(selected) + 1);
         return selected;
     }
 
@@ -255,16 +254,16 @@ public class DQNOrchestrator extends DefaultOrchestrator {
             if(!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")) return super.tradeOff(architecture, task);
             else return greedyChoice(architecture, task);
         if (rand.nextDouble() < epsilon) {
-            System.out.println("Scelta random, epsilon = " + epsilon);
+            if(printNodeDestination) System.out.println("Scelta random, epsilon = " + epsilon);
             return randChoice(architecture, task);
         } else {
-            System.out.print("Scelta dalla rete neurale, ");
+            if(printNodeDestination) System.out.print("Scelta dalla rete neurale, ");
             // Get the action index based on the Q-values
             int k = 0;
             while(k < nodeList.size()){
                 int choice = getKthBestQAction(state, k); // Change the 1 to 2, 3, etc., for second, third best, etc.
                 if (offloadingIsPossible(task, nodeList.get(choice), architectureLayers)) {
-                    System.out.println("nodo: " + nodeList.get(choice).getName() + ", Dimensionequeue = " + nodeList.get(choice).getTasksQueue().size() + ", epsilon = " + epsilon); 
+                    if(printNodeDestination) System.out.println("nodo: " + nodeList.get(choice).getName() + ", Dimensionequeue = " + nodeList.get(choice).getTasksQueue().size() + ", epsilon = " + epsilon); 
                     return choice;
                 }
                 k++;
@@ -296,9 +295,13 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         //Sopra è l'implementazione corretta, questa effettua una scelta pseudo-randomica basata sui migliore 3 nodi.
         int exploreTopK = 3; // Esplora tra i primi nodeList.size()/3 migliori Q-values. Analogamente si potrebbe mettere: = nodeList.size()/3
         Random rand = new Random();
-        if (rand.nextDouble() < epsilon) {
-            k = rand.nextInt(Math.min(exploreTopK, qValues.size()));
-        }
+        // if (rand.nextDouble() < epsilon) {
+        //     k = rand.nextInt(Math.min(exploreTopK, qValues.size()));                     commentata per testare
+        // }
+        int random = rand.nextInt(100);
+        if(50 < random && random < 100) k = 0;
+        else if (20 < random && random < 50) k = 1;
+        else k = 3;
         return qValues.get(k).getValue();
     }
 
@@ -352,7 +355,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         double avgAvailableRam = state[0];
         double avgcpuLoad = state[1];
         double avgAvailableStorage = state[2];
-        double avgMipsPerCore = state[3];
+        double avgMipsTotal = state[3];
         double avgfailurerate = state[4];
     
         // Inizializza la ricompensa
@@ -371,8 +374,8 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         else if (avgAvailableStorage > nodeList.get(action).getAvailableStorage()) reward -= 10;  // Penalizzazione per storage quasi pieno
     
         // Ricompensa per nodi con potenza di calcolo elevata (MIPS)
-        if (nodeList.get(action).getTotalMipsCapacity() > avgMipsPerCore)  reward += 10;
-        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsPerCore) reward -= 10;    
+        if (nodeList.get(action).getTotalMipsCapacity() > avgMipsTotal)  reward += 10;
+        else  if(nodeList.get(action).getTotalMipsCapacity() < avgMipsTotal) reward -= 10;    
         
         //penalizzo il nodo se il task viene messo in coda
         if(nodeList.get(action).getAvailableCores() == 0) reward -= 15;
@@ -390,10 +393,10 @@ public class DQNOrchestrator extends DefaultOrchestrator {
         else reward += 20;
 
         //penalizzo il nodo per avere un failure-rate più alto dei suoi vicini
-        if(nodeList.get(action).getFailureRate() > avgfailurerate) reward -= (nodeList.get(action).getFailureRate() - avgfailurerate)*nodeList.get(action).getNumberOfCPUCores()*2;
-        else reward += (10 + (nodeList.get(action).getFailureRate() - avgfailurerate)*nodeList.get(action).getNumberOfCPUCores()*2);
+        // if(nodeList.get(action).getFailureRate() > avgfailurerate) reward -= (nodeList.get(action).getFailureRate() - avgfailurerate)*nodeList.get(action).getNumberOfCPUCores()*2;
+        // else reward += (10 + (nodeList.get(action).getFailureRate() - avgfailurerate)*nodeList.get(action).getNumberOfCPUCores()*2);
 
-        System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
+        if(printNodeDestination) System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
         return reward;
     }
     
@@ -403,6 +406,7 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
         int action = chooseAction(state, architecture, task);
+        if(printVMtaskUsage) super.historyMap.put(action, historyMap.get(action) + 1);
 
         //System.out.println("Action: " + action);
     
@@ -436,12 +440,23 @@ public class DQNOrchestrator extends DefaultOrchestrator {
     
         // Aggiorna la rete target se necessario
         if (shouldUpdateTargetNetwork()) {        
-            System.out.println("----------------------------------------------UPDATE FATTO----------------------------------------------");
+            if(printNodeDestination) System.out.println("----------------------------------------------UPDATE FATTO----------------------------------------------");
             targetNetwork.setParams(qNetwork.params());
         }
 
         numberoftasksorchestrated++;
-        if(simulationManager.getSimulation().clock() > 17000 ) {System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);}
+
+        if(simulationManager.getSimulation().clock() > SimulationParameters.simulationDuration*0.99 && printVMtaskUsage) {
+            printVMtaskUsage = false;
+            for(int i = 0; i < nodeList.size(); i++){
+                System.out.println("Nodo " + nodeList.get(i).getName());
+                System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
+                System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
+            }
+            System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
+        }
+
+
 
     }
 

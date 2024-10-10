@@ -273,6 +273,18 @@ public class ComputingNodeNull implements ComputingNode {
 	@Override
 	public void incrementTasksFailed(){	
 	}
+	
+	/**
+	 * 
+	 * Returns 0 since there are no tasksfailed on this Computing Node.
+	 * 
+	 * @return 0.
+	 */
+	@Override
+	public double getSentTasks(){
+		return 0;
+	}
+
 
 	/**
 	 * 

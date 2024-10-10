@@ -354,6 +354,14 @@ public interface ComputingNode {
 	double getAvailableStorage();
 
 	/**
+	 * Gets sent tasks on this computing
+	 * node.
+	 * 
+	 * @return the tasksfailed.
+	 */
+	public double getSentTasks();
+
+	/**
 	 * Gets available cores on this computing
 	 * node.
 	 * 

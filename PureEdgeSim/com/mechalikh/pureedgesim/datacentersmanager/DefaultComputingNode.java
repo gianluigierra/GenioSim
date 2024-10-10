@@ -84,6 +84,10 @@ public class DefaultComputingNode extends LocationAwareNode {
 		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);
 	}
 
+	public double getSentTasks(){
+		return sentTasks;
+	}
+
 	public double getFailureRate(){
 		return failureRate;
 	}

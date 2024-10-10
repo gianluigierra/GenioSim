@@ -61,6 +61,10 @@ public class VM extends LocationAwareNode {
 		}
 	}
 
+	public double getSentTasks(){
+		return sentTasks;
+	}
+
 	public void incrementTasksFailed(){
 		this.tasksFailed++;
 		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);

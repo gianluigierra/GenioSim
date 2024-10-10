@@ -85,11 +85,11 @@ public class VmCPUChart extends Chart {
             VmEdgeCpuUsageData.add(VmEdgeCpuUsage);
 
             //Se decommento questo devo decommentare anche sotto "update the chart with new data" in quanto questi mi visualizzano solo le percentuali recenti di Cpu
-            // Remove old data points.
-            // int maxDataPoints = (int) (300 / SimulationParameters.chartsUpdateInterval);
-            // while (VmEdgeCpuUsageData.size() > maxDataPoints) {
-            //     VmEdgeCpuUsageData.remove(0);
-            // }
+            //Remove old data points.
+            int maxDataPoints = (int) (1000 / SimulationParameters.chartsUpdateInterval);
+            while (VmEdgeCpuUsageData.size() > maxDataPoints) {
+                VmEdgeCpuUsageData.remove(0);
+            }
 
             // Compute the time values for the data points.
             double[] time = new double[VmEdgeCpuUsageData.size()];
@@ -99,7 +99,7 @@ public class VmCPUChart extends Chart {
             }
 
             // Update the chart with the new data.
-            //updateSize(currentTime - 200, currentTime, 0.0, null);
+            updateSize(currentTime - 1000, currentTime, null, null);
 
             // Update the series for each element in the map.
             for (Map.Entry<String, Double> entry : VmEdgeCpuUsage.entrySet()) {

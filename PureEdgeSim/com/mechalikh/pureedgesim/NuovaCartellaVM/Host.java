@@ -138,6 +138,10 @@ public class Host extends LocationAwareNode {
 		this.DataCenter.incrementTasksFailed();
 	}
 
+	public double getSentTasks(){
+		return sentTasks;
+	}
+
 	public double getFailureRate(){
 		return failureRate;
 	}
