@@ -287,6 +287,13 @@ public class ComputingNodeNull implements ComputingNode {
 
 
 	/**
+	 * Increases by 1 the number of tasks sent to the computingNode
+	 */
+	@Override
+	public void increaseTask(Task task){
+	}
+
+	/**
 	 * 
 	 * Returns 0 since there are no tasksfailed on this Computing Node.
 	 * 

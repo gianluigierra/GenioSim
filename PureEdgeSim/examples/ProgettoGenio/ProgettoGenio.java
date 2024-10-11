@@ -2,7 +2,7 @@ package examples.ProgettoGenio;
 
 import com.mechalikh.pureedgesim.datacentersmanager.DefaultTopologyCreator;
 import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
-import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
+import com.mechalikh.pureedgesim.simulationmanager.*;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.*;
@@ -26,7 +26,7 @@ public class ProgettoGenio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// cambio la modalità di esecuzione
-		String exampleMode = "E_Health";
+		String exampleMode = "Smart_Lights";
 
 		switch (exampleMode) {
 			case "Smart_Lights":
@@ -51,29 +51,11 @@ public class ProgettoGenio {
 				break;
 		}
 
-		// To change the mobility model
-		//sim.setCustomMobilityModel(Example2CustomMobilityModel.class);
-		
-		// To change the computing node class
-		//sim.setCustomComputingNode(Example4CustomComputingNode.class);
-		
-		// To change the tasks generator
-		sim.setCustomTaskGenerator(DefaultTaskGenerator.class); 
-		
-		// To change the network model
-		sim.setCustomNetworkModel(DefaultNetworkModel.class); 
-		
-		// To change the simulation manager
-		sim.setCustomSimulationManager(DefaultSimulationManager.class); 
-		
-		// To change the topology
-		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
-		
         //cambio l'orchestratore con quello creatto da me
 	    sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
-		//sim.setCustomEdgeOrchestrator(examples.ExampleMio.DQNOrchestrator.class);
-		
-		/* to use the default one you can simply delete or comment those lines */
+
+		//cambio il simulationManager con quello modificato da me
+		//sim.setCustomSimulationManager(MySimulationManager.class);
 
 		// Finally, you can launch the simulation
 		sim.launchSimulation();

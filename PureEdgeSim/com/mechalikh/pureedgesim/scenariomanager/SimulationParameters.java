@@ -616,6 +616,11 @@ public class SimulationParameters {
 	public static int tasksForGreedyTraining;
 
 	/**
+	 * PER LA RETE NEURALE
+	 */
+	public static int networkBatchSize;
+
+	/**
 	 * How many tasks are scheduled each time (used to avoid scheduling all tasks from the beginning of the simulation).
 	 */
 	public static int batchSize;

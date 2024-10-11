@@ -115,6 +115,11 @@ public interface ComputingNode {
 	boolean isConnect();
 	
 	void setAsConnect(boolean isConnect);
+
+	/**
+	 * Increases by 1 the number of tasks sent to the computingNode
+	 */
+	void increaseTask(Task task);
 	
 	/**
 	 * Checks if this computing node is an orchestrator.

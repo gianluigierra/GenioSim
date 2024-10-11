@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
+
+import javax.swing.JOptionPane;
 
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,7 +39,7 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
     private double epsilonDecay = SimulationParameters.epsilonDecay;
     private double gamma = SimulationParameters.gamma;
     private double learningRate = SimulationParameters.learningRate;
-    private int batchSize = SimulationParameters.batchSize;
+    private int batchSize = SimulationParameters.networkBatchSize;
     private int replayMemory = 10000;
 
     //variabili per esecuzione
@@ -57,11 +60,14 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
     public DQNOrchestrator(SimulationManager simulationManager) {
         super(simulationManager);
 
-        // Prova a caricare un modello esistente, se esiste
-        String modelPath = SimulationParameters.settingspath+"dqn_model_"+ SimulationParameters.simName +".zip";
-        File modelFile = new File(modelPath);
-        if(usePreviousModel && modelFile.exists()){
-            loadModel(modelPath);
+        if ("DQN".equals(algorithmName) && usePreviousModel) {
+            int response = JOptionPane.showConfirmDialog(null, "Vuoi Caricare il modello?", "Caruca modello", JOptionPane.YES_NO_OPTION);
+            
+            if (response == JOptionPane.YES_OPTION) {
+                String modelPath = SimulationParameters.settingspath + "dqn_model_" + SimulationParameters.simName + ".zip";
+                loadModel(modelPath);
+            }
+            else qNetwork = createNetwork();
         }
         else qNetwork = createNetwork();
         targetNetwork = createNetwork();
@@ -155,6 +161,16 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgMipsTotal, avgfailurerate};
     }
 
+    private double[] getCurrentState2(List<ComputingNode> nodeList, Task task) {
+		double avgAvailableRam = getAvgAvailableRam(nodeList);
+		double avgAvailableStorage = getAvgAvailableStorage(nodeList);
+        double avgcpuLoad = getAvgCpuLoad(nodeList);
+        double avgfailurerate = getAvgFailureRate(nodeList);
+        double avgsenttasks = getAverageOrchestratedTasks(nodeList);
+    
+        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgsenttasks, avgfailurerate};
+    }
+
     private double[] getNextState(int nodeIndex, Task task) {
         // Aggiorna lo stato in base al nodo selezionato e al task assegnato
         ComputingNode node = nodeList.get(nodeIndex);
@@ -167,6 +183,14 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         //double tasksFailed = simulationManager.getSimulationLogger().tasksFailed;
     
         return new double[]{nodeRam, nodeStorage, nodeMips, nodecpuLoad, nodefailurerate};
+    }
+
+    private double getAverageOrchestratedTasks(List<ComputingNode> nodeList){
+        double AvgSentTasks = 0;
+        for(int i = 0; i < nodeList.size(); i++){
+            AvgSentTasks += super.historyMap.get(i);
+        }
+        return AvgSentTasks/nodeList.size();
     }
 
     private double getAvgFailureRate(List<ComputingNode> nodeList) {
@@ -192,7 +216,15 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         }
         return AvgMips/nodeList.size();
     }
-    
+
+    private double getAverageMipsPerCore(List<ComputingNode> nodeList) {
+        int AvgMips = 0;
+        for(int i = 0; i < nodeList.size(); i++){
+            AvgMips += nodeList.get(i).getMipsPerCore();
+        }
+        return AvgMips/nodeList.size();
+    }
+ 
     private double getAvgAvailableStorage(List<ComputingNode> nodeList) {
         int AvgStorage = 0;
         for(int i = 0; i < nodeList.size(); i++){
@@ -245,17 +277,16 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
                 selected = i;
             }
         }
-        super.historyMap.put(selected, super.historyMap.get(selected) + 1);
+        if("GREEDY".equals(algorithmName)) super.historyMap.put(selected, super.historyMap.get(selected) + 1);
         return selected;
     }
 
     private int chooseAction(double[] state, String[] architecture, Task task) {
 
         //i primi task vengono eseguiti con un algoritmo greedy, per fornire i pesi iniziali alla rete neurale
-        if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
-            //if(!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")) return greedyChoice(architecture, task);
-            //else return greedyChoice(architecture, task);
-            return greedyChoice(architecture, task);
+        //if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
+        if(SimulationParameters.greedyTraining)
+            return tradeOff(architecture, task);
      
         Random rand = new Random();
         if (rand.nextDouble() < epsilon) {
@@ -270,7 +301,8 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
             while(k < nodeList.size()){
                 int choice = getKthBestQAction(state, k); // Change the 1 to 2, 3, etc., for second, third best, etc.
                 if (offloadingIsPossible(task, nodeList.get(choice), architectureLayers)) {
-                    if(printNodeDestination) System.out.println("nodo: " + nodeList.get(choice).getName() + ", Dimensionequeue = " + nodeList.get(choice).getTasksQueue().size() + ", epsilon = " + epsilon); 
+                    if(printNodeDestination) System.out.println("nodo: " + nodeList.get(choice).getName() + ", Dimensionequeue = " + nodeList.get(choice).getTasksQueue().size() + ", epsilon = " + epsilon);  
+                    super.historyMap.put(choice, super.historyMap.get(choice) + 1);
                     return choice;
                 }
                 k++;
@@ -300,15 +332,15 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
 
         //Sopra è l'implementazione corretta, questa effettua una scelta pseudo-randomica basata sui migliore 3 nodi.
-        int exploreTopK = 3; // Esplora tra i primi nodeList.size()/3 migliori Q-values. Analogamente si potrebbe mettere: = nodeList.size()/3
-        Random rand = new Random();
+        // int exploreTopK = 3; // Esplora tra i primi nodeList.size()/3 migliori Q-values. Analogamente si potrebbe mettere: = nodeList.size()/3
+        // Random rand = new Random();
         // if (rand.nextDouble() < epsilon) {
-        //     k = rand.nextInt(Math.min(exploreTopK, qValues.size()));                     commentata per testare
+        //     k = rand.nextInt(Math.min(exploreTopK, qValues.size()));                     
         // }
-        int random = rand.nextInt(100);
-        if(50 < random && random < 100) k = 0;
-        else if (20 < random && random < 50) k = 1;
-        else k = 3;
+        // int random = rand.nextInt(100);
+        // if(50 < random && random < 100) k = 0;
+        // else if (20 < random && random < 50) k = 1;
+        // else k = 3;
         return qValues.get(k).getValue();
     }
 
@@ -323,6 +355,9 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         }
         // Send this task to this computing node
 		task.setOffloadingDestination(node);
+
+        //increase the sentTasks of the VM
+        //nodeList.get(action).increaseTask(task);                      //da mettere solo se si usa il MysimulationManager
 
 		// Application has been deployed
 		task.getEdgeDevice().setApplicationPlacementLocation(node);
@@ -406,21 +441,36 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         if(printNodeDestination) System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
         return reward;
     }
-    
+ 
+    private double grantReward2(int action, Task task){
+        double reward = 0.0;
+
+        //penalizzo il nodo se ha più task assegnati della media
+        if(super.historyMap.get(action)  > getAverageOrchestratedTasks(nodeList)) reward -= 1;
+        //lo premio se ne ha di meno
+        else if (super.historyMap.get(action) < getAverageOrchestratedTasks(nodeList)) reward += 1;
+
+        //premio il nodo se ha i mips più alti degli altri
+        if(nodeList.get(action).getMipsPerCore() > getAverageMipsPerCore(nodeList)) reward += 1;
+
+        if(printNodeDestination) System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
+        return reward;
+    }
+
     protected void DoDQN(String[] architecture, Task task) {
         // Ottiene lo stato attuale basato sui nodi disponibili
-        double[] state = getCurrentState(nodeList, task);
+        //double[] state = getCurrentState(nodeList, task);
+        double[] state = getCurrentState2(nodeList, task);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
         int action = chooseAction(state, architecture, task);
-        if(printVMtaskUsage) super.historyMap.put(action, historyMap.get(action) + 1);
-
-        //System.out.println("Action: " + action);
     
         // Esegui l'azione e ottieni lo stato successivo
         PerformAction(action, task);
-        double reward = grantReward(action, task);
-        double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
+        //double reward = grantReward(action, task);
+        double reward = grantReward2(action, task);
+        //double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
+        double [] nextState = getCurrentState2(nodeList, task);
 
         //update variabili DQN
         if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
@@ -437,7 +487,14 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
             replayBufferfUpdateCounter = 0;
             updateNetwork(batchSize);
         }
-    
+     
+        if(printVMtaskUsage && simulationManager.getSimulation().clock()%580 == 0) {
+            System.out.println("Epsilon: " + epsilon);
+            printVMtaskUsage = false;
+        }
+        if(simulationManager.getSimulation().clock()%580 != 0)
+            printVMtaskUsage = true;
+
         // Aggiorna epsilon per ridurre gradualmente l'esplorazione
         if (epsilonUpdateCounter == SimulationParameters.neuralNetworkLearningSpeed && epsilon > epsilonMin){
             numberofepsilonupdates++;
@@ -492,18 +549,24 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
     @Override
     public void onSimulationEnd() {
-        if(simulationManager.getSimulation().clock() > SimulationParameters.simulationDuration*0.99 && printVMtaskUsage) {
-            for(int i = 0; i < nodeList.size(); i++){
-                System.out.println("Nodo " + nodeList.get(i).getName());
-                System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
-                System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
-            }
-            //System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
-            
-            String modelPath = SimulationParameters.settingspath+"dqn_model_"+ SimulationParameters.simName +".zip";
-            if ("DQN".equals(algorithmName) && saveThisModel) saveModel(modelPath);
+        for(int i = 0; i < nodeList.size(); i++){
+            System.out.println("Nodo " + nodeList.get(i).getName());
+            System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
+            System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
         }
+        //System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
+
+        if ("DQN".equals(algorithmName)) {
+            int response = JOptionPane.showConfirmDialog(null, "Vuoi salvare il modello?", "Salva modello", JOptionPane.YES_NO_OPTION);
+            
+            if (response == JOptionPane.YES_OPTION) {
+                String modelPath = SimulationParameters.settingspath + "dqn_model_" + SimulationParameters.simName + ".zip";
+                saveModel(modelPath);
+            }
+        }
+
     }
+    
 
     
 

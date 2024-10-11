@@ -28,7 +28,7 @@ public class VM extends LocationAwareNode {
 	protected static final int EXECUTION_FINISHED = 2;
 	private int tasksFailed = 0;
 	private double failureRate = 0;
-	private int sentTasks = 0;
+	public int sentTasks = 0;
 	private static boolean sharedQueue = false;	//variabile booleana per fare condividere la queue dei task tra tutte le VM del dato datacenter
 	protected Host Host;	//the host of this VM
 
@@ -59,6 +59,10 @@ public class VM extends LocationAwareNode {
 			this.Host.processEvent(e);
 			executionFinished(e);
 		}
+	}
+
+	public void increaseTask(Task task){
+		this.sentTasks++;
 	}
 
 	public double getSentTasks(){

@@ -166,7 +166,7 @@ public class ParametersParser extends FileParserAbstract {
 
 			SimulationParameters.tasksForGreedyTraining = (int) assertDouble(prop, "tasks_for_greedy_learning", value -> (value > 0), "> 0");
 
-			SimulationParameters.batchSize = (int) assertDouble(prop, "batch_size", value -> (value > 0), "> 0");
+			SimulationParameters.networkBatchSize = (int) assertDouble(prop, "network_batch_size", value -> (value > 0), "> 0");
 
 			SimulationParameters.gamma = assertDouble(prop, "gamma", value -> (value > 0), "> 0");
 

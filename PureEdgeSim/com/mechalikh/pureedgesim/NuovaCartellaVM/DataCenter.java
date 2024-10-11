@@ -137,6 +137,10 @@ public class DataCenter extends LocationAwareNode {
 			executionFinished(e);
 	}
 
+	public void increaseTask(Task task){
+		sentTasks++;
+	}
+
 	public void incrementTasksFailed(){
 		this.tasksFailed++;
 		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);
