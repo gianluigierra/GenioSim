@@ -147,7 +147,9 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
     } 
 
     private int getStateSize() {
-        return 5;  // Stato con 6 variabili
+        //return 6;  // Stato con 6 variabili
+        //return 3 * nodeList.size() + 4;
+        return 5*nodeList.size() + 4;
     }
   
     private double[] getCurrentState(List<ComputingNode> nodeList, Task task) {
@@ -167,9 +169,80 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         double avgcpuLoad = getAvgCpuLoad(nodeList);
         double avgfailurerate = getAvgFailureRate(nodeList);
         double avgsenttasks = getAverageOrchestratedTasks(nodeList);
+        double epsilon = this.epsilon;
+        double clock = simulationManager.getSimulation().clock();
     
-        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgsenttasks, avgfailurerate};
+        return new double[]{avgAvailableRam, avgcpuLoad, avgAvailableStorage, avgsenttasks, avgfailurerate, epsilon, clock};
     }
+
+    private double[] getCurrentState3(List<ComputingNode> nodeList, Task task) {
+        // Il nuovo stato conterrà 3 valori per ogni nodo e 4 variabili globali
+        double[] state = new double[nodeList.size() * 3 + 4]; // 3 valori per nodo (CPU, FailureRate, sentTasks) + 4 variabili globali
+    
+        // Aggiungi i valori per ogni nodo nella nodeList
+        for (int i = 0; i < nodeList.size(); i++) {
+            ComputingNode node = nodeList.get(i);
+    
+            double cpuLoad = node.getAvgCpuUtilization();       // Ottieni il carico CPU del nodo
+            double failureRate = node.getFailureRate(); // Ottieni il failure rate del nodo
+            double sentTasks = super.historyMap.get(i);   // Ottieni il numero di task orchestrati
+    
+            state[i * 3] = cpuLoad;          // Metti il valore di CPU load
+            state[i * 3 + 1] = failureRate;  // Metti il valore di failureRate
+            state[i * 3 + 2] = sentTasks;    // Metti il numero di sentTasks
+        }
+    
+        // Aggiungi i valori globali
+        double avgAvailableRam = getAvgAvailableRam(nodeList);          // Media della RAM disponibile
+        double avgAvailableStorage = getAvgAvailableStorage(nodeList);  // Media dello storage disponibile
+        double epsilon = this.epsilon;                                  // Epsilon attuale
+        double clock = simulationManager.getSimulation().clock();       // Tempo corrente della simulazione
+    
+        int globalStartIndex = nodeList.size() * 3;  // Indice di partenza per i valori globali
+        state[globalStartIndex] = avgAvailableRam;     // Aggiungi avgAvailableRam
+        state[globalStartIndex + 1] = avgAvailableStorage; // Aggiungi avgAvailableStorage
+        state[globalStartIndex + 2] = epsilon;         // Aggiungi epsilon
+        state[globalStartIndex + 3] = clock;           // Aggiungi clock
+    
+        return state;
+    }
+
+    private double[] getCurrentState4(List<ComputingNode> nodeList, Task task) {
+        // Il nuovo stato conterrà 5 valori per ogni nodo e 4 variabili
+        double[] state = new double[nodeList.size() * 5 + 4]; // 5 valori per nodo (CPU, FailureRate, sentTasks, RAM e Storage) + 4 variabili
+    
+        // Aggiungi i valori per ogni nodo nella nodeList
+        for (int i = 0; i < nodeList.size(); i++) {
+            ComputingNode node = nodeList.get(i);
+    
+            double cpuLoad = node.getAvgCpuUtilization();       // Ottieni il carico CPU del nodo
+            double failureRate = node.getFailureRate(); // Ottieni il failure rate del nodo
+            double sentTasks = super.historyMap.get(i);   // Ottieni il numero di task orchestrati
+            double ram = node.getAvailableRam();  //Ottieni la ram del nodo
+            double storage = node.getAvailableStorage();  //Ottieni lo storage del nodo
+    
+            state[i * 5] = cpuLoad;          // Metti il valore di CPU load
+            state[i * 5 + 1] = failureRate;  // Metti il valore di failureRate
+            state[i * 5 + 2] = sentTasks;    // Metti il numero di sentTasks
+            state[i * 5 + 3] = ram;    // Metti la ram 
+            state[i * 5 + 4] = storage;    // Metti lo storage
+        }
+    
+        // Aggiungi i valori globali
+        double epsilon = this.epsilon;                                  // Epsilon attuale
+        double clock = simulationManager.getSimulation().clock();       // Tempo corrente della simulazione
+        double taskSize = task.getFileSizeInBits();                     // size del task in bytes
+        double maxLatency = task.getMaxLatency();                       //latency max del task
+    
+        int globalStartIndex = nodeList.size() * 5;  // Indice di partenza per i valori globali
+        state[globalStartIndex] = epsilon;         // Aggiungi epsilon
+        state[globalStartIndex + 1] = clock;       // Aggiungi clock
+        state[globalStartIndex + 2] = taskSize;    // Aggiungi tasksize
+        state[globalStartIndex + 3] = maxLatency;  // Aggiungi maxlatency
+    
+        return state;
+    }
+    
 
     private double[] getNextState(int nodeIndex, Task task) {
         // Aggiorna lo stato in base al nodo selezionato e al task assegnato
@@ -285,7 +358,9 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
         //i primi task vengono eseguiti con un algoritmo greedy, per fornire i pesi iniziali alla rete neurale
         //if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
-        if(SimulationParameters.greedyTraining)
+        if(numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && !SimulationParameters.greedyTraining)
+            return tradeOff(architecture, task);
+        else if(SimulationParameters.greedyTraining)
             return tradeOff(architecture, task);
      
         Random rand = new Random();
@@ -446,9 +521,9 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         double reward = 0.0;
 
         //penalizzo il nodo se ha più task assegnati della media
-        if(super.historyMap.get(action)  > getAverageOrchestratedTasks(nodeList)) reward -= 1;
+        if(super.historyMap.get(action)  > getAverageOrchestratedTasks(nodeList)) reward -= Math.abs(super.historyMap.get(action)-getAverageOrchestratedTasks(nodeList));
         //lo premio se ne ha di meno
-        else if (super.historyMap.get(action) < getAverageOrchestratedTasks(nodeList)) reward += 1;
+        else if (super.historyMap.get(action) < getAverageOrchestratedTasks(nodeList)) reward += Math.abs(super.historyMap.get(action)-getAverageOrchestratedTasks(nodeList));
 
         //premio il nodo se ha i mips più alti degli altri
         if(nodeList.get(action).getMipsPerCore() > getAverageMipsPerCore(nodeList)) reward += 1;
@@ -457,10 +532,21 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         return reward;
     }
 
+    private double grantReward3(int action, Task task){
+        double reward = 0.0;
+
+        //penalizzo il nodo se ha più task assegnati della media
+        if(nodeList.get(action).getTasksQueue().size() == 0) reward +=1;
+        else reward -= 1;
+
+        if(printNodeDestination) System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
+        return reward;
+    }
+
     protected void DoDQN(String[] architecture, Task task) {
         // Ottiene lo stato attuale basato sui nodi disponibili
         //double[] state = getCurrentState(nodeList, task);
-        double[] state = getCurrentState2(nodeList, task);
+        double[] state = getCurrentState4(nodeList, task);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
         int action = chooseAction(state, architecture, task);
@@ -468,13 +554,14 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         // Esegui l'azione e ottieni lo stato successivo
         PerformAction(action, task);
         //double reward = grantReward(action, task);
-        double reward = grantReward2(action, task);
+        double reward = grantReward3(action, task);                                                             //NB: grantreward va con getcurrentstate, grantreward2 va con getcurrentstate2 e 3, grantreward3 va con getcurrentstate4
         //double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
-        double [] nextState = getCurrentState2(nodeList, task);
+        double [] nextState = getCurrentState4(nodeList, task);
 
         //update variabili DQN
-        if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
-        else if(numberoftasksorchestrated > SimulationParameters.tasksForGreedyTraining) epsilonUpdateCounter++;
+        //if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
+        //else if(numberoftasksorchestrated > SimulationParameters.tasksForGreedyTraining) epsilonUpdateCounter++;
+        epsilonUpdateCounter++;
 
         if(replayBufferfUpdateCounter < Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)) replayBufferfUpdateCounter++;
 
