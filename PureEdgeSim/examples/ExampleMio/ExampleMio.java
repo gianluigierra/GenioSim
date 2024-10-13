@@ -50,6 +50,10 @@ public class ExampleMio {
 		
 		/* to use the default one you can simply delete or comment those lines */
 
+		
+		String exampleMode = "ExampleMio";
+		sim.setSimulationName(exampleMode);
+
 		// Finally, you can launch the simulation
 		sim.launchSimulation();
 		

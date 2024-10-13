@@ -2,11 +2,18 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.Random;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Scanner;
+import org.json.JSONObject;
+import java.io.FileWriter;
+import java.io.FileReader;
 
 import javax.swing.JOptionPane;
 
@@ -61,25 +68,34 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         super(simulationManager);
 
         if ("DQN".equals(algorithmName) && usePreviousModel) {
-            int response = JOptionPane.showConfirmDialog(null, "Vuoi Caricare il modello?", "Caruca modello", JOptionPane.YES_NO_OPTION);
+            int response = JOptionPane.showConfirmDialog(null, "Vuoi Caricare il modello?", "Carica modello", JOptionPane.YES_NO_OPTION);
             
             if (response == JOptionPane.YES_OPTION) {
-                String modelPath = SimulationParameters.settingspath + "dqn_model_" + SimulationParameters.simName + ".zip";
+                String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/dqn_model_" + SimulationParameters.simName;
                 loadModel(modelPath);
+                modelPath = SimulationParameters.settingspath + SimulationParameters.simName;
+                this.replayBuffer = loadReplayBuffer(modelPath);    //carico il replayBuffer
+                this.epsilon = loadEpsilon(modelPath);  //carico la epsilon
             }
-            else qNetwork = createNetwork();
+            else {
+                qNetwork = createNetwork();
+                targetNetwork = createNetwork();
+            }
+            replayBuffer = new ReplayBuffer(replayMemory);
         }
-        else qNetwork = createNetwork();
-        targetNetwork = createNetwork();
+        else if ("DQN".equals(algorithmName) && !usePreviousModel){
+            qNetwork = createNetwork();
+            targetNetwork = createNetwork();
+            replayBuffer = new ReplayBuffer(replayMemory);
+        }
 
-        replayBuffer = new ReplayBuffer(replayMemory);
     }
     
     private MultiLayerNetwork createNetwork() {
         int inputSize = getStateSize();
         int outputSize = getActionSize();
 
-        int size = 28;
+        int size = 64;
 
         MultiLayerNetwork network = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
             .updater(new Adam(learningRate))
@@ -149,7 +165,7 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
     private int getStateSize() {
         //return 6;  // Stato con 6 variabili
         //return 3 * nodeList.size() + 4;
-        return 5*nodeList.size() + 4;
+        return 5*nodeList.size() + 2;           //modificare se si passa alla versione con epsilon e clock
     }
   
     private double[] getCurrentState(List<ComputingNode> nodeList, Task task) {
@@ -208,8 +224,8 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
     }
 
     private double[] getCurrentState4(List<ComputingNode> nodeList, Task task) {
-        // Il nuovo stato conterrà 5 valori per ogni nodo e 4 variabili
-        double[] state = new double[nodeList.size() * 5 + 4]; // 5 valori per nodo (CPU, FailureRate, sentTasks, RAM e Storage) + 4 variabili
+        // Il nuovo stato conterrà 5 valori per ogni nodo e 2 variabili
+        double[] state = new double[nodeList.size() * 5 + 2]; // 5 valori per nodo (CPU, FailureRate, sentTasks, RAM e Storage) + 4 variabili
     
         // Aggiungi i valori per ogni nodo nella nodeList
         for (int i = 0; i < nodeList.size(); i++) {
@@ -235,10 +251,10 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         double maxLatency = task.getMaxLatency();                       //latency max del task
     
         int globalStartIndex = nodeList.size() * 5;  // Indice di partenza per i valori globali
-        state[globalStartIndex] = epsilon;         // Aggiungi epsilon
-        state[globalStartIndex + 1] = clock;       // Aggiungi clock
-        state[globalStartIndex + 2] = taskSize;    // Aggiungi tasksize
-        state[globalStartIndex + 3] = maxLatency;  // Aggiungi maxlatency
+        state[globalStartIndex] = maxLatency;         // Aggiungi epsilon
+        state[globalStartIndex + 1] = taskSize;       // Aggiungi clock
+        //state[globalStartIndex + 2] = epsilon;    // Aggiungi tasksize
+        //state[globalStartIndex + 3] = clock;  // Aggiungi maxlatency
     
         return state;
     }
@@ -358,9 +374,12 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
         //i primi task vengono eseguiti con un algoritmo greedy, per fornire i pesi iniziali alla rete neurale
         //if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
-        if(numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && !SimulationParameters.greedyTraining)
-            return tradeOff(architecture, task);
-        else if(SimulationParameters.greedyTraining)
+
+        //usato per testare
+        // if(numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && !SimulationParameters.greedyTraining)
+        //     return tradeOff(architecture, task);
+        //else 
+            if(SimulationParameters.greedyTraining)
             return tradeOff(architecture, task);
      
         Random rand = new Random();
@@ -537,7 +556,7 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
         //penalizzo il nodo se ha più task assegnati della media
         if(nodeList.get(action).getTasksQueue().size() == 0) reward +=1;
-        else reward -= 1;
+        else reward -= nodeList.get(action).getTasksQueue().size();
 
         if(printNodeDestination) System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
         return reward;
@@ -559,9 +578,9 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         double [] nextState = getCurrentState4(nodeList, task);
 
         //update variabili DQN
-        //if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
+        if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
         //else if(numberoftasksorchestrated > SimulationParameters.tasksForGreedyTraining) epsilonUpdateCounter++;
-        epsilonUpdateCounter++;
+        //epsilonUpdateCounter++;
 
         if(replayBufferfUpdateCounter < Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)) replayBufferfUpdateCounter++;
 
@@ -614,8 +633,13 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
     public void saveModel(String filePath) {
         try {
-            File file = new File(filePath);
+            String modelPath = filePath + "Q_Network.zip";
+            File file = new File(modelPath);
             qNetwork.save(file, true); // true per includere anche l'updater, come Adam
+            System.out.println("Modello salvato con successo in: " + filePath);
+            modelPath = filePath + "Target_Network.zip";
+            file = new File(modelPath);
+            targetNetwork.save(file, true); // true per includere anche l'updater, come Adam
             System.out.println("Modello salvato con successo in: " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -625,13 +649,95 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
     public void loadModel(String filePath) {
         try {
-            File file = new File(filePath);
+            String modelPath = filePath + "Q_Network.zip";
+            File file = new File(modelPath);
             qNetwork = MultiLayerNetwork.load(file, true); // true per caricare anche l'updater
+            System.out.println("Modello caricato con successo da: " + filePath);
+            modelPath = filePath + "Target_Network.zip";
+            file = new File(modelPath);
+            targetNetwork = MultiLayerNetwork.load(file, true); // true per caricare anche l'updater
             System.out.println("Modello caricato con successo da: " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Errore nel caricamento del modello.");
         }
+    }
+
+    public void saveReplayBuffer(ReplayBuffer replayBuffer, String filePath) {
+        try {
+            String replayPath = filePath + "/replay.ser";
+            FileOutputStream fileOut = new FileOutputStream(replayPath);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(replayBuffer); // Serializza il replay buffer
+            out.close();
+            fileOut.close();
+            System.out.println("Replay buffer salvato in " + replayPath);
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public ReplayBuffer loadReplayBuffer(String filePath) {
+        ReplayBuffer replayBuffer = null;
+        try {
+            String replayPath = filePath + "/replay.ser";
+            FileInputStream fileIn = new FileInputStream(replayPath);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            replayBuffer = (ReplayBuffer) in.readObject(); // Carica il replay buffer
+            in.close();
+            fileIn.close();
+            System.out.println("Replay buffer caricato da " + replayPath);
+        } catch (IOException | ClassNotFoundException i) {
+            i.printStackTrace();
+        }
+        return replayBuffer;
+    }
+
+    public void saveEpsilon(String filePath) {
+        try {
+            String epsilonPath = filePath + "/Epsilon.json";
+            JSONObject json = new JSONObject();
+            json.put("epsilon", epsilon);
+
+            FileWriter file = new FileWriter(epsilonPath);
+            file.write(json.toString());
+            file.flush();
+            file.close();
+
+            System.out.println("Epsilon salvato in: " + epsilonPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Errore nel salvataggio del valore di epsilon.");
+        }
+    }
+
+    public double loadEpsilon(String filePath) {
+        double epsilon = -1; // Valore di default, nel caso in cui qualcosa vada storto
+        try {
+            String epsilonPath = filePath + "/Epsilon.json";
+            BufferedReader reader = new BufferedReader(new FileReader(epsilonPath));
+            StringBuilder jsonContent = new StringBuilder();
+            String line;
+            
+            // Legge tutto il contenuto del file JSON
+            while ((line = reader.readLine()) != null) {
+                jsonContent.append(line);
+            }
+            reader.close();
+
+            // Crea un oggetto JSON dal contenuto del file
+            JSONObject json = new JSONObject(jsonContent.toString());
+
+            // Estrae il valore di epsilon
+            epsilon = json.getDouble("epsilon");
+            System.out.println("Epsilon caricato dal file: " + epsilon);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Errore nel caricamento del file epsilon.");
+        }
+
+        return epsilon;
     }
 
     @Override
@@ -643,12 +749,15 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         }
         //System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
 
-        if ("DQN".equals(algorithmName)) {
+        if ("DQN".equals(algorithmName) && saveThisModel) {
             int response = JOptionPane.showConfirmDialog(null, "Vuoi salvare il modello?", "Salva modello", JOptionPane.YES_NO_OPTION);
             
             if (response == JOptionPane.YES_OPTION) {
-                String modelPath = SimulationParameters.settingspath + "dqn_model_" + SimulationParameters.simName + ".zip";
+                String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/dqn_model_" + SimulationParameters.simName;
                 saveModel(modelPath);
+                modelPath = SimulationParameters.settingspath + SimulationParameters.simName;
+                saveReplayBuffer(replayBuffer, modelPath);
+                saveEpsilon(modelPath);
             }
         }
 

@@ -2,11 +2,14 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ReplayBuffer {
+public class ReplayBuffer implements Serializable{
+    private static final long serialVersionUID = 1L; // Consigliato per la serializzazione
+
     private Queue<Experience> buffer;
     private int maxSize;
 

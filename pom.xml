@@ -410,6 +410,13 @@
 			<version>3.12.0</version> <!-- or the latest version -->
 		</dependency>
 
+		<!-- JSon -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20240303</version>
+		</dependency>
+
 		
 		<dependency>
 			<groupId>org.jgrapht</groupId>
@@ -445,5 +452,5 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/PureEdgeSim/libs/jFuzzyLogic_v3.0.jar</systemPath>
 		</dependency>
-	</dependencies>
+ </dependencies>
 </project>

@@ -1,6 +1,10 @@
 package com.mechalikh.pureedgesim.taskorchestrator;
 
-public class Experience {
+import java.io.Serializable;
+
+public class Experience implements Serializable{
+    private static final long serialVersionUID = 1L; // Consigliato per la serializzazione
+
     public double[] state;
     public int action;
     public double reward;
