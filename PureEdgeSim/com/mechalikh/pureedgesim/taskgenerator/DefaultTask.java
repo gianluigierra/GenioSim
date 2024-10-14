@@ -34,6 +34,21 @@ import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 public class DefaultTask extends TaskAbstract {
 
 	/**
+	 * The associated current state previous of execution
+	 */
+	protected double[] currentState;								//aggiunta mia per DDQN
+
+	/**
+	 * The associated current state previous of execution
+	 */
+	protected double[] nextState;								//aggiunta mia per DDQN
+
+	/**
+	 * The associated action previous of execution
+	 */
+	protected int action;											//aggiunta mia per DDQN
+
+	/**
 	 * The associated application name
 	 */
 	protected String AssociatedAppName;
@@ -106,6 +121,55 @@ public class DefaultTask extends TaskAbstract {
 	public DefaultTask(int id) {
 		super(id);
 	}
+
+	/**
+	 * sets associated current state previous of execution
+	 */
+	@Override
+	public void setCurrentState(double[] currentState){
+		this.currentState = currentState;
+	}
+
+	/**
+	 * sets associated next state previous of execution
+	 */
+	@Override
+	public void setNextState(double[] nextState){
+		this.nextState = nextState;
+	}
+
+	/**
+	 * sets The associated action previous of execution
+	 */
+	@Override
+	public void setAction(int action){
+		this.action = action;
+	}
+	
+	/**
+	 * gets associated current state previous of execution
+	 */
+	@Override
+	public double[] getCurrentState(){
+		return this.currentState;
+	}
+	
+	/**
+	 * gets associated current state previous of execution
+	 */
+	@Override
+	public double[] getNextState(){
+		return this.nextState;
+	}
+
+	/**
+	 * gets The associated action previous of execution
+	 */
+	@Override
+	public int getAction(){
+		return this.action;
+	}
+
 
 	/**
 	 * Sets the associated application name

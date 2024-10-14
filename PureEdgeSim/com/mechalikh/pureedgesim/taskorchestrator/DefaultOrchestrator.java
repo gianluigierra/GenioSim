@@ -122,4 +122,9 @@ public class DefaultOrchestrator extends Orchestrator {
 		
 	}
 
+	@Override
+	public void notifyOrchestratorOfTaskExecution(Task task) {
+		
+	}
+
 }

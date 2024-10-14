@@ -95,6 +95,36 @@ public interface Task extends QueueElement {
 	void addActualNetworkTime(double actualNetworkTime);
 
 	/**
+	 * sets associated current state previous of execution
+	 */
+	void setCurrentState(double[] CurrentState);
+
+	/**
+	 * sets associated next state previous of execution
+	 */
+	void setNextState(double[] CurrentState);
+
+	/**
+	 * sets The associated action previous of execution
+	 */
+	void setAction(int action);
+
+	/**
+	 * gets associated current state previous of execution
+	 */
+	double[] getCurrentState();
+
+	/**
+	 * gets associated current state previous of execution
+	 */
+	double[] getNextState();
+
+	/**
+	 * gets The associated action previous of execution
+	 */
+	int getAction();
+
+	/**
 	 * Returns the actual CPU time of the Task.
 	 * 
 	 * @return the actual CPU time of the Task

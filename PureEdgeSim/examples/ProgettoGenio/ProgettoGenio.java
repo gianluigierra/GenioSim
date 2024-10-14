@@ -15,7 +15,9 @@ public class ProgettoGenio {
 	// The custom output folder is
 	private static String outputPath = "PureEdgeSim/examples/ProgettoGenio/ProgettoGenio_output/";
 
-	public ProgettoGenio() {
+	public ProgettoGenio() {}
+
+	public void StartSimulation(){
 		// Create a PureEdgeSim simulation
 		Simulation sim = new Simulation();
 
@@ -33,6 +35,7 @@ public class ProgettoGenio {
 				sim.setSimulationParameterProperties(settingsPath, "Smart_Lights/simulation_parameters_Smart_Lights.properties");
 				sim.setApplicationsXML(settingsPath, "Smart_Lights/applications_Smart_Lights.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "Smart_Lights/edge_datacenters_Smart_Lights.xml");
+				sim.setCloudDatacentersXML(settingsPath, "Smart_Lights/cloud_Smart_Lights.xml");
 				sim.setSimulationName(exampleMode);
 				break;
 		
@@ -40,6 +43,7 @@ public class ProgettoGenio {
 				sim.setSimulationParameterProperties(settingsPath, "E_Health/simulation_parameters_E_Health.properties");
 				sim.setApplicationsXML(settingsPath, "E_Health/applications_E_Health.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "E_Health/edge_datacenters_E_Health.xml");
+				sim.setCloudDatacentersXML(settingsPath, "E_Health/cloud_E_Health.xml");
 				sim.setSimulationName(exampleMode);
 				break;
 		
@@ -47,12 +51,13 @@ public class ProgettoGenio {
 				sim.setSimulationParameterProperties(settingsPath, "Video_Surveillance/simulation_parameters_Video_Surveillance.properties");
 				sim.setApplicationsXML(settingsPath, "Video_Surveillance/applications_Video_Surveillance.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "Video_Surveillance/edge_datacenters_Video_Surveillance.xml");
+				sim.setCloudDatacentersXML(settingsPath, "Video_Surveillance/cloud_Video_Surveillance.xml");
 				sim.setSimulationName(exampleMode);
 				break;
 		}
 
         //cambio l'orchestratore con quello creatto da me
-	    sim.setCustomEdgeOrchestrator(DQNOrchestrator.class);
+	    sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
 
 		//cambio il simulationManager con quello modificato da me
 		//sim.setCustomSimulationManager(MySimulationManager.class);
@@ -63,7 +68,8 @@ public class ProgettoGenio {
 	}
 
 	public static void main(String[] args) {
-		new ProgettoGenio();
+		ProgettoGenio sim = new ProgettoGenio();
+		sim.StartSimulation();
 	}
 
 }

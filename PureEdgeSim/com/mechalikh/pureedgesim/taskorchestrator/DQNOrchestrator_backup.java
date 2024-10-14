@@ -35,7 +35,7 @@ import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulationEndListener{
+public class DQNOrchestrator_backup extends DefaultOrchestrator implements OnSimulationEndListener{
     private MultiLayerNetwork qNetwork;
     private MultiLayerNetwork targetNetwork;
     private ReplayBuffer replayBuffer;
@@ -62,18 +62,18 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
     private int numberofepsilonupdates = 0;
     private boolean printNodeDestination = true;
     private boolean printVMtaskUsage = true;
+    private int totalReward = 0;
 
 
-    public DQNOrchestrator(SimulationManager simulationManager) {
+    public DQNOrchestrator_backup(SimulationManager simulationManager) {
         super(simulationManager);
 
         if ("DQN".equals(algorithmName) && usePreviousModel) {
             int response = JOptionPane.showConfirmDialog(null, "Vuoi Caricare il modello?", "Carica modello", JOptionPane.YES_NO_OPTION);
             
             if (response == JOptionPane.YES_OPTION) {
-                String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/dqn_model_" + SimulationParameters.simName;
-                loadModel(modelPath);
-                modelPath = SimulationParameters.settingspath + SimulationParameters.simName;
+                String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/" + simulationManager.getScenario().getStringOrchArchitecture();
+                loadModel(modelPath + "/dqn_model_" +  SimulationParameters.simName);   //carico i modelli DQN
                 this.replayBuffer = loadReplayBuffer(modelPath);    //carico il replayBuffer
                 this.epsilon = loadEpsilon(modelPath);  //carico la epsilon
             }
@@ -378,7 +378,7 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         //usato per testare
         // if(numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && !SimulationParameters.greedyTraining)
         //     return tradeOff(architecture, task);
-        //else 
+        // else 
             if(SimulationParameters.greedyTraining)
             return tradeOff(architecture, task);
      
@@ -559,6 +559,7 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
         else reward -= nodeList.get(action).getTasksQueue().size();
 
         if(printNodeDestination) System.out.println("Nodo: "+nodeList.get(action).getName()+", reward: " + reward);
+        this.totalReward += reward;
         return reward;
     }
 
@@ -746,6 +747,7 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
             System.out.println("Nodo " + nodeList.get(i).getName());
             System.out.println("    tasks offloaded: " + nodeList.get(i).getSentTasks());
             System.out.println("    tasks orchestrated: " + super.historyMap.get(i));
+            System.out.println("    totalReward: " + totalReward);
         }
         //System.out.println("Tasks orchestrated: " + numberoftasksorchestrated + " , epsilon updates: " + numberofepsilonupdates + " , replay updates: " + numberofreplayupdates);
 
@@ -753,9 +755,8 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
             int response = JOptionPane.showConfirmDialog(null, "Vuoi salvare il modello?", "Salva modello", JOptionPane.YES_NO_OPTION);
             
             if (response == JOptionPane.YES_OPTION) {
-                String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/dqn_model_" + SimulationParameters.simName;
-                saveModel(modelPath);
-                modelPath = SimulationParameters.settingspath + SimulationParameters.simName;
+                String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/" + simulationManager.getScenario().getStringOrchArchitecture();
+                saveModel(modelPath + "/dqn_model_" + SimulationParameters.simName);
                 saveReplayBuffer(replayBuffer, modelPath);
                 saveEpsilon(modelPath);
             }
@@ -763,7 +764,4 @@ public class DQNOrchestrator extends DefaultOrchestrator implements OnSimulation
 
     }
     
-
-    
-
 }

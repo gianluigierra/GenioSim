@@ -295,6 +295,9 @@ sim.setCustomComputingNode(YourCustomComputingNode.class);
 		
 // To change the tasks generator:
 sim.setCustomTaskGenerator(YourCustomTaskGenerator.class); 
+
+// To change the tasks class:
+sim.setCustomTaskClass(YourCustomTaskClass.class); 
 		
 // To change the network model
 sim.setCustomNetworkModel(YourCustomNetworkModel.class); 

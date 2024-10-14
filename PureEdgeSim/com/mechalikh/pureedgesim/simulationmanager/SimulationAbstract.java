@@ -248,6 +248,15 @@ public abstract class SimulationAbstract {
 	}
 
 	/**
+	 * Allows to specifically set the cloud_datacenters.xml file.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setCloudDatacentersXML(String settingsFolder, String CloudDatacentersXML){
+		setCustomFilePath(settingsFolder + CloudDatacentersXML, Files.CLOUD_FILE);
+	}
+
+	/**
 	 * Allows to set a custom path of each configuration file individually.
 	 * 
 	 * @param path the path from which the file will be loaded

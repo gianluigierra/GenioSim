@@ -11,54 +11,54 @@
 		<hosts>
 		    <host>
 				<cores>8</cores>
-				<mips>60000</mips>
+				<mips>6000</mips>
 				<ram>64000</ram>
 				<storage>1000000</storage>
 				<VMs>
 					<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 
 						<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 	<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 
 						<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>6400</ram>
 						<storage>125000</storage>
 					</VM> 
 					<VM>
 						<cores>1</cores>
-						<mips>60000</mips>
+						<mips>6000</mips>
 						<ram>8000</ram>
 						<storage>125000</storage>
 					</VM> 

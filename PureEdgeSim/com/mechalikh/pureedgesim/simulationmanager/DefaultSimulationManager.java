@@ -188,6 +188,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			if (taskFailed(task, 2))
 				return;
 			task.getOffloadingDestination().submitTask(task);
+			edgeOrchestrator.notifyOrchestratorOfTaskExecution(task);
 			break;
 
 		case TRANSFER_RESULTS_TO_ORCH:
@@ -294,7 +295,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		//System.out.println("GetWaitingTime: " + task.getWatingTime());
 		//System.out.println("GetActualNetworkTime: " + task.getActualNetworkTime());
 		//System.out.println("GetDelay: " + task.getTotalDelay());
-		if (scenary.equals("CLOUD_ONLY") || scenary.equals("EDGE_ONLY")){
+		if ((scenary.equals("CLOUD_ONLY") || scenary.equals("EDGE_ONLY")) && false){					//decommentare per avere grafici latency
 			
 			double delay=task.getTotalDelay();
 			double utilization_time_edge=simLog.getCurCpuUtilizationForNodeType(TYPES.EDGE_DATACENTER);

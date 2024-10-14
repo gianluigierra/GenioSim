@@ -261,4 +261,14 @@ public abstract class Orchestrator extends SimEntity {
 
 	public abstract void resultsReturned(Task task);
 
+	public String[] getArchitectureLayers(){
+		return architectureLayers;
+	}
+
+	public List<ComputingNode> getNodeList(){
+		return nodeList;
+	}
+
+	public abstract void notifyOrchestratorOfTaskExecution(Task task);
+	
 }
