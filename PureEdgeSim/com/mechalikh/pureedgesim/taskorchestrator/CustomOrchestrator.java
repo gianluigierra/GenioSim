@@ -1,15 +1,12 @@
 package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import javax.swing.JOptionPane;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
-import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
@@ -19,10 +16,10 @@ import examples.ProgettoGenio.ProgettoGenio;
 public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulationEndListener{
 
     // Parametri DQN
-    private DDQNAgent m_agent = null;
+    private DQNAgent m_agent = null;
 
     //variabili per esecuzione
-    private boolean IsTrainingOn = true;
+    public boolean IsTrainingOn = true;
     private List<Task> tasksList = new ArrayList<>();
 
     //questi servono solo per printare debug
@@ -38,11 +35,11 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         // else IsTrainingOn = true;
 
         if ("DQN".equals(algorithmName) && IsTrainingOn) {
-            m_agent = new DDQNAgent(this, simulationManager);
+            m_agent = new DQNAgent(this, simulationManager);
         }
         else if ("DQN".equals(algorithmName) && !IsTrainingOn){
             String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/" + simulationManager.getScenario().getStringOrchArchitecture();
-            m_agent = new DDQNAgent(modelPath + "/dqn_model_" +  SimulationParameters.simName, modelPath, this, simulationManager);
+            m_agent = new DQNAgent(modelPath + "/dqn_model_" +  SimulationParameters.simName, modelPath, this, simulationManager);
 
             System.out.println("Pesi della rete Q: " + m_agent.qNetwork.params());
             System.out.println("Pesi della rete Target: " +  m_agent.targetNetwork.params());
@@ -71,7 +68,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         if ("ROUND_ROBIN".equals(algorithmName) || "TRADE_OFF".equals(algorithmName) || "GREEDY".equals(algorithmName)) {
 			assignTaskToComputingNode(task, architectureLayers);
 		} else if ("DQN".equals(algorithmName)) {
-			DoDDQN(architectureLayers, task);
+			DoDQN(architectureLayers, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
 					+ algorithmName + "', please check the simulation parameters file...");
@@ -162,7 +159,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 		simLog.deepLog(simulationManager.getSimulation().clock() + ": " + this.getClass() + " Task: " + task.getId() + " assigned to " + node.getType() + " Computing Node: " + node.getId());
     }
 
-    protected void DoDDQN(String[] architecture, Task task) {
+    protected void DoDQN(String[] architecture, Task task) {
         // aggiungi il task alla lista dei task orchestrati
         tasksList.add(task);
 
@@ -190,7 +187,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
     //il task ha finito e se previsto, si effettua l'update dell'Agent
 	@Override
 	public void resultsReturned(Task task) {
-        if(algorithmName.equals("DQN") && IsTrainingOn && this.tasksList.contains(task)) m_agent.DDQN(task, isDone());
+        if(algorithmName.equals("DQN") && IsTrainingOn && this.tasksList.contains(task)) m_agent.DQN(task, isDone());
 	}
 
     private boolean isDone() {

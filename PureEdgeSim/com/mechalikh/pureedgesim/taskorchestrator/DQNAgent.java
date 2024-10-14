@@ -33,7 +33,7 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DDQNAgent {
+public class DQNAgent {
     
     public MultiLayerNetwork qNetwork;
     public MultiLayerNetwork targetNetwork;
@@ -62,7 +62,7 @@ public class DDQNAgent {
     private int totalReward = 0;
 
     //per iniziare la simulazione da zero
-    public DDQNAgent(CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent(CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         simOrchestrator = orch;
         simulationManager = sm;
@@ -72,7 +72,7 @@ public class DDQNAgent {
     }
 
     //per recuperare un agente e un replayBuffer precedente
-    public DDQNAgent(String pathToNetwork, String pathToRBuff, CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent(String pathToNetwork, String pathToRBuff, CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = loadReplayBuffer(pathToRBuff);
         //epsilon = loadEpsilon(pathToRBuff);
         simOrchestrator = orch;
@@ -207,7 +207,7 @@ public class DDQNAgent {
         return reward;
     }
 
-    public void DDQN(Task task, boolean isDone){
+    public void DQN(Task task, boolean isDone){
 
         double reward = grantReward(task);                                                             
 
