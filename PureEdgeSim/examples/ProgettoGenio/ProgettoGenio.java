@@ -69,8 +69,9 @@ public class ProgettoGenio {
 	public static void main(String[] args) {
 
         List<Integer> rewardsList = new ArrayList<>();
+        List<Double> failureRateList = new ArrayList<>();
         double avgFailureRate = 0;
-		int numberOfIterations = 10;
+		int numberOfIterations = 30;
 		String algName = "";
 
 		//10 iterazioni dell'algoritmo
@@ -78,13 +79,14 @@ public class ProgettoGenio {
 			System.out.println("\n\nIterazione numero: " + (i+1));
 			new ProgettoGenio();
 			rewardsList.add(CustomOrchestrator.totalreward);
+			failureRateList.add(CustomOrchestrator.failureRate);
 			avgFailureRate += CustomOrchestrator.failureRate;
 			algName = CustomOrchestrator.algName;
 		}
 		if(algName.contains("DQN")){
 			System.out.println("Rewards list: ");
 			for(int i = 0; i < rewardsList.size(); i++){
-				System.out.println("    -Iterazione " + (i+1) +", reward: " + rewardsList.get(i));
+				System.out.println("    -Iterazione " + (i+1) +", reward: " + rewardsList.get(i) + ", success rate: " + failureRateList.get(i));
 			}
 		}
 		System.out.println("Avg success rate: " + avgFailureRate/numberOfIterations);

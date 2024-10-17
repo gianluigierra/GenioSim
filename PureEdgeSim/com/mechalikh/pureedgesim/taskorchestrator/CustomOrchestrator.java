@@ -20,7 +20,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 
     //questi servono solo per printare debug
     private boolean printNodeDestination = false;
-    private boolean printTaskNodes = false;
+    private boolean printTaskNodes = true;
     public static int totalreward;
     public static double failureRate;
     public static String algName;
@@ -34,7 +34,8 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         if (algorithmName.contains("DQN")){
             String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/" + simulationManager.getScenario().getStringOrchArchitecture();
             if(algorithmName.equals("DQN1")) m_agent = new DQNAgent1(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
-            else m_agent = new DQNAgent2(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
+            else if(algorithmName.equals("DQN2")) m_agent = new DQNAgent2(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
+            else if(algorithmName.equals("DQN3")) m_agent = new DQNAgent3(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager); 
         }
         CustomOrchestrator.totalreward = 0;
     }
@@ -156,9 +157,6 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         // Send this task to this computing node
 		task.setOffloadingDestination(node);
 
-        //increase the sentTasks of the VM
-        //nodeList.get(action).increaseTask(task);                      //da mettere solo se si usa il MysimulationManager
-
 		// Application has been deployed
 		task.getEdgeDevice().setApplicationPlacementLocation(node);
 		simLog.deepLog(simulationManager.getSimulation().clock() + ": " + this.getClass() + " Task: " + task.getId() + " assigned to " + node.getType() + " Computing Node: " + node.getId());
@@ -187,11 +185,12 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         PerformAction(action, task);
 
         //dal momento che il secondo algoritmo DQN non si basa sull'aspettare il termine del task devo avviarne l'esecuzione qua
-        //if(algorithmName.equals("DQN2") && IsTrainingOn && this.tasksList.contains(task)) {                       //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
-        if(algorithmName.equals("DQN2") && this.tasksList.contains(task)) {
+        //if((algorithmName.equals("DQN2") || algorithmName.equals("DQN3")) && IsTrainingOn && this.tasksList.contains(task)) {                       //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
+        if((algorithmName.equals("DQN2") || algorithmName.equals("DQN3")) && this.tasksList.contains(task)) {
             task.setNextState(getCurrentState2(nodeList, task));
             m_agent.DQN(task, false);
         }
+        //else if((algorithmName.equals("DQN2") || algorithmName.equals("DQN3")) && !IsTrainingOn && this.tasksList.contains(task)) m_agent.grantReward(task); //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
     }
 
     //il task viene eseguito e si preleva il nextState
@@ -205,6 +204,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 	@Override
 	public void resultsReturned(Task task) {
         //if(algorithmName.equals("DQN1") && IsTrainingOn && this.tasksList.contains(task)) m_agent.DQN(task, true);    //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
+        //else if(algorithmName.equals("DQN1") && !IsTrainingOn && this.tasksList.contains(task)) m_agent.grantReward(task);   //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
         if(algorithmName.equals("DQN1") && this.tasksList.contains(task)) m_agent.DQN(task, true);
 	}
 

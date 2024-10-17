@@ -166,6 +166,11 @@ public class DQNAgent1 extends DQNAgentAbstract{
     private void updateNetwork(int batchSize) {
         List<Experience> batch = replayBuffer.sample(batchSize);  // Campionamento del buffer di replay
     
+        //facciamo sta prova:
+        INDArray inputs = Nd4j.create(batchSize, getStateSize());  // Array per tutti gli input del batch
+        INDArray targets = Nd4j.create(batchSize, getActionSize()); // Array per tutti i target del batch
+
+        int i = 0;
         for (Experience exp : batch) {
             double targetQ = exp.reward;
     
@@ -183,18 +188,23 @@ public class DQNAgent1 extends DQNAgentAbstract{
     
             // Imposta il valore target per l'azione specifica
             target.putScalar(exp.action, targetQ);
-    
-            // Addestra la rete con lo stato corrente e il valore target aggiornato
-            qNetwork.fit(input, target);
+
+            inputs.putRow(i, input);  // Aggiungi lo stato all'array di input
+            targets.putRow(i, target); // Aggiungi il target all'array di target
+
+            i++;
         }
+        
+        // Addestra la rete con l'array di stati correnti e i valori target aggiornati
+        qNetwork.fit(inputs, targets);
     }
 
-    private double grantReward(Task task){
+    public double grantReward(Task task){
         double reward = 0.0;
 
         //penalizzo il nodo se ha più task assegnati della media
         if(task.getStatus().equals(com.mechalikh.pureedgesim.taskgenerator.Task.Status.SUCCESS)) reward += 1;
-        else reward -= -1;
+        else reward -= 1;
 
         if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);                                                            
 
@@ -250,11 +260,11 @@ public class DQNAgent1 extends DQNAgentAbstract{
         try {
             String modelPath = filePath + "Q_Network.zip";
             File file = new File(modelPath);
-            qNetwork.save(file, true); // true per includere anche l'updater, come Adam
+            qNetwork.save(file, SimulationParameters.neuralTraining); // true per includere anche l'updater, come Adam
             System.out.println("Modello salvato con successo in: " + filePath);
             modelPath = filePath + "Target_Network.zip";
             file = new File(modelPath);
-            targetNetwork.save(file, true); // true per includere anche l'updater, come Adam
+            targetNetwork.save(file, SimulationParameters.neuralTraining); // true per includere anche l'updater, come Adam
             System.out.println("Modello salvato con successo in: " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -266,11 +276,11 @@ public class DQNAgent1 extends DQNAgentAbstract{
         try {
             String modelPath = filePath + "Q_Network.zip";
             File file = new File(modelPath);
-            qNetwork = MultiLayerNetwork.load(file, true); // true per caricare anche l'updater
+            qNetwork = MultiLayerNetwork.load(file, SimulationParameters.neuralTraining); // true per caricare anche l'updater
             System.out.println("Modello caricato con successo da: " + filePath);
             modelPath = filePath + "Target_Network.zip";
             file = new File(modelPath);
-            targetNetwork = MultiLayerNetwork.load(file, true); // true per caricare anche l'updater
+            targetNetwork = MultiLayerNetwork.load(file, SimulationParameters.neuralTraining); // true per caricare anche l'updater
             System.out.println("Modello caricato con successo da: " + filePath);
         } catch (IOException e) {
             //e.printStackTrace();

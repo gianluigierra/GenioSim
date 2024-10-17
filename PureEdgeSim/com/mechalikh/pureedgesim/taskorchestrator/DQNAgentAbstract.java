@@ -15,4 +15,6 @@ public abstract class DQNAgentAbstract {
 
     public void IterationEnd() {};
 
+    public double grantReward(Task task){return 0;}
+
 }
