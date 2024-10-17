@@ -25,8 +25,9 @@ import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
-import com.mechalikh.pureedgesim.taskorchestrator.DQNOrchestrator_vecchissimo;
-import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator; 
+import com.mechalikh.pureedgesim.taskorchestrator.CustomOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.Orchestratori_inutilizzati.DQNOrchestrator_vecchissimo; 
 
 public class Example1 {
 	/**
@@ -77,7 +78,7 @@ public class Example1 {
 		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
 		
 		// To change the taskOrchestrator
-	    sim.setCustomEdgeOrchestrator(DQNOrchestrator_vecchissimo.class);
+	    sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
 
 		/* to use the default one you can simply delete or comment those lines */
 

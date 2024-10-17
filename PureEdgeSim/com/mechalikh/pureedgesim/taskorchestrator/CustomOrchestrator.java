@@ -3,57 +3,52 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 import java.util.List;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-import examples.ProgettoGenio.ProgettoGenio;
-
 public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulationEndListener{
 
     // Parametri DQN
-    private DQNAgent m_agent = null;
+    private DQNAgentAbstract m_agent = null;
 
     //variabili per esecuzione
-    public boolean IsTrainingOn = true;
+    public boolean IsTrainingOn;
     private List<Task> tasksList = new ArrayList<>();
 
     //questi servono solo per printare debug
-    private boolean printNodeDestination = true;
+    private boolean printNodeDestination = false;
+    private boolean printTaskNodes = false;
+    public static int totalreward;
+    public static double failureRate;
+    public static String algName;
 
 
     public CustomOrchestrator(SimulationManager simulationManager) {
         super(simulationManager);
-
-        // int response = JOptionPane.showConfirmDialog(null, "Vuoi Caricare il modello?", "Carica modello", JOptionPane.YES_NO_OPTION);
-
-        // if (response == JOptionPane.YES_OPTION) IsTrainingOn = false;
-        // else IsTrainingOn = true;
-
-        if ("DQN".equals(algorithmName) && IsTrainingOn) {
-            m_agent = new DQNAgent(this, simulationManager);
-        }
-        else if ("DQN".equals(algorithmName) && !IsTrainingOn){
+        this.IsTrainingOn = SimulationParameters.neuralTraining;
+        algName = algorithmName;
+        
+        if (algorithmName.contains("DQN")){
             String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/" + simulationManager.getScenario().getStringOrchArchitecture();
-            m_agent = new DQNAgent(modelPath + "/dqn_model_" +  SimulationParameters.simName, modelPath, this, simulationManager);
-
-            System.out.println("Pesi della rete Q: " + m_agent.qNetwork.params());
-            System.out.println("Pesi della rete Target: " +  m_agent.targetNetwork.params());
-
+            if(algorithmName.equals("DQN1")) m_agent = new DQNAgent1(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
+            else m_agent = new DQNAgent2(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
         }
-
+        CustomOrchestrator.totalreward = 0;
     }
 
     @Override
     protected int findComputingNode(String[] architecture, Task task) {
+
+        //aggiungi il task alla lista di quelli orchestrati dall'orchestratore
+        tasksList.add(task);
+
         if ("ROUND_ROBIN".equals(algorithmName)) {
             return super.roundRobin(architecture, task);
 		} else if ("GREEDY".equals(algorithmName)) {
-            return greedyChoice(architecture, task);
+            return super.greedyChoice(architecture, task);
 		}  else if ("TRADE_OFF".equals(algorithmName)) {
             return super.tradeOff(architecture, task);
 		} else {
@@ -67,7 +62,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 	public void orchestrate(Task task) {
         if ("ROUND_ROBIN".equals(algorithmName) || "TRADE_OFF".equals(algorithmName) || "GREEDY".equals(algorithmName)) {
 			assignTaskToComputingNode(task, architectureLayers);
-		} else if ("DQN".equals(algorithmName)) {
+		} else if (algorithmName.contains("DQN")) {
 			DoDQN(architectureLayers, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
@@ -86,58 +81,68 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 		}
 	}
 
-    private double[] getCurrentState(List<ComputingNode> nodeList, Task task) {
-        // Il nuovo stato conterrà 5 valori per ogni nodo e 2 variabili
-        double[] state = new double[nodeList.size() * 4 + 2]; // 5 valori per nodo (CPU, FailureRate, sentTasks, RAM e Storage) + 4 variabili
+    private double[] getCurrentState1(List<ComputingNode> nodeList, Task task) {
+        double[] state = new double[nodeList.size() * 6 + 2]; // 6 valori per nodo (CPU disponibili, FailureRate, mipspercore, CPU, RAM e Storage) + 2 variabili
     
         // Aggiungi i valori per ogni nodo nella nodeList
         for (int i = 0; i < nodeList.size(); i++) {
             ComputingNode node = nodeList.get(i);
     
-            double availableCores = node.getAvailableCores();       // Ottieni il carico CPU del nodo
-            //double failureRate = node.getFailureRate(); // Ottieni il failure rate del nodo
-            double mipsPerCore = node.getMipsPerCore();   // Ottieni il numero di task orchestrati
-            double ram = node.getAvailableRam();  //Ottieni la ram del nodo
-            double storage = node.getAvailableStorage();  //Ottieni lo storage del nodo
+            double availableCores = node.getAvailableCores();           // Ottieni il carico CPU del nodo
+            double failureRate = node.getFailureRate();                 // Ottieni il failure rate del nodo
+            double mipsPerCore = node.getMipsPerCore();                 // Ottieni il numero di task orchestrati
+            double avgCpuUtilization = node.getAvgCpuUtilization();     // Ottieni l'utilizzo medio di CPU
+            double ram = node.getAvailableRam();                        //Ottieni la ram del nodo
+            double storage = node.getAvailableStorage();                //Ottieni lo storage del nodo
     
-            state[i * 4] = availableCores;          // Metti il valore di CPU load
-            state[i * 4 + 1] = mipsPerCore;    // Metti il numero di sentTasks
-            state[i * 4 + 2] = ram;          // Metti la ram 
-            state[i * 4 + 3] = storage;      // Metti lo storage
-            //state[i * 4 + 1] = failureRate;  // Metti il valore di failureRate
+            state[i * 6] = availableCores;                              // Metti il valore di CPU load
+            state[i * 6 + 1] = mipsPerCore;                             // Metti il numero di sentTasks
+            state[i * 6 + 2] = ram;                                     // Metti la ram 
+            state[i * 6 + 3] = storage;                                 // Metti lo storage
+            state[i * 6 + 4] = avgCpuUtilization;                       // Metti il consumio medio di CPU
+            state[i * 6 + 5] = failureRate;                             // Metti il failure rate medio 
         }
     
         // Aggiungi i valori globali
         double taskSize = task.getFileSizeInBits();                     // size del task in bytes
         double maxLatency = task.getMaxLatency();                       //latency max del task
     
-        int globalStartIndex = nodeList.size() * 4;  // Indice di partenza per i valori globali
-        state[globalStartIndex] = maxLatency;         // Aggiungi epsilon
-        state[globalStartIndex + 1] = taskSize;       // Aggiungi clock
+        int globalStartIndex = nodeList.size() * 6;                     // Indice di partenza per i valori globali
+        state[globalStartIndex] = maxLatency;                           // Aggiungi maxlatency del task
+        state[globalStartIndex + 1] = taskSize;                         // Aggiungi tasksize
     
         return state;
     }
+
+    private double[] getCurrentState2(List<ComputingNode> nodeList, Task task) {
+        double[] state = new double[nodeList.size() * 5 + 2]; // 5 valori per nodo (CPU, FailureRate, sentTasks, RAM e Storage) + 2 variabili
     
-    private int greedyChoice(String[] architecture, Task task){
-        int selected = 0;
-        double bestfit = Double.MAX_VALUE;
-        double bestnumberofcores = 0;
-        for(int i = 0; i < nodeList.size(); i++){
-            //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
-            if( (super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
-                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
-                selected = i;
-            }
-            //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
-            else if((super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
-                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = super.historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
-                selected = i;
-            }
+        // Aggiungi i valori per ogni nodo nella nodeList
+        for (int i = 0; i < nodeList.size(); i++) {
+            ComputingNode node = nodeList.get(i);
+    
+            double cpuLoad = node.getAvgCpuUtilization();       // Ottieni il carico CPU del nodo
+            double failureRate = node.getFailureRate(); // Ottieni il failure rate del nodo
+            double sentTasks = super.historyMap.get(i);   // Ottieni il numero di task orchestrati
+            double ram = node.getAvailableRam();  //Ottieni la ram del nodo
+            double storage = node.getAvailableStorage();  //Ottieni lo storage del nodo
+    
+            state[i * 5] = cpuLoad;          // Metti il valore di CPU load
+            state[i * 5 + 1] = failureRate;  // Metti il valore di failureRate
+            state[i * 5 + 2] = sentTasks;    // Metti il numero di sentTasks
+            state[i * 5 + 3] = ram;         // Metti la ram 
+            state[i * 5 + 4] = storage;    // Metti lo storage
         }
-        if("GREEDY".equals(algorithmName)) super.historyMap.put(selected, super.historyMap.get(selected) + 1);
-        return selected;
+    
+        // Aggiungi i valori globali
+        double taskSize = task.getFileSizeInBits();                     // size del task in bytes
+        double maxLatency = task.getMaxLatency();                       //latency max del task
+    
+        int globalStartIndex = nodeList.size() * 5;  // Indice di partenza per i valori globali
+        state[globalStartIndex] = maxLatency;         // Aggiungi maxlatency del task
+        state[globalStartIndex + 1] = taskSize;       // Aggiungi tasksize
+    
+        return state;
     }
 
     private void PerformAction(int action, Task task) {
@@ -164,10 +169,14 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         tasksList.add(task);
 
         // Ottiene lo stato attuale basato sui nodi disponibili
-        double[] state = getCurrentState(nodeList, task);
+        double[] state;
+        if(algorithmName.equals("DQN1")) state = getCurrentState1(nodeList, task);
+        else state = getCurrentState2(nodeList, task);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
-        int action = m_agent.chooseAction(state, architecture, task);
+        int action;
+        if(IsTrainingOn) action = m_agent.chooseAction(state, architecture, task);
+        else action = m_agent.getKthBestQAction(state, 0);
         super.historyMap.put(action, super.historyMap.get(action) + 1);
 
         //setto stato e azione per il task
@@ -176,34 +185,49 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
     
         // Esegui l'azione e avanza verso lo stato successivo
         PerformAction(action, task);
+
+        //dal momento che il secondo algoritmo DQN non si basa sull'aspettare il termine del task devo avviarne l'esecuzione qua
+        //if(algorithmName.equals("DQN2") && IsTrainingOn && this.tasksList.contains(task)) {                       //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
+        if(algorithmName.equals("DQN2") && this.tasksList.contains(task)) {
+            task.setNextState(getCurrentState2(nodeList, task));
+            m_agent.DQN(task, false);
+        }
     }
 
     //il task viene eseguito e si preleva il nextState
 	@Override
 	public void notifyOrchestratorOfTaskExecution(Task task) {
-        if(algorithmName.equals("DQN") && IsTrainingOn && this.tasksList.contains(task)) task.setNextState(getCurrentState(nodeList, task));
+        if(this.tasksList.contains(task) && algorithmName.contains("DQN")) 
+            if(algorithmName.equals("DQN1"))task.setNextState(getCurrentState1(nodeList, task));
     }
     
     //il task ha finito e se previsto, si effettua l'update dell'Agent
 	@Override
 	public void resultsReturned(Task task) {
-        if(algorithmName.equals("DQN") && IsTrainingOn && this.tasksList.contains(task)) m_agent.DQN(task, isDone());
+        //if(algorithmName.equals("DQN1") && IsTrainingOn && this.tasksList.contains(task)) m_agent.DQN(task, true);    //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
+        if(algorithmName.equals("DQN1") && this.tasksList.contains(task)) m_agent.DQN(task, true);
 	}
-
-    private boolean isDone() {
-        // Definire la condizione di terminazione della simulazione
-        return false;
-    }
 
     @Override
     public void onSimulationEnd() {
-        m_agent.IterationEnd();
-        m_agent.saveAll();
-    }
 
-    public static void main(String[] args) {
-		ProgettoGenio sim = new ProgettoGenio();
-		sim.StartSimulation();
-	}
+        System.out.println("Tasklist size = " + tasksList.size());
+        List<Task> tasksListriusciti = new ArrayList<>();
+        List<Task> tasksListfalliti = new ArrayList<>();
+        for(Task task : tasksList){
+            if(task.getStatus().equals(com.mechalikh.pureedgesim.taskgenerator.Task.Status.SUCCESS)) tasksListriusciti.add(task);
+            else tasksListfalliti.add(task);
+        }
+        System.out.println("Tasklist riusciti size = " + tasksListriusciti.size());
+        System.out.println("Tasklist falliti size = " + tasksListfalliti.size());
+
+        if(algorithmName.contains("DQN")){
+            if(printTaskNodes) m_agent.IterationEnd();
+            if(IsTrainingOn) m_agent.saveAll();
+            CustomOrchestrator.totalreward = m_agent.getTotalReward();
+            System.out.println("TotalReward: " + m_agent.getTotalReward());
+        }
+        failureRate = 100 - simulationManager.getFailureRate();
+    }
 
 }

@@ -608,12 +608,7 @@ public class SimulationParameters {
 	/**
 	 * wether the neuralnetwork needs training or not with greedy function.
 	 */
-	public static boolean greedyTraining;
-
-	/**
-	 * wether the neuralnetwork needs training or not with greedy function.
-	 */
-	public static int tasksForGreedyTraining;
+	public static boolean neuralTraining;
 
 	/**
 	 * PER LA RETE NEURALE

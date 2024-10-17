@@ -4,7 +4,7 @@
 		<periphery>true</periphery>
 		<idleConsumption>100</idleConsumption>
 		<maxConsumption>250</maxConsumption>
-		<isOrchestrator>false</isOrchestrator>
+		<isOrchestrator>true</isOrchestrator>
 		<location>
 			<x_pos>100</x_pos>
 			<y_pos>100</y_pos>

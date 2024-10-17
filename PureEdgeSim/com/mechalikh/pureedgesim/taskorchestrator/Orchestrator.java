@@ -221,6 +221,19 @@ public abstract class Orchestrator extends SimEntity {
 		boolean offloadingpossible = true;
 		if(!offloadingpossible){
 			SimulationParameters.TYPES nodeType = node.getType();
+
+		
+			System.out.print("\n");
+			System.out.println("Nodo destinazione di offload = " + node.getName());
+			System.out.println("UpLink dell'edge device associato al task = " + task.getEdgeDevice().getCurrentLink(LinkOrientation.UP_LINK).getDst().getName());
+			System.out.print("\n\n");
+			System.out.println("Nodo destinazione di offload = " + node.getName());
+			System.out.println("UpLink dell'orchestrator associato al task = " + task.getOrchestrator().getCurrentLink(LinkOrientation.UP_LINK).getDst().getName());
+			System.out.print("\n\n");
+			System.out.println("Nodo destinazione di offload = " + node.getName());
+			System.out.println("Orchestrator associato al task = " + task.getOrchestrator().getType());
+			System.out.print("\n\n\n\n");
+
 			return (
 				
 					(arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.VM_CLOUD) // cloud computing

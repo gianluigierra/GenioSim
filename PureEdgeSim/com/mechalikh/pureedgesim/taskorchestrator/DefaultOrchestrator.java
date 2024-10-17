@@ -31,7 +31,6 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public class DefaultOrchestrator extends Orchestrator {
 	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();
-	private int tsk = 1;
 
 	public DefaultOrchestrator(SimulationManager simulationManager) {
 		super(simulationManager);
@@ -42,11 +41,11 @@ public class DefaultOrchestrator extends Orchestrator {
 
 	protected int findComputingNode(String[] architecture, Task task) {
 		if ("ROUND_ROBIN".equals(algorithmName)) {
-			System.out.println(tsk); tsk++;
 			return roundRobin(architecture, task);
 		} else if ("TRADE_OFF".equals(algorithmName)) {
-			System.out.println(tsk); tsk++;
 			return tradeOff(architecture, task);
+		} else if ("GREEDY".equals(algorithmName)) {
+			return greedyChoice(architecture, task);
 		} else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
 					+ algorithmName + "', please check the simulation parameters file...");
@@ -92,7 +91,7 @@ public class DefaultOrchestrator extends Orchestrator {
 		return selected;
 	}
 
-	public int roundRobin(String[] architecture, Task task) {
+	protected int roundRobin(String[] architecture, Task task) {
 		int selected = -1;
 		int minTasksCount = -1; // Computing node with minimum assigned tasks.
 		for (int i = 0; i < nodeList.size(); i++) {
@@ -109,6 +108,28 @@ public class DefaultOrchestrator extends Orchestrator {
 
 		return selected;
 	}
+
+	protected int greedyChoice(String[] architecture, Task task){
+        int selected = 0;
+        double bestfit = Double.MAX_VALUE;
+        double bestnumberofcores = 0;
+        for(int i = 0; i < nodeList.size(); i++){
+            //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
+            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
+                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
+                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
+                selected = i;
+            }
+            //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
+            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
+                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
+                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
+                selected = i;
+            }
+        }
+        if("GREEDY".equals(algorithmName)) historyMap.put(selected, historyMap.get(selected) + 1);
+        return selected;
+    }
 
 	@Override
 	public void resultsReturned(Task task) {

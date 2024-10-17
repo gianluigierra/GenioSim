@@ -1,0 +1,3 @@
+DQNOrchestrator_vecchio/vecchissimo = orchestratori adatti all'esempio: Esempio_Mio
+
+DQNOrchestrator_backup = orchestratore con ottima resa nel progetto genio. Usa la queue di elementi per dare reward

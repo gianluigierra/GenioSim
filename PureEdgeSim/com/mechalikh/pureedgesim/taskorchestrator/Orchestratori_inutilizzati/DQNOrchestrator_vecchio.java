@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator;
+package com.mechalikh.pureedgesim.taskorchestrator.Orchestratori_inutilizzati;
 
 import java.util.Random;
 import java.util.ArrayList;
@@ -22,6 +22,9 @@ import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.Experience;
+import com.mechalikh.pureedgesim.taskorchestrator.ReplayBuffer;
 
 public class DQNOrchestrator_vecchio extends DefaultOrchestrator {
     private MultiLayerNetwork qNetwork;
@@ -213,32 +216,9 @@ public class DQNOrchestrator_vecchio extends DefaultOrchestrator {
         }
     }
 
-    //funzione greedy per iniziare il DQN
-    private int greedyChoice(String[] architecture, Task task){
-        int selected = 0;
-        double bestfit = Double.MAX_VALUE;
-        double bestnumberofcores = 0;
-        for(int i = 0; i < nodeList.size(); i++){
-            //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
-            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
-                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
-                selected = i;
-            }
-            //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
-            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
-                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
-                selected = i;
-            }
-        }
-        historyMap.put(selected, historyMap.get(selected) + 1);
-        return selected;
-    }
-
     private int chooseAction(double[] state, String[] architecture, Task task) {
         Random rand = new Random();
-        if (numberoftasksorchestrated <= SimulationParameters.tasksForGreedyTraining && SimulationParameters.greedyTraining)
+        if (numberoftasksorchestrated <= 1000 && SimulationParameters.neuralTraining)
             if(!simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")) return super.tradeOff(architecture, task);
             else return greedyChoice(architecture, task);
         if (rand.nextDouble() < epsilon) {
@@ -394,8 +374,8 @@ public class DQNOrchestrator_vecchio extends DefaultOrchestrator {
         double[] nextState = getNextState(action, task);  // Ottieni lo stato successivo dopo l'azione
 
         //update variabili DQN
-        if(!SimulationParameters.greedyTraining) epsilonUpdateCounter++;
-        else if(numberoftasksorchestrated > SimulationParameters.tasksForGreedyTraining) epsilonUpdateCounter++;
+        if(!SimulationParameters.neuralTraining) epsilonUpdateCounter++;
+        else if(numberoftasksorchestrated > 1000) epsilonUpdateCounter++;
 
         if(replayBufferfUpdateCounter < Math.ceil(SimulationParameters.neuralNetworkLearningSpeed/2)) replayBufferfUpdateCounter++;
 

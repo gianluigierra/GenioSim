@@ -1,10 +1,10 @@
 package examples.ProgettoGenio;
 
-import com.mechalikh.pureedgesim.datacentersmanager.DefaultTopologyCreator;
-import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.mechalikh.pureedgesim.simulationmanager.*;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
-import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.*;
 
 public class ProgettoGenio {
@@ -15,9 +15,8 @@ public class ProgettoGenio {
 	// The custom output folder is
 	private static String outputPath = "PureEdgeSim/examples/ProgettoGenio/ProgettoGenio_output/";
 
-	public ProgettoGenio() {}
+	public ProgettoGenio(){
 
-	public void StartSimulation(){
 		// Create a PureEdgeSim simulation
 		Simulation sim = new Simulation();
 
@@ -62,14 +61,35 @@ public class ProgettoGenio {
 		//cambio il simulationManager con quello modificato da me
 		//sim.setCustomSimulationManager(MySimulationManager.class);
 
-		// Finally, you can launch the simulation
+		//inizia la simulazione
 		sim.launchSimulation();
 		
 	}
 
 	public static void main(String[] args) {
-		ProgettoGenio sim = new ProgettoGenio();
-		sim.StartSimulation();
+
+        List<Integer> rewardsList = new ArrayList<>();
+        double avgFailureRate = 0;
+		int numberOfIterations = 10;
+		String algName = "";
+
+		//10 iterazioni dell'algoritmo
+		for(int i = 0; i < numberOfIterations; i++){
+			System.out.println("\n\nIterazione numero: " + (i+1));
+			new ProgettoGenio();
+			rewardsList.add(CustomOrchestrator.totalreward);
+			avgFailureRate += CustomOrchestrator.failureRate;
+			algName = CustomOrchestrator.algName;
+		}
+		if(algName.contains("DQN")){
+			System.out.println("Rewards list: ");
+			for(int i = 0; i < rewardsList.size(); i++){
+				System.out.println("    -Iterazione " + (i+1) +", reward: " + rewardsList.get(i));
+			}
+		}
+		System.out.println("Avg success rate: " + avgFailureRate/numberOfIterations);
+
+		
 	}
 
 }
