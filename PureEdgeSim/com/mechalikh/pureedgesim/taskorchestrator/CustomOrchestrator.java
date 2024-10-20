@@ -35,7 +35,8 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
             String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/" + simulationManager.getScenario().getStringOrchArchitecture();
             if(algorithmName.equals("DQN1")) m_agent = new DQNAgent1(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
             else if(algorithmName.equals("DQN2")) m_agent = new DQNAgent2(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
-            else if(algorithmName.equals("DQN3")) m_agent = new DQNAgent3(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager); 
+            else if(algorithmName.equals("DQN3")) m_agent = new DQNAgent3(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager);
+            else if(algorithmName.equals("DQN1_2")) m_agent = new DQNAgent1_2(modelPath + "/" + algorithmName + "_model_" +  SimulationParameters.simName, this, simulationManager); 
         }
         CustomOrchestrator.totalreward = 0;
     }
@@ -168,12 +169,13 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 
         // Ottiene lo stato attuale basato sui nodi disponibili
         double[] state;
-        if(algorithmName.equals("DQN1")) state = getCurrentState1(nodeList, task);
+        if(algorithmName.equals("DQN1") || algorithmName.equals("DQN1_2")) state = getCurrentState1(nodeList, task);
         else state = getCurrentState2(nodeList, task);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
         int action;
         if(IsTrainingOn) action = m_agent.chooseAction(state, architecture, task);
+        else if(tasksList.size() < nodeList.size() * 20) action = super.tradeOff(architecture, task);
         else action = m_agent.getKthBestQAction(state, 0);
         super.historyMap.put(action, super.historyMap.get(action) + 1);
 
@@ -197,7 +199,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 	@Override
 	public void notifyOrchestratorOfTaskExecution(Task task) {
         if(this.tasksList.contains(task) && algorithmName.contains("DQN")) 
-            if(algorithmName.equals("DQN1"))task.setNextState(getCurrentState1(nodeList, task));
+            if(algorithmName.equals("DQN1") || algorithmName.equals("DQN1_2"))task.setNextState(getCurrentState1(nodeList, task));
     }
     
     //il task ha finito e se previsto, si effettua l'update dell'Agent
@@ -205,7 +207,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
 	public void resultsReturned(Task task) {
         //if(algorithmName.equals("DQN1") && IsTrainingOn && this.tasksList.contains(task)) m_agent.DQN(task, true);    //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
         //else if(algorithmName.equals("DQN1") && !IsTrainingOn && this.tasksList.contains(task)) m_agent.grantReward(task);   //devo commentarla perchè non riesco ad addestrare a dovere l'algoritmo
-        if(algorithmName.equals("DQN1") && this.tasksList.contains(task)) m_agent.DQN(task, true);
+        if((algorithmName.equals("DQN1")  || algorithmName.equals("DQN1_2"))&& this.tasksList.contains(task)) m_agent.DQN(task, true);
 	}
 
     @Override

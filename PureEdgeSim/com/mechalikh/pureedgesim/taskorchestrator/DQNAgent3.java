@@ -213,13 +213,12 @@ public class DQNAgent3 extends DQNAgentAbstract{
 
         //penalizzo il nodo se ha più task assegnati della media
         if(simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size() == 0) reward +=1;
-        //lo rewardo se ha la coda vuota
         else reward -= simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size();
 
-        //penalizzo il nodo se ha più task inviati rispetto ai suoi compari
-        if(simOrchestrator.nodeList.get(task.getAction()).getSentTasks()>getAvgHistoryMapTasks()) reward -= 1;
-        //lo rewardo se ne ha di meno
-        else reward += 1;
+        // //penalizzo il nodo se ha più task inviati rispetto ai suoi compari
+        // if(simOrchestrator.nodeList.get(task.getAction()).getSentTasks()>getAvgHistoryMapTasks()) reward -= 1;
+        // //lo rewardo se ne ha di meno
+        // else reward += 1;
 
         if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);
         

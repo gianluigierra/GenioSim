@@ -71,7 +71,7 @@ public class ProgettoGenio {
         List<Integer> rewardsList = new ArrayList<>();
         List<Double> failureRateList = new ArrayList<>();
         double avgFailureRate = 0;
-		int numberOfIterations = 30;
+		int numberOfIterations = 100;
 		String algName = "";
 
 		//10 iterazioni dell'algoritmo

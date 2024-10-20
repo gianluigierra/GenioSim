@@ -1,4 +1,5 @@
 Agent 1 è imperfetto ed è quello che si basa sul reward pari al failurerate, inoltre imposta isDone = true
+Agent 1_2 è uguale all'1 solo che aggiunge un ulteriore layer di apprendimento
 Agent 2 si basa sul reward pari alla coda, imposta isDone = false
 Agent 3 si basa sul reward pari alla coda ed anche in base al numero di task assegnati agli altri nodi; è una sorta di Agent 2 2.0. Imposta isDone = false
 

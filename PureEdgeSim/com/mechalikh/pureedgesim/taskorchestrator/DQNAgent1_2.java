@@ -26,7 +26,7 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNAgent1 extends DQNAgentAbstract{
+public class DQNAgent1_2 extends DQNAgentAbstract{
     
     // Oggetti DQN
     public MultiLayerNetwork qNetwork;
@@ -57,7 +57,7 @@ public class DQNAgent1 extends DQNAgentAbstract{
     private int totalReward = 0;
 
     //per iniziare la simulazione da zero
-    public DQNAgent1(CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent1_2(CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         simOrchestrator = orch;
         simulationManager = sm;
@@ -66,12 +66,15 @@ public class DQNAgent1 extends DQNAgentAbstract{
     }
 
     //per recuperare un agente
-    public DQNAgent1(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent1_2(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         modelPath = pathToNetwork;
         simOrchestrator = orch;
         simulationManager = sm;
         loadModel(pathToNetwork);
+        Random rnd = new Random();
+        int caso = rnd.nextInt(2);
+        if(caso == 1) epsilon = 0.01;
     }
     
     private MultiLayerNetwork createNetwork() {
@@ -83,6 +86,10 @@ public class DQNAgent1 extends DQNAgentAbstract{
             .seed(1234)
             .list()
             .layer(new DenseLayer.Builder().nIn(inputSize).nOut(neuralNetworkSize)
+                    .activation(Activation.RELU)
+                    .weightInit(WeightInit.XAVIER)
+                    .build())
+            .layer(new DenseLayer.Builder().nIn(neuralNetworkSize).nOut(neuralNetworkSize)
                     .activation(Activation.RELU)
                     .weightInit(WeightInit.XAVIER)
                     .build())
