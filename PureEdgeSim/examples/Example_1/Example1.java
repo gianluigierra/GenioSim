@@ -26,8 +26,7 @@ import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.CustomOrchestrator;
-import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
-import com.mechalikh.pureedgesim.taskorchestrator.Orchestratori_inutilizzati.DQNOrchestrator_vecchissimo; 
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator; 
 
 public class Example1 {
 	/**

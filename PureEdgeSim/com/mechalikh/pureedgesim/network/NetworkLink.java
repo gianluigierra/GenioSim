@@ -232,7 +232,7 @@ public class NetworkLink extends SimEntity {
 		this.transferProgressList.remove(transfer);
 
 		// Add the network link latency to the task network delay
-		transfer.getTask().addActualNetworkTime(latency);
+		transfer.getTask().addActualNetworkTime(0);		//era settato latency, ho messo 0 come Vitale altrimenti i task fallivano
 
 		// Remove the previous hop (data has been transferred one hop)
 		transfer.getVertexList().remove(0);
