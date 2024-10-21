@@ -175,7 +175,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
         int action;
         if(IsTrainingOn) action = m_agent.chooseAction(state, architecture, task);
-        else if(tasksList.size() < nodeList.size() * 20) action = super.tradeOff(architecture, task);
+        //else if(tasksList.size() < nodeList.size() * 20) action = super.tradeOff(architecture, task);
         else action = m_agent.getKthBestQAction(state, 0);
         super.historyMap.put(action, super.historyMap.get(action) + 1);
 

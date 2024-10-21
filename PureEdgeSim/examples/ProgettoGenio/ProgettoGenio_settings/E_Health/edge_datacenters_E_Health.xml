@@ -17,10 +17,10 @@
 				<storage>1000000</storage>
 				<VMs>
 					<VM>
-						<cores>2</cores>
+						<cores>3</cores>
 						<mips>50000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<ram>19200</ram>
+						<storage>300000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
@@ -29,22 +29,10 @@
 						<storage>200000</storage>
 					</VM>
 					<VM>
-						<cores>1</cores>
+						<cores>2</cores>
 						<mips>50000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
-					</VM>
-					<VM>
-						<cores>1</cores>
-						<mips>50000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
-					</VM>
-					<VM>
-						<cores>1</cores>
-						<mips>50000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<ram>12800</ram>
+						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>1</cores>
