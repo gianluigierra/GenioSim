@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator;
+package com.mechalikh.pureedgesim.taskorchestrator.DQN;
 
 //import di esecuzione/tipi
 import java.io.File;
@@ -21,12 +21,11 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 //import di simulazione
-import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DQNAgent1_2 extends DQNAgentAbstract{
+public class DQNAgent2 extends DQNAgentAbstract{
     
     // Oggetti DQN
     public MultiLayerNetwork qNetwork;
@@ -57,7 +56,7 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
     private int totalReward = 0;
 
     //per iniziare la simulazione da zero
-    public DQNAgent1_2(CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent2(CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         simOrchestrator = orch;
         simulationManager = sm;
@@ -66,7 +65,7 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
     }
 
     //per recuperare un agente
-    public DQNAgent1_2(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent2(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         modelPath = pathToNetwork;
         simOrchestrator = orch;
@@ -90,10 +89,6 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
                     .activation(Activation.RELU)
                     .weightInit(WeightInit.XAVIER)
                     .build())
-            .layer(new DenseLayer.Builder().nIn(neuralNetworkSize).nOut(neuralNetworkSize)
-                    .activation(Activation.RELU)
-                    .weightInit(WeightInit.XAVIER)
-                    .build())
             .layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                     .activation(Activation.IDENTITY)
                     .nIn(neuralNetworkSize).nOut(outputSize)
@@ -110,7 +105,7 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
     } 
 
     private int getStateSize() {
-        return 6*simOrchestrator.nodeList.size() + 2;           
+         return 5*simOrchestrator.nodeList.size() + 2;           
     }
 
     public int chooseAction(double[] state, String[] architecture, Task task) {
@@ -171,11 +166,6 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
     private void updateNetwork(int batchSize) {
         List<Experience> batch = replayBuffer.sample(batchSize);  // Campionamento del buffer di replay
     
-        //facciamo sta prova:
-        INDArray inputs = Nd4j.create(batchSize, getStateSize());  // Array per tutti gli input del batch
-        INDArray targets = Nd4j.create(batchSize, getActionSize()); // Array per tutti i target del batch
-
-        int i = 0;
         for (Experience exp : batch) {
             double targetQ = exp.reward;
     
@@ -193,42 +183,25 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
     
             // Imposta il valore target per l'azione specifica
             target.putScalar(exp.action, targetQ);
-
-            inputs.putRow(i, input);  // Aggiungi lo stato all'array di input
-            targets.putRow(i, target); // Aggiungi il target all'array di target
-
-            //qNetwork.fit(input, target);
-
-            i++;
+    
+            // Addestra la rete con lo stato corrente e il valore target aggiornato
+            qNetwork.fit(input, target);
         }
-        
-        // Addestra la rete con l'array di stati correnti e i valori target aggiornati
-        qNetwork.fit(inputs, targets);
-    }
-
-    private boolean isStationary(){
-        for(ComputingNode cn : simOrchestrator.nodeList)
-            if(cn.getAvgCpuUtilization() == 0) return true;
-        return false;
     }
 
     public double grantReward(Task task){
         double reward = 0.0;
 
         //penalizzo il nodo se ha più task assegnati della media
-        if(task.getStatus().equals(com.mechalikh.pureedgesim.taskgenerator.Task.Status.SUCCESS)) reward += 1;
-        else reward -= 1;
+        if(simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size() == 0) reward +=1;
+        else reward -= simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size();
 
-        //penalizzo il nodo se esistono VM che hanno cpuUtilization pari a zero
-        if(isStationary() && simulationManager.getSimulation().clockInMinutes() > 0.7) reward -= 10;
-
-        if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);                                                            
-
+        if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);
+        
         //aggiorno il counter della epsilon
         epsilonUpdateCounter++;
 
         this.totalReward += reward;
-
         return reward;
     }
 
@@ -316,6 +289,7 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
             System.out.println("Nodo " + simOrchestrator.nodeList.get(i).getName());
             System.out.println("    tasks offloaded: " + simOrchestrator.nodeList.get(i).getSentTasks());
             System.out.println("    tasks orchestrated: " + simOrchestrator.historyMap.get(i));
+            System.out.println("    totalReward: " + totalReward);
         }
 
     }

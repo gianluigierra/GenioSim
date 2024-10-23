@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator;
+package com.mechalikh.pureedgesim.taskorchestrator.DQN;
 
 import java.io.Serializable;
 

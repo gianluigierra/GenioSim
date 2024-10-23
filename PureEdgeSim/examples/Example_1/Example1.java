@@ -25,8 +25,8 @@ import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
-import com.mechalikh.pureedgesim.taskorchestrator.CustomOrchestrator;
-import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator; 
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.DQN.CustomOrchestrator; 
 
 public class Example1 {
 	/**

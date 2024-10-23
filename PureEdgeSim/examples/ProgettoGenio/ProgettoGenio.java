@@ -6,6 +6,7 @@ import java.util.List;
 import com.mechalikh.pureedgesim.simulationmanager.*;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskorchestrator.*;
+import com.mechalikh.pureedgesim.taskorchestrator.DQN.CustomOrchestrator;
 
 public class ProgettoGenio {
 

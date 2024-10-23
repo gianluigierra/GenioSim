@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator;
+package com.mechalikh.pureedgesim.taskorchestrator.DQN;
 
 //import di esecuzione/tipi
 import java.io.File;
@@ -21,12 +21,12 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 //import di simulazione
-import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 
-public class DQNAgent1 extends DQNAgentAbstract{
+public class DQNAgent3 extends DQNAgentAbstract{
     
     // Oggetti DQN
     public MultiLayerNetwork qNetwork;
@@ -57,7 +57,7 @@ public class DQNAgent1 extends DQNAgentAbstract{
     private int totalReward = 0;
 
     //per iniziare la simulazione da zero
-    public DQNAgent1(CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent3(CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         simOrchestrator = orch;
         simulationManager = sm;
@@ -66,7 +66,7 @@ public class DQNAgent1 extends DQNAgentAbstract{
     }
 
     //per recuperare un agente
-    public DQNAgent1(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent3(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
         replayBuffer = new ReplayBuffer(replayMemory);
         modelPath = pathToNetwork;
         simOrchestrator = orch;
@@ -106,7 +106,7 @@ public class DQNAgent1 extends DQNAgentAbstract{
     } 
 
     private int getStateSize() {
-        return 6*simOrchestrator.nodeList.size() + 2;           
+         return 5*simOrchestrator.nodeList.size() + 2;           
     }
 
     public int chooseAction(double[] state, String[] architecture, Task task) {
@@ -200,29 +200,32 @@ public class DQNAgent1 extends DQNAgentAbstract{
         qNetwork.fit(inputs, targets);
     }
 
-    private boolean isStationary(){
-        for(ComputingNode cn : simOrchestrator.nodeList)
-            if(cn.getAvgCpuUtilization() == 0) return true;
-        return false;
+    private int getAvgHistoryMapTasks(){
+        int avgSentTasks = 0;
+        for(int i = 0; i < simOrchestrator.nodeList.size(); i++){
+            avgSentTasks += simOrchestrator.historyMap.get(i);
+        } 
+        return avgSentTasks/simOrchestrator.nodeList.size();
     }
 
     public double grantReward(Task task){
         double reward = 0.0;
 
         //penalizzo il nodo se ha più task assegnati della media
-        if(task.getStatus().equals(com.mechalikh.pureedgesim.taskgenerator.Task.Status.SUCCESS)) reward += 1;
-        else reward -= 1;
+        if(simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size() == 0) reward +=1;
+        else reward -= simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size();
 
-        //penalizzo il nodo se esistono VM che hanno cpuUtilization pari a zero
-        if(isStationary() && simulationManager.getSimulation().clockInMinutes() > 0.7) reward -= 10;
+        // //penalizzo il nodo se ha più task inviati rispetto ai suoi compari
+        // if(simOrchestrator.nodeList.get(task.getAction()).getSentTasks()>getAvgHistoryMapTasks()) reward -= 1;
+        // //lo rewardo se ne ha di meno
+        // else reward += 1;
 
-        if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);                                                            
-
+        if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);
+        
         //aggiorno il counter della epsilon
         epsilonUpdateCounter++;
 
         this.totalReward += reward;
-
         return reward;
     }
 
@@ -310,6 +313,7 @@ public class DQNAgent1 extends DQNAgentAbstract{
             System.out.println("Nodo " + simOrchestrator.nodeList.get(i).getName());
             System.out.println("    tasks offloaded: " + simOrchestrator.nodeList.get(i).getSentTasks());
             System.out.println("    tasks orchestrated: " + simOrchestrator.historyMap.get(i));
+            System.out.println("    totalReward: " + totalReward);
         }
 
     }

@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator;
+package com.mechalikh.pureedgesim.taskorchestrator.DQN;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
 
 public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulationEndListener{
 
@@ -231,5 +232,7 @@ public class CustomOrchestrator extends DefaultOrchestrator implements OnSimulat
         }
         failureRate = 100 - simulationManager.getFailureRate();
     }
+
+    
 
 }

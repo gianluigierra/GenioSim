@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator.Orchestratori_inutilizzati;
+package com.mechalikh.pureedgesim.taskorchestrator.DQN.Orchestratori_inutilizzati;
 
 import java.util.Random;
 import java.io.IOException;
@@ -35,8 +35,8 @@ import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
-import com.mechalikh.pureedgesim.taskorchestrator.Experience;
-import com.mechalikh.pureedgesim.taskorchestrator.ReplayBuffer;
+import com.mechalikh.pureedgesim.taskorchestrator.DQN.Experience;
+import com.mechalikh.pureedgesim.taskorchestrator.DQN.ReplayBuffer;
 
 public class DQNOrchestrator_backup extends DefaultOrchestrator implements OnSimulationEndListener{
     private MultiLayerNetwork qNetwork;

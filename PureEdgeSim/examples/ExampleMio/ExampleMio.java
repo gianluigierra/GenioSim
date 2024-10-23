@@ -6,7 +6,7 @@ import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.*;
-import com.mechalikh.pureedgesim.taskorchestrator.Orchestratori_inutilizzati.DQNOrchestrator_vecchissimo;
+import com.mechalikh.pureedgesim.taskorchestrator.DQN.Orchestratori_inutilizzati.DQNOrchestrator_vecchissimo;
 
 public class ExampleMio {
 

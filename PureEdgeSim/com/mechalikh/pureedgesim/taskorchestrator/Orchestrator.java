@@ -31,7 +31,7 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 public abstract class Orchestrator extends SimEntity {
-	protected List<ComputingNode> nodeList = new ArrayList<>();
+	public List<ComputingNode> nodeList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
 	protected SimulationManager simulationManager;
 	protected SimLog simLog;
 	protected String algorithmName;
@@ -217,7 +217,7 @@ public abstract class Orchestrator extends SimEntity {
 		return false;
 	}
 
-	protected boolean offloadingIsPossible(Task task, ComputingNode node, String[] architectureLayers) {
+	public boolean offloadingIsPossible(Task task, ComputingNode node, String[] architectureLayers) {					//modificato per visibilità degli agenti DQN, era protected
 		boolean offloadingpossible = true;
 		if(!offloadingpossible){
 			SimulationParameters.TYPES nodeType = node.getType();

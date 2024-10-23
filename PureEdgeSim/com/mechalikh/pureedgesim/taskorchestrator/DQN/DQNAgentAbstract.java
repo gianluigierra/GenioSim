@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.taskorchestrator;
+package com.mechalikh.pureedgesim.taskorchestrator.DQN;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public abstract class DQNAgentAbstract {
