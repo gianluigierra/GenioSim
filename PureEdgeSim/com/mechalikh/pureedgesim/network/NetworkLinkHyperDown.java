@@ -1,4 +1,5 @@
 /**
+ * 
  *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
  *
  *     This file is part of PureEdgeSim Project.
@@ -18,19 +19,18 @@
  *     
  *     @author Charafeddine Mechalikh
  **/
-package com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM;
+package com.mechalikh.pureedgesim.network;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
-import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink;
+import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink; 
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-import com.mechalikh.pureedgesim.network.*;
 
 /**
  * A WAN network link.
  */
-public class NetworkLinkHyperUp extends NetworkLink {
+public class NetworkLinkHyperDown extends NetworkLink {
 
-	public NetworkLinkHyperUp(ComputingNode src, ComputingNode dst, SimulationManager simulationManager, NetworkLinkTypes type) {
+	public NetworkLinkHyperDown(ComputingNode src, ComputingNode dst, SimulationManager simulationManager, NetworkLinkTypes type) {
 		super(src, dst, simulationManager, type);
 		setBandwidth(Integer.MAX_VALUE);
 		setLatency(0);

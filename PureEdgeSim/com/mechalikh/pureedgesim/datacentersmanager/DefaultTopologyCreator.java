@@ -49,6 +49,8 @@ import com.mechalikh.pureedgesim.network.NetworkLinkCellularUp;
 import com.mechalikh.pureedgesim.network.NetworkLinkEthernet;
 import com.mechalikh.pureedgesim.network.NetworkLinkMan;
 import com.mechalikh.pureedgesim.network.NetworkLinkFiber;
+import com.mechalikh.pureedgesim.network.NetworkLinkHyperDown;
+import com.mechalikh.pureedgesim.network.NetworkLinkHyperUp;
 import com.mechalikh.pureedgesim.network.NetworkLinkWanDown;
 import com.mechalikh.pureedgesim.network.NetworkLinkWanUp;
 import com.mechalikh.pureedgesim.network.NetworkLinkWifiDeviceToDevice;

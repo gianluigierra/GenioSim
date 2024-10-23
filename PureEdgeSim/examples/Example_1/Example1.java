@@ -77,7 +77,7 @@ public class Example1 {
 		sim.setCustomTopologyCreator(DefaultTopologyCreator.class); 
 		
 		// To change the taskOrchestrator
-	    sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
+	    sim.setCustomEdgeOrchestrator(DefaultOrchestrator.class);
 
 		/* to use the default one you can simply delete or comment those lines */
 
