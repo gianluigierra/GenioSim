@@ -23,12 +23,12 @@ package com.mechalikh.pureedgesim.simulationvisualizer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 

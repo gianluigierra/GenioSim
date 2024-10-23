@@ -18,19 +18,19 @@
  *     
  *     @author Charafeddine Mechalikh
  **/
-package com.mechalikh.pureedgesim.NuovaCartellaVM;
+package com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
-import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink; 
+import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.network.*;
 
 /**
  * A WAN network link.
  */
-public class NetworkLinkHyperDown extends NetworkLink {
+public class NetworkLinkHyperUp extends NetworkLink {
 
-	public NetworkLinkHyperDown(ComputingNode src, ComputingNode dst, SimulationManager simulationManager, NetworkLinkTypes type) {
+	public NetworkLinkHyperUp(ComputingNode src, ComputingNode dst, SimulationManager simulationManager, NetworkLinkTypes type) {
 		super(src, dst, simulationManager, type);
 		setBandwidth(Integer.MAX_VALUE);
 		setLatency(0);

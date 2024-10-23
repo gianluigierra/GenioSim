@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 public abstract class Orchestrator extends SimEntity {
 	public List<ComputingNode> nodeList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected

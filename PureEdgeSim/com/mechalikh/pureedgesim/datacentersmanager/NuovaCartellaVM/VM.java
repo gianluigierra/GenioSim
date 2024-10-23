@@ -1,4 +1,4 @@
-package com.mechalikh.pureedgesim.NuovaCartellaVM;
+package com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM;
 
 import java.util.ArrayList;
 import java.util.List;

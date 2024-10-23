@@ -1,4 +1,5 @@
 /**
+ * 
  *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
  *
  *     This file is part of PureEdgeSim Project.
@@ -30,7 +31,7 @@ import java.util.Map;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
-import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 

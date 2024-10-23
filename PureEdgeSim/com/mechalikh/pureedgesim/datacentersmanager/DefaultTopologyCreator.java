@@ -1,4 +1,5 @@
 /**
+ * 
  *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
  *
  *     This file is part of PureEdgeSim Project.
@@ -39,6 +40,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.network.InfrastructureGraph;
 import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.network.NetworkLink.NetworkLinkTypes;
@@ -54,7 +56,6 @@ import com.mechalikh.pureedgesim.network.NetworkLinkWifiDown;
 import com.mechalikh.pureedgesim.network.NetworkLinkWifiUp;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 
 /**

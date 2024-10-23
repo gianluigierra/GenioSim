@@ -1,4 +1,5 @@
 /**
+ * 
  *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
  *
  *     This file is part of PureEdgeSim Project.
@@ -36,13 +37,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.energy.EnergyModelComputingNode;
 import com.mechalikh.pureedgesim.locationmanager.Location;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 

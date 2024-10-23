@@ -1,11 +1,7 @@
-package com.mechalikh.pureedgesim.NuovaCartellaVM;
+package com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
@@ -16,7 +12,12 @@ import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
 import com.mechalikh.pureedgesim.energy.EnergyModelComputingNode;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 
-public class Host extends LocationAwareNode {
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public class DataCenter extends LocationAwareNode {
+
 	protected int applicationType;
 	protected boolean isSensor = false;
 	protected double availableStorage = 0; // in Megabytes
@@ -35,101 +36,105 @@ public class Host extends LocationAwareNode {
 	private int tasksFailed = 0;
 	private double failureRate = 0;
 	private int sentTasks = 0;
-	protected DataCenter DataCenter;
-	protected List<VM> VMlist = new ArrayList<>();
 
-	public Host(SimulationManager simulationManager, double mipsPerCore, int numberOfCPUCores,
-			double storage, double ram, DataCenter datacenter, Element hostElement) {
+	protected List<Host> HostList = new ArrayList<>();
+
+	public DataCenter(SimulationManager simulationManager, Element datacenterElement) {
 		super(simulationManager);
-		setStorage(storage);
-		setAvailableStorage(storage);
-		setTotalMipsCapacity(mipsPerCore * numberOfCPUCores);
-		this.mipsPerCore = mipsPerCore;
-		setRam(ram);
-		setAvailableRam(ram);
-		setNumberOfCPUCores(numberOfCPUCores);
-		this.availableCores = numberOfCPUCores;
-
-		this.DataCenter = datacenter;
-		this.createVms(simulationManager, this, hostElement);
+		createHosts(datacenterElement, simulationManager);
+		setDataCenterInfo();
 	}
 
-	private void createVms(SimulationManager simulationManager, Host host, Element hostElement) {
-		NodeList vmNodeList = hostElement.getElementsByTagName("VM");
-		for (int k = 0; k < vmNodeList.getLength(); k++) {
-			Node vmNode = vmNodeList.item(k);
-			Element vmElement = (Element) vmNode;
-			// VM Parameters
-			int vmNumOfCores = Integer.parseInt(vmElement.getElementsByTagName("cores").item(0).getTextContent());
-			double vmMips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
-			double vmStorage = Double.parseDouble(vmElement.getElementsByTagName("storage").item(0).getTextContent());
-			double vmRam = Double.parseDouble(vmElement.getElementsByTagName("ram").item(0).getTextContent());
+	private void createHosts(Element datacenterElement, SimulationManager simulationManager) {
 
-			//Create Vms
-			VM vm = new VM(simulationManager, vmMips, vmNumOfCores, vmStorage, vmRam, this);
-			VMlist.add(vm);
+		NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
+		for (int j = 0; j < hostNodeList.getLength(); j++) {
+
+			Node hostNode = hostNodeList.item(j);
+			Element hostElement = (Element) hostNode;
+			int numOfCores = Integer.parseInt(hostElement.getElementsByTagName("cores").item(0).getTextContent());
+			double mips = Double.parseDouble(hostElement.getElementsByTagName("mips").item(0).getTextContent());
+			double storage = Double.parseDouble(hostElement.getElementsByTagName("storage").item(0).getTextContent());
+			double ram = Integer.parseInt(hostElement.getElementsByTagName("ram").item(0).getTextContent());
+
+			// Create Hosts
+			Host host = new Host(simulationManager, mips, numOfCores, storage, ram, this, hostElement);
+			HostList.add(host);
 
 		}
-	}
 
+	}
+	
 	@Override 
 	public void setEnergyModel(EnergyModelComputingNode emcn){
 		this.energyModel = emcn;
-		for(VM vm : this.VMlist){
-			vm.setEnergyModel(new EnergyModelComputingNode(emcn.getMaxActiveConsumption()/VMlist.size(), emcn.getIdleConsumption()/VMlist.size()));
+		for(Host host : this.HostList){
+			host.setEnergyModel(new EnergyModelComputingNode(0, 0));
 		}
 	}
 
 	@Override 
 	public void setAsOrchestrator(boolean isOrchestrator){
 		this.isOrchestrator = isOrchestrator;
-		for(VM vm : this.VMlist){
-			vm.setAsOrchestrator(isOrchestrator);
+		for(Host host : this.HostList){
+			host.setAsOrchestrator(false);
 		}
 	}
-
 
 	@Override 
 	public void setMobilityModel(MobilityModel mobilityModel){
 		this.mobilityModel = mobilityModel;
-		for(VM vm : this.VMlist){
-			vm.setMobilityModel(mobilityModel);
+		for(Host host : this.HostList){
+			host.setMobilityModel(mobilityModel);
 		}
 	}
 
 	@Override
 	public void setName(String name){
 		this.name = name;
-		for(VM vm : VMlist){
-			if(this.getType() == SimulationParameters.TYPES.HOST_EDGE) vm.setName("VM Edge " + vm.getId());
-			else vm.setName("VM Cloud " + vm.getId());
+		for(Host host : this.HostList){
+			if(this.getType() == SimulationParameters.TYPES.EDGE_DATACENTER) host.setName("Host Edge " + host.getId());
+			else host.setName("Host Cloud " + host.getId());
 		}
 	}
 
 	@Override
 	public void setType(SimulationParameters.TYPES type){
 		this.nodeType = type;
-		for(VM vm : VMlist){
-			if(this.getType() == SimulationParameters.TYPES.HOST_EDGE) vm.setType(SimulationParameters.TYPES.VM_EDGE);
-			else vm.setType(SimulationParameters.TYPES.VM_CLOUD);
+		for(Host host : this.HostList){
+			if(this.getType() == SimulationParameters.TYPES.EDGE_DATACENTER) host.setType(SimulationParameters.TYPES.HOST_EDGE);
+			else host.setType(SimulationParameters.TYPES.HOST_CLOUD);
 		}
 	}
 
-	public List<VM> getVMList(){
-		return VMlist;
+	private void setDataCenterInfo(){
+		double storage = 0, mipsPerCore = 0, ram = 0;
+		int numberOfCPUCores = 0; 
+		for(Host host : HostList){
+			storage += host.storage;
+			mipsPerCore += host.mipsPerCore;
+			numberOfCPUCores += host.numberOfCPUCores;
+			ram += host.ram;
+		}
+		setStorage(storage);
+		setAvailableStorage(storage);
+		this.mipsPerCore = mipsPerCore/HostList.size();
+		setTotalMipsCapacity(this.mipsPerCore * numberOfCPUCores);
+		setRam(ram);
+		setAvailableRam(ram);
+		setNumberOfCPUCores(numberOfCPUCores);
+		this.availableCores = numberOfCPUCores;
 	}
 
-	public DataCenter getDataCenter(){
-		return DataCenter;
+	public List<Host> getHostList(){
+		return HostList;
 	}
 
 	@Override
 	public void processEvent(Event e) {
 		super.processEvent(e);
-		if (e.getTag() == EXECUTION_FINISHED){
-			this.DataCenter.processEvent(e);
+		if (e.getTag() == EXECUTION_FINISHED)
 			executionFinished(e);
-		}
 	}
 
 	public void increaseTask(Task task){
@@ -139,7 +144,6 @@ public class Host extends LocationAwareNode {
 	public void incrementTasksFailed(){
 		this.tasksFailed++;
 		this.failureRate = ((double) tasksFailed * 100) / Math.max(1, sentTasks);
-		this.DataCenter.incrementTasksFailed();
 	}
 
 	public double getSentTasks(){
@@ -302,8 +306,6 @@ public class Host extends LocationAwareNode {
 		this.sentTasks++;
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
-
-		this.DataCenter.submitTask(task);
 	}
 
 	protected void startExecution(Task task) {
@@ -313,8 +315,6 @@ public class Host extends LocationAwareNode {
 		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
 		// Update the number of available cores.
 		availableCores--;
-
-		this.DataCenter.startExecution(task);
 
 		/*
 		 * Arguably, the correct way to get energy consumption measurement is to place
@@ -362,7 +362,6 @@ public class Host extends LocationAwareNode {
 			simulationManager.getDataCentersManager().getTopology().addLink(currentDeviceToDeviceWifiLink);
 		}
 
-		this.DataCenter.setApplicationPlacementLocation(node);
 	}
 
 }

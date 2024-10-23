@@ -1,4 +1,5 @@
 /**
+ * 
  *     PureEdgeSim:  A Simulation Framework for Performance Evaluation of Cloud, Edge and Mist Computing Environments 
  *
  *     This file is part of PureEdgeSim Project.
@@ -24,12 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.w3c.dom.Element;
 
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.NuovaCartellaVM.*;
 
 /**
  * This class is responsible for generating the computing resources from the
