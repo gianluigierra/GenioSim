@@ -459,8 +459,6 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		}
 		// The task is failed due to long delay
 		if (phase == 3 && task.getTotalDelay() >= task.getMaxLatency()) {
-			System.out.println("totaldelay: " + task.getTotalDelay() + ", maxlatency: " + task.getMaxLatency());
-			System.out.println("actualnetworktime: " + task.getActualNetworkTime() + ", actualcputime: " + task.getActualCpuTime() + ", waitingtime: " + task.getWatingTime());
 			task.setFailureReason(Task.FailureReason.FAILED_DUE_TO_LATENCY);
 			simLog.incrementTasksFailedLatency(task);
 			return setFailed(task, phase);

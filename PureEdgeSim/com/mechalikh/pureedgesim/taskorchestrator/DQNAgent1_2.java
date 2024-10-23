@@ -72,9 +72,6 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
         simOrchestrator = orch;
         simulationManager = sm;
         loadModel(pathToNetwork);
-        Random rnd = new Random();
-        int caso = rnd.nextInt(2);
-        if(caso == 1) epsilon = 0.01;
     }
     
     private MultiLayerNetwork createNetwork() {
@@ -199,6 +196,8 @@ public class DQNAgent1_2 extends DQNAgentAbstract{
 
             inputs.putRow(i, input);  // Aggiungi lo stato all'array di input
             targets.putRow(i, target); // Aggiungi il target all'array di target
+
+            //qNetwork.fit(input, target);
 
             i++;
         }
