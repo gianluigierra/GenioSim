@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ONT>
-	<ONTDevice name="ont1">
+	<ONTDevice name="ONT">
 		<idleConsumption>0</idleConsumption>
 		<maxConsumption>0</maxConsumption>
 		<isOrchestrator>false</isOrchestrator>

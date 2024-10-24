@@ -112,6 +112,8 @@ public class MapChart extends Chart {
 		updateEdgeDataCenters();
 		// Add cloud data centers to the map and display their CPU utilization
 		updateCloudDataCenters();
+		// Add SDN to the map 
+		updateSDN();
 	}
 	
 
@@ -193,5 +195,28 @@ public class MapChart extends Chart {
 					toArray(y_activeCloudDataCentersList), SeriesMarkers.DIAMOND, Color.RED);
 
 		}
+		
+	}
+
+	/**
+	 * Updates the map with the current edge data centers and their status.
+	 */
+	protected void updateSDN() {
+
+			// List of idle cloud servers
+			List<Double> x_SDN = new ArrayList<>();
+			List<Double> y_SDN = new ArrayList<>();
+
+			double Xpos = computingNodesGenerator.getSDN().getMobilityModel().getCurrentLocation().getXPos();
+			double Ypos = computingNodesGenerator.getSDN().getMobilityModel().getCurrentLocation().getYPos();
+			
+			x_SDN.add(Xpos);
+			y_SDN.add(Ypos);
+
+			updateSeries(getChart(), "Active SDN", toArray(x_SDN),
+					toArray(y_SDN), SeriesMarkers.TRIANGLE_UP, Color.RED);
+
+
+		
 	}
 }

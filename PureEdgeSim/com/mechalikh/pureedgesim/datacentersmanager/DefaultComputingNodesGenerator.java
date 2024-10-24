@@ -96,6 +96,8 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 												
 			ComputingNode computingNode = createSDNNode(SDN_Element, type);
 			allNodesList.add(computingNode);
+			ONTandServer_List.add(computingNode);
+			SDN = computingNode;
 			
 		} catch (Exception e) {
 			e.printStackTrace();

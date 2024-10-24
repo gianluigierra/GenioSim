@@ -29,6 +29,7 @@ import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
+import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
@@ -88,6 +89,12 @@ public abstract class ComputingNodesGenerator {
 	 *      task)
 	 */
 	protected List<ComputingNode> mistOnlyListSensorsExcluded;
+
+	/**
+	 * The SDN device used in the simulation
+	 * 
+	 */
+	protected ComputingNode SDN;
 
 	/**
 	 * A list that contains only edge data centers and servers.
@@ -256,6 +263,17 @@ public abstract void generateDatacentersAndDevices();
 	 */
 	public List<DataCenter> getEdgeOnlyList() {
 		return this.edgeOnlyList;
+	}
+
+	/**
+	 * Gets the SDN
+	 * 
+	 * @see com.mechalikh.pureedgesim.datacentersmanager.DefaultComputingNodesGenerator#generateSDNDevice(String, TYPES)
+	 * 
+	 * @return the SDN
+	 */
+	public ComputingNode getSDN() {
+		return this.SDN;
 	}
 
 	/**

@@ -28,7 +28,7 @@ public class ProgettoGenio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// cambio la modalità di esecuzione
-		String exampleMode = "Smart_Lights";
+		String exampleMode = "E_Health";
 
 		switch (exampleMode) {
 			case "Smart_Lights":
@@ -72,7 +72,7 @@ public class ProgettoGenio {
         List<Integer> rewardsList = new ArrayList<>();
         List<Double> failureRateList = new ArrayList<>();
         double avgFailureRate = 0;
-		int numberOfIterations = 100;
+		int numberOfIterations = 5;
 		String algName = "";
 
 		//10 iterazioni dell'algoritmo
