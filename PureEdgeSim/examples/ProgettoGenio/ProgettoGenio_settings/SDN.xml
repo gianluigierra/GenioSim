@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<SDN>
+	<SDNDevice name="SDN">
+		<idleConsumption>0</idleConsumption>
+		<maxConsumption>0</maxConsumption>
+		<location>
+			<x_pos>100</x_pos>
+			<y_pos>150</y_pos>
+		</location>
+	</SDNDevice>
+	<network_links>
+		<!-- To create a topology add links here. See example 3 -->
+	</network_links>
+</SDN>

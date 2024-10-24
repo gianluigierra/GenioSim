@@ -78,6 +78,14 @@ public class SimulationParameters {
 	public static String OntFile = "PureEdgeSim/settings/ONT.xml";
 
 	/**
+	 * The path to the SDN characteristics file.
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomFilePath(String,
+	 *      Files)
+	 */
+	public static String SdnFile = "PureEdgeSim/settings/SDN.xml";
+
+	/**
 	 * The path to the current used setting
 	 * 
 	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomFilePath(String,
@@ -222,7 +230,7 @@ public class SimulationParameters {
 	 * @see com.mechalikh.pureedgesim.datacentersmanager.ComputingNode#setType(TYPES)
 	 */
 	public enum TYPES {
-		CLOUD, EDGE_DATACENTER, EDGE_DEVICE, ONT, NULL, HOST_EDGE, HOST_CLOUD, VM_EDGE, VM_CLOUD
+		CLOUD, EDGE_DATACENTER, EDGE_DEVICE, ONT, NULL, HOST_EDGE, HOST_CLOUD, VM_EDGE, VM_CLOUD, SDN
 	}
 
 	/**

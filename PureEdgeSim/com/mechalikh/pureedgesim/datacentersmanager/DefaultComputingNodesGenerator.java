@@ -70,9 +70,37 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		//Generate ONT devices
 		generateONTDevices(SimulationParameters.OntFile, SimulationParameters.TYPES.ONT);
 
+		//Generate SDN device
+		generateSDNDevice(SimulationParameters.SdnFile, SimulationParameters.TYPES.SDN);
+
 		getSimulationManager().getSimulationLogger()
 				.print("%s - Datacenters and devices were generated", getClass().getSimpleName());
 				
+	}
+
+	/**
+	 * Generates SDN device
+	 */
+	public void generateSDNDevice(String file, TYPES type) {
+		
+		try(InputStream SDN_FILE = new FileInputStream(file)) {
+			
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(SDN_FILE);
+			NodeList SDN_nodeList = doc.getElementsByTagName("SDNDevice");
+			Element SDN_Element = (Element) SDN_nodeList.item(0);
+			
+			//Generates SDN 
+												
+			ComputingNode computingNode = createSDNNode(SDN_Element, type);
+			allNodesList.add(computingNode);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
 	}
 
 	/**
@@ -252,7 +280,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	protected ComputingNode createComputingNode(Element datacenterElement, SimulationParameters.TYPES type)
+	protected ComputingNode createComputingNode(Element deviceElement, SimulationParameters.TYPES type)
 			throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		// SecureRandom is preferred to generate random values.
@@ -266,14 +294,14 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		int xPosition = -1;
 		int yPosition = -1;
 		double idleConsumption = Double
-				.parseDouble(datacenterElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
+				.parseDouble(deviceElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
 		double maxConsumption = Double
-				.parseDouble(datacenterElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
-		Location datacenterLocation = new Location(xPosition, yPosition);
-		int numOfCores = Integer.parseInt(datacenterElement.getElementsByTagName("cores").item(0).getTextContent());
-		double mips = Double.parseDouble(datacenterElement.getElementsByTagName("mips").item(0).getTextContent());
-		double storage = Double.parseDouble(datacenterElement.getElementsByTagName("storage").item(0).getTextContent());
-		double ram = Double.parseDouble(datacenterElement.getElementsByTagName("ram").item(0).getTextContent());
+				.parseDouble(deviceElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
+		Location deviceLocation = new Location(xPosition, yPosition);
+		int numOfCores = Integer.parseInt(deviceElement.getElementsByTagName("cores").item(0).getTextContent());
+		double mips = Double.parseDouble(deviceElement.getElementsByTagName("mips").item(0).getTextContent());
+		double storage = Double.parseDouble(deviceElement.getElementsByTagName("storage").item(0).getTextContent());
+		double ram = Double.parseDouble(deviceElement.getElementsByTagName("ram").item(0).getTextContent());
 
 		Constructor<?> datacenterConstructor = computingNodeClass.getConstructor(SimulationManager.class, double.class,
 				int.class, double.class, double.class);
@@ -281,7 +309,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 				numOfCores, storage, ram);
 
 		computingNode.setAsOrchestrator(Boolean
-				.parseBoolean(datacenterElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
+				.parseBoolean(deviceElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
 
 		if (computingNode.isOrchestrator())
 			orchestratorsList.add(computingNode);
@@ -291,42 +319,42 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	 	if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
 			computingNode.setName("Edge Device id " + DeviceCount);
 			DeviceCount ++;
-			mobile = Boolean.parseBoolean(datacenterElement.getElementsByTagName("mobility").item(0).getTextContent());
-			speed = Double.parseDouble(datacenterElement.getElementsByTagName("speed").item(0).getTextContent());
+			mobile = Boolean.parseBoolean(deviceElement.getElementsByTagName("mobility").item(0).getTextContent());
+			speed = Double.parseDouble(deviceElement.getElementsByTagName("speed").item(0).getTextContent());
 			minPauseDuration = Double
-					.parseDouble(datacenterElement.getElementsByTagName("minPauseDuration").item(0).getTextContent());
+					.parseDouble(deviceElement.getElementsByTagName("minPauseDuration").item(0).getTextContent());
 			maxPauseDuration = Double
-					.parseDouble(datacenterElement.getElementsByTagName("maxPauseDuration").item(0).getTextContent());
+					.parseDouble(deviceElement.getElementsByTagName("maxPauseDuration").item(0).getTextContent());
 			minMobilityDuration = Double.parseDouble(
-					datacenterElement.getElementsByTagName("minMobilityDuration").item(0).getTextContent());
+				deviceElement.getElementsByTagName("minMobilityDuration").item(0).getTextContent());
 			maxMobilityDuration = Double.parseDouble(
-					datacenterElement.getElementsByTagName("maxMobilityDuration").item(0).getTextContent());
+				deviceElement.getElementsByTagName("maxMobilityDuration").item(0).getTextContent());
 			computingNode.getEnergyModel().setBattery(
-					Boolean.parseBoolean(datacenterElement.getElementsByTagName("battery").item(0).getTextContent()));
+					Boolean.parseBoolean(deviceElement.getElementsByTagName("battery").item(0).getTextContent()));
 			computingNode.getEnergyModel().setBatteryCapacity(Double
-					.parseDouble(datacenterElement.getElementsByTagName("batteryCapacity").item(0).getTextContent()));
+					.parseDouble(deviceElement.getElementsByTagName("batteryCapacity").item(0).getTextContent()));
 			computingNode.getEnergyModel().setIntialBatteryPercentage(Double.parseDouble(
-					datacenterElement.getElementsByTagName("initialBatteryLevel").item(0).getTextContent()));
+				deviceElement.getElementsByTagName("initialBatteryLevel").item(0).getTextContent()));
 			computingNode.getEnergyModel().setConnectivityType(
-					datacenterElement.getElementsByTagName("connectivity").item(0).getTextContent());
+				deviceElement.getElementsByTagName("connectivity").item(0).getTextContent());
 			computingNode.enableTaskGeneration(Boolean
-					.parseBoolean(datacenterElement.getElementsByTagName("generateTasks").item(0).getTextContent()));
+					.parseBoolean(deviceElement.getElementsByTagName("generateTasks").item(0).getTextContent()));
 			// Generate random location for edge devices
-			datacenterLocation = new Location(random.nextInt(SimulationParameters.simulationMapWidth),
+			deviceLocation = new Location(random.nextInt(SimulationParameters.simulationMapWidth),
 					random.nextInt(SimulationParameters.simulationMapLength));
 			getSimulationManager().getSimulationLogger()
 					.deepLog("DefaultComputingNodesGenerator- Edge device:" + mistOnlyList.size() + "    location: ( "
-							+ datacenterLocation.getXPos() + "," + datacenterLocation.getYPos() + " )");
+							+ deviceLocation.getXPos() + "," + deviceLocation.getYPos() + " )");
 			//SimLog.println(computingNode.getName() + " Location: (" + datacenterLocation.getXPos() + "," + datacenterLocation.getYPos() + " )");
 			
 		} else if (type == SimulationParameters.TYPES.ONT){
-			String name = datacenterElement.getAttribute("name");
+			String name = deviceElement.getAttribute("name");
 			computingNode.setName(name + "id " + ONTcount);
 			
 			//set ONT location near the edge device 
 			double xPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getXPos() + random.nextInt(2)+1;
 			double yPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getYPos() + random.nextInt(2)+1;
-			datacenterLocation = new Location(xPos, yPos); 
+			deviceLocation = new Location(xPos, yPos); 
 			
 			//SimLog.println(computingNode.getName() + " Location: (" + xPos + "," + yPos + ")");
 			ONTcount++;
@@ -343,7 +371,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		computingNode.setType(type);
 		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
 		MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
-				datacenterLocation)).setMobile(mobile).setSpeed(speed).setMinPauseDuration(minPauseDuration)
+		deviceLocation)).setMobile(mobile).setSpeed(speed).setMinPauseDuration(minPauseDuration)
 				.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
 				.setMaxMobilityDuration(maxMobilityDuration);
 
@@ -435,6 +463,71 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		}
 
 		return dataCenter;
+	}
+
+		/**
+	 * Creates the SDN node.
+	 * 
+	 * @see #generateSDN(String, TYPES)
+	 * @see #generateDevicesInstances(Element)
+	 * 
+	 * @param SDNElement The configuration file.
+	 * @param type              The type, whether an MIST (edge) device, an EDGE
+	 *                          data center, or a CLOUD one.
+	 * @throws NoSuchAlgorithmException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 */
+	protected SDN createSDNNode(Element SDNElement, SimulationParameters.TYPES type)
+			throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		// SecureRandom is preferred to generate random values.
+		Boolean mobile = false;
+		double speed = 0;
+		double minPauseDuration = 0;
+		double maxPauseDuration = 0;
+		double minMobilityDuration = 0;
+		double maxMobilityDuration = 0;
+		int xPosition = -1;
+		int yPosition = -1;
+		double idleConsumption = Double
+				.parseDouble(SDNElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
+		double maxConsumption = Double
+				.parseDouble(SDNElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
+
+		Element location = (Element) SDNElement.getElementsByTagName("location").item(0);
+		xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+		yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+		Location SDNLocation = new Location(xPosition, yPosition);
+
+		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
+		MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
+		SDNLocation)).setMobile(mobile).setSpeed(speed).setMinPauseDuration(minPauseDuration)
+				.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
+				.setMaxMobilityDuration(maxMobilityDuration);
+
+		SDN sdn = new SDN(simulationManager, 0.0, 0, 0.0, 0.0);
+
+		sdn.setMobilityModel(mobilityModel);
+		
+		sdn.setType(type);
+
+		sdn.setAsOrchestrator(true);
+
+		if (sdn.isOrchestrator())
+			orchestratorsList.add(sdn);
+
+		sdn.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
+
+		//Imposto il nome dell'SDN	
+		String name = SDNElement.getAttribute("name");
+		sdn.setName(name);
+
+		return sdn;
 	}
 
 }
