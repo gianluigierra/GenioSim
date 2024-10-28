@@ -31,6 +31,8 @@ import com.mechalikh.pureedgesim.simulationengine.FutureQueue;
 import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.TaskGenerator;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskgenerator.ContainerGenerator;
 
 /**
  * The {@code SimulationThread} class allows to run parallel simulations.
@@ -205,6 +207,19 @@ public class SimulationThread {
 		long endTime = System.currentTimeMillis();
 		System.out.println("Time taken: " + (endTime - startTime) + " milliseconds");
 		
+		// Generate Container list
+		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Container Generator...");
+		Constructor<?> containersGeneratorConstructor = simulation.containersGenerator.getConstructor(SimulationManager.class);
+		ContainerGenerator containersGenerator = (ContainerGenerator) containersGeneratorConstructor.newInstance(simulationManager);
+		FutureQueue<Container> containerList = containersGenerator.generate();
+		simulationManager.setContainerList(containerList);
+
+		// Initialize the Container orchestrator
+		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Container Orchestrator...");
+		//Constructor<?> orchestratorConstructor = simulation.orchestrator.getConstructor(SimulationManager.class);
+		//orchestratorConstructor.newInstance(simulationManager);
+		//SimLog.println(this.getClass().getSimpleName() + " - All modules were successfully launched...");
+		
 		// Generate tasks list
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task Generator...");
 		Constructor<?> tasksGeneratorConstructor = simulation.tasksGenerator.getConstructor(SimulationManager.class);
@@ -212,7 +227,7 @@ public class SimulationThread {
 		FutureQueue<Task> taskList = tasksGenerator.generate();
 		simulationManager.setTaskList(taskList);
 
-		// Initialize the orchestrator
+		// Initialize the Task orchestrator
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task Orchestrator...");
 		Constructor<?> orchestratorConstructor = simulation.orchestrator.getConstructor(SimulationManager.class);
 		orchestratorConstructor.newInstance(simulationManager);

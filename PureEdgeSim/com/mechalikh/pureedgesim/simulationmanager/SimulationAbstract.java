@@ -32,7 +32,9 @@ import com.mechalikh.pureedgesim.network.DefaultNetworkModel;
 import com.mechalikh.pureedgesim.network.NetworkModel;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
+import com.mechalikh.pureedgesim.taskgenerator.DefaultContainerGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.TaskGenerator;
+import com.mechalikh.pureedgesim.taskgenerator.ContainerGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
 import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 
@@ -69,6 +71,13 @@ public abstract class SimulationAbstract {
 	 * @see #setCustomTaskGenerator(Class)
 	 */
 	protected Class<? extends TaskGenerator> tasksGenerator = DefaultTaskGenerator.class;
+
+	/**
+	 * The Container Generator class that is used in the simulation.
+	 * 
+	 * @see #setCustomContainerGenerator(Class)
+	 */
+	protected Class<? extends ContainerGenerator> containersGenerator = DefaultContainerGenerator.class;
 
 	/**
 	 * The Orchestrator class that is used in the simulation.
@@ -123,6 +132,16 @@ public abstract class SimulationAbstract {
 	 */
 	public void setCustomTaskGenerator(Class<? extends TaskGenerator> taskGenerator) {
 		this.tasksGenerator = taskGenerator;
+	}
+
+	/**
+	 * Allows to use a custom containers generator class in the simulation. The class
+	 * must extend the {@link ContainerGenerator} provided by PureEdgeSim.
+	 * 
+	 * @param taskGenerator the custom task generator class to use.
+	 */
+	public void setCustomContainerGenerator(Class<? extends ContainerGenerator> containerGenerator) {
+		this.containersGenerator = containerGenerator;
 	}
 
 	/**

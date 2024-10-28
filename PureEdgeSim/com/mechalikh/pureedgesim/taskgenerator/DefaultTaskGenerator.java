@@ -62,17 +62,20 @@ public class DefaultTaskGenerator extends TaskGenerator {
 		// Remove devices that do not generate
 		devicesList.removeIf(dev -> !dev.isGeneratingTasks());
 
-		int devicesCount = devicesList.size();
+		//int devicesCount = devicesList.size();
 
 		// Browse all applications
-		IntStream.range(0, SimulationParameters.applicationList.size() - 1).forEach(app -> {
-			int numberOfDevices = (int) (SimulationParameters.applicationList.get(app).getUsagePercentage()
-					* devicesCount / 100);
-			IntStream.range(0, numberOfDevices).mapToObj(i -> devicesList.remove(random.nextInt(devicesList.size())))
-					.peek(dev -> dev.setApplicationType(app)).forEach(dev -> generateTasksForDevice(dev, app));
-		});
+		// IntStream.range(0, SimulationParameters.applicationList.size() - 1).forEach(app -> {
+		// 	int numberOfDevices = (int) (SimulationParameters.applicationList.get(app).getUsagePercentage()
+		// 			* devicesCount / 100);
+		// 	IntStream.range(0, numberOfDevices).mapToObj(i -> devicesList.remove(random.nextInt(devicesList.size())))		//COMMENTATA PERCHè NON DEVO GIRARE TRA TUTTE LE APP
+		// 			.peek(dev -> dev.setApplicationType(app)).forEach(dev -> generateTasksForDevice(dev, app));				//DEVO PRELEVARE L'APP TYPE IMPOSTATO DAL CONTAINER
+		// });
 
-		devicesList.forEach(dev -> generateTasksForDevice(dev, SimulationParameters.applicationList.size() - 1));
+		// devicesList.forEach(dev -> generateTasksForDevice(dev, SimulationParameters.applicationList.size() - 1));
+
+		devicesList.forEach(dev -> generateTasksForDevice(dev, dev.getApplicationType()));
+
 		return this.getTaskList();
 	}
 

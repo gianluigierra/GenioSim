@@ -31,6 +31,7 @@ import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 
 /**
@@ -70,6 +71,7 @@ public abstract class SimulationManager extends SimEntity {
 	protected List<Task> finishedTasks = new ArrayList<>();
 	protected Scenario scenario;
 	protected FutureQueue<Task> taskList;
+	protected FutureQueue<Container> containerList;
 
 	/**
 	 * Initializes the simulation manager.
@@ -125,6 +127,18 @@ public abstract class SimulationManager extends SimEntity {
 	 */
 	public void setTaskList(FutureQueue<Task> taskList) {
 		this.taskList = taskList;
+	}
+	
+	/**
+	 * Sets the list of ordered plcaement requests
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationThread#loadModels(DefaultSimulationManager
+	 *      simulationManager)
+	 * 
+	 * @param taskList the ordered list of placement requests.
+	 */
+	public void setContainerList(FutureQueue<Container> containerList) {
+		this.containerList = containerList;
 	}
 	
 	/**
