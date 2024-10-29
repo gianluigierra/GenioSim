@@ -38,10 +38,10 @@ public class Example6 {
 	 * @since PureEdgeSim 2.4
 	 */
 	// Below is the path for the settings folder of this example
-	private static String settingsPath = "PureEdgeSim/examples/Example6_settings/";
+	private static String settingsPath = "PureEdgeSim/examples/Examples_PES/Example6_settings/";
 
 	// The custom output folder is
-	private static String outputPath = "PureEdgeSim/examples/Example6_output/";
+	private static String outputPath = "PureEdgeSim/examples/Examples_PES/Example6_output/";
 
 	// If we want only to use files one by one
 	private static String simConfigfile = settingsPath + "simulation_parameters.properties";

@@ -13,6 +13,22 @@
 		<mips>40000</mips>
 		<ram>16000</ram>
 		<storage>200000</storage>
+		<hosts>
+		    <host>
+				<cores>10</cores>
+				<mips>40000</mips>
+				<ram>16000</ram>
+				<storage>200000</storage>
+				<VMs>
+					<VM>
+						<cores>10</cores>
+						<mips>40000</mips>
+						<ram>16000</ram>
+						<storage>200000</storage>
+					</VM>
+				</VMs>
+			</host>
+		</hosts>
 	</datacenter>
 	<network_links>
 		<!-- To create a topology add links here. See example 3 -->
