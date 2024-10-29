@@ -24,6 +24,7 @@ package com.mechalikh.pureedgesim.datacentersmanager;
 import com.mechalikh.pureedgesim.network.NetworkLink.NetworkLinkTypes;
 
 import org.jgrapht.graph.DirectedWeightedMultigraph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.io.FileInputStream;
@@ -125,7 +126,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		
 		// Generate the topology of edge data centers from an XML file
 		generateTopologyFromXmlFile();
-		
+
 		//Connetto l'SDN al cloud mediante WAN link
 		infrastructureTopology.addLink(new NetworkLinkWanUp(computingNodesGenerator.getSDN(), wanNode, simulationManager, NetworkLinkTypes.WAN));
 		infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, computingNodesGenerator.getSDN(), simulationManager, NetworkLinkTypes.WAN));
@@ -197,7 +198,8 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		
 		// Save the shortest paths between all computing nodes
 		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getEdgeAndCloudList());
-		infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandServer_List());
+		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandServer_List());
+		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getAllNodesList());							//se tolgo questo lo creo nel defaultnetworkmodel ad ogni richiesta
 		//infrastructureTopology.savePathsToMap(computingNodesGenerator.getONTandVM_List());
 	}
 

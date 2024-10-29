@@ -82,6 +82,22 @@ public class DataCenter extends LocationAwareNode {
 	}
 
 	@Override 
+	public void setAsEdgeOrchestrator(boolean isOrchestrator){
+		this.isEdgeOrchestrator = isOrchestrator;
+		for(Host host : this.HostList){
+			host.setAsEdgeOrchestrator(false);
+		}
+	}
+
+	@Override 
+	public void setAsCloudOrchestrator(boolean isOrchestrator){
+		this.isCloudOrchestrator = isOrchestrator;
+		for(Host host : this.HostList){
+			host.setAsCloudOrchestrator(false);
+		}
+	}
+
+	@Override 
 	public void setMobilityModel(MobilityModel mobilityModel){
 		this.mobilityModel = mobilityModel;
 		for(Host host : this.HostList){

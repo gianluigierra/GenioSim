@@ -88,6 +88,21 @@ public class Host extends LocationAwareNode {
 		}
 	}
 
+	@Override 
+	public void setAsEdgeOrchestrator(boolean isOrchestrator){
+		this.isEdgeOrchestrator = isOrchestrator;
+		for(VM vm : this.VMlist){
+			vm.setAsEdgeOrchestrator(isOrchestrator);
+		}
+	}
+
+	@Override 
+	public void setAsCloudOrchestrator(boolean isOrchestrator){
+		this.isCloudOrchestrator = isOrchestrator;
+		for(VM vm : this.VMlist){
+			vm.setAsCloudOrchestrator(isOrchestrator);
+		}
+	}
 
 	@Override 
 	public void setMobilityModel(MobilityModel mobilityModel){

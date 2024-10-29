@@ -193,8 +193,8 @@ public class DefaultNetworkModel extends NetworkModel {
 	}
 
 	public void sendRequestFromDeviceToEdgeOrch(Task task) {
-		//if (task.getEdgeDevice() != task.getOrchestrator()) {
-		if (SimulationParameters.enableOrchestrators && task.getEdgeDevice() != task.getOrchestrator()) {
+		if (task.getEdgeDevice() != task.getOrchestrator()) {
+		//if (SimulationParameters.enableOrchestrators && task.getEdgeDevice() != task.getOrchestrator()) {
 			send(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),
 					TransferProgress.Type.REQUEST);
 

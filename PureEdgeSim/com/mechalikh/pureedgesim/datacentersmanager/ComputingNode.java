@@ -131,6 +131,24 @@ public interface ComputingNode {
 	boolean isOrchestrator();
 
 	/**
+	 * Checks if this computing node is an orchestrator.
+	 * 
+	 * @return true if this computing node is set as orchestrator.
+	 * 
+	 * @see #setAsOrchestrator(boolean)
+	 */
+	boolean isEdgeOrchestrator();
+	
+	/**
+	 * Checks if this computing node is an orchestrator.
+	 * 
+	 * @return true if this computing node is set as orchestrator.
+	 * 
+	 * @see #setAsOrchestrator(boolean)
+	 */
+	boolean isCloudOrchestrator();
+
+	/**
 	 * When true, it sets this computing node as an orchestrator. By doing so, the
 	 * tasks will be sent to this node to make offloading/placement decisions.
 	 * 
@@ -139,6 +157,26 @@ public interface ComputingNode {
 	 * @see #isOrchestrator()
 	 */
 	void setAsOrchestrator(boolean isOrchestrator);
+
+	/**
+	 * When true, it sets this computing node as an orchestrator. By doing so, the
+	 * tasks will be sent to this node to make offloading decisions.
+	 * 
+	 * @param isOrchestrator whether this computing node is orchestrator or not.
+	 * 
+	 * @see #isOrchestrator()
+	 */
+	void setAsEdgeOrchestrator(boolean isOrchestrator);
+
+	/**
+	 * When true, it sets this computing node as an orchestrator. By doing so, the
+	 * Containers will be sent to this node to make placement decisions.
+	 * 
+	 * @param isOrchestrator whether this computing node is orchestrator or not.
+	 * 
+	 * @see #isOrchestrator()
+	 */
+	void setAsCloudOrchestrator(boolean isOrchestrator);
 
 	/**
 	 * Sets the node that orchestrates the tasks on behalf of this one. Used only
@@ -151,6 +189,26 @@ public interface ComputingNode {
 	void setOrchestrator(ComputingNode orchestrator);
 
 	/**
+	 * Sets the node that orchestrates the tasks on behalf of this one. Used only
+	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}
+	 * 
+	 * @param orchestrator the node that orchestrates the tasks of this device.
+	 * 
+	 * @see #isOrchestrator()
+	 */
+	void setEdgeOrchestrator(ComputingNode edgeOrchestrator);
+
+	/**
+	 * Sets the node that orchestrates the contrainers on behalf of this one. Used only
+	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}
+	 * 
+	 * @param orchestrator the node that orchestrates the tasks of this device.
+	 * 
+	 * @see #isOrchestrator()
+	 */
+	void setCloudOrchestrator(ComputingNode cloudOrchestrator);
+
+	/**
 	 * Gets the node that orchestrates the tasks on behalf of this one. Used only
 	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
 	 * 
@@ -160,6 +218,28 @@ public interface ComputingNode {
 	 * @see #setAsOrchestrator(boolean)
 	 */
 	ComputingNode getOrchestrator();
+
+	/**
+	 * Gets the node that orchestrates the tasks on behalf of this one. Used only
+	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
+	 * 
+	 * @return the orchestrator of this edge device.
+	 * 
+	 * @see DefaultSimulationManager#sendTaskToOrchestrator(Task task)
+	 * @see #setAsOrchestrator(boolean)
+	 */
+	ComputingNode getEdgeOrchestrator();
+
+	/**
+	 * Gets the node that orchestrates the Containers on behalf of this one. Used only
+	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
+	 * 
+	 * @return the orchestrator of this edge device.
+	 * 
+	 * @see DefaultSimulationManager#sendTaskToOrchestrator(Task task)
+	 * @see #setAsOrchestrator(boolean)
+	 */
+	ComputingNode getCloudOrchestrator();
 
 	/**
 	 * Sets whether this computing node generates tasks (e.g. an IoT sensor). Used

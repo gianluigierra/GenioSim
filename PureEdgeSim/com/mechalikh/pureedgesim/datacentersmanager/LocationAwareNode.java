@@ -87,6 +87,16 @@ public abstract class LocationAwareNode extends EnergyAwareNode {
 		return orchestrator;
 	}
 
+	@Override
+	public ComputingNode getEdgeOrchestrator() {
+		return edgeOrchestrator;
+	}
+
+	@Override
+	public ComputingNode getCloudOrchestrator() {
+		return cloudOrchestrator;
+	}
+
 	public MobilityModel getMobilityModel() {
 		return mobilityModel;
 	}

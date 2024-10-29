@@ -59,6 +59,20 @@ public abstract class AbstractNode extends SimEntity implements ComputingNode, O
     protected ComputingNode orchestrator = ComputingNode.NULL;
 
     /**
+     * The Edge node that orchestrates the task of this device. (SDN)
+     *
+     * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#sendTaskToOrchestrator(Task task)
+     */
+    protected ComputingNode edgeOrchestrator = ComputingNode.NULL;
+
+    /**
+     * The Cloud node that orchestrates the task of this device. (CLOUD)
+     *
+     * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#sendTaskToOrchestrator(Task task)
+     */
+    protected ComputingNode cloudOrchestrator = ComputingNode.NULL;
+
+    /**
      * Whether this computing node (IoT device in this case) generates tasks or not.
      */
     protected boolean canGenerateTasks = false;
@@ -69,6 +83,20 @@ public abstract class AbstractNode extends SimEntity implements ComputingNode, O
      * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#sendTaskToOrchestrator(Task task)
      */
     protected boolean isOrchestrator = false;
+
+    /**
+     * Whether this computing node can orchestrate tasks.
+     *
+     * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#sendTaskToOrchestrator(Task task)
+     */
+    protected boolean isEdgeOrchestrator = false;
+
+    /**
+     * Whether this computing node can orchestrate containers.
+     *
+     * @see com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager#sendTaskToOrchestrator(Task task)
+     */
+    protected boolean isCloudOrchestrator = false;
 
     /**
      * Constructs a new AbstractNode instance.
@@ -158,6 +186,24 @@ public abstract class AbstractNode extends SimEntity implements ComputingNode, O
     }
 
     /**
+     * Returns true if this computing node is set as orchestrator.
+     * 
+     * @return true if this computing node is set as orchestrator, false otherwise.
+     */
+    public boolean isEdgeOrchestrator() {
+        return isEdgeOrchestrator;
+    }
+
+    /**
+     * Returns true if this computing node is set as orchestrator.
+     * 
+     * @return true if this computing node is set as orchestrator, false otherwise.
+     */
+    public boolean isCloudOrchestrator() {
+        return isCloudOrchestrator;
+    }
+
+    /**
      * Sets whether this computing node is orchestrator or not. By doing so, the
      * tasks will be sent to this node to make offloading/placement decisions.
      * 
@@ -167,6 +213,56 @@ public abstract class AbstractNode extends SimEntity implements ComputingNode, O
         this.isOrchestrator = isOrchestrator;
         this.orchestrator = this;
     }
+
+    /**
+     * Sets whether this computing node is orchestrator or not. By doing so, the
+     * tasks will be sent to this node to make offloading decisions.
+     * 
+     * @param isOrchestrator true if this computing node is set as orchestrator, false otherwise.
+     */
+    public void setAsEdgeOrchestrator(boolean isEdgeOrchestrator) {
+        this.isEdgeOrchestrator = isEdgeOrchestrator;
+        this.edgeOrchestrator = this;
+    }
+
+    /**
+     * Sets whether this computing node is orchestrator or not. By doing so, the
+     * Containers will be sent to this node to make placement decisions.
+     * 
+     * @param isOrchestrator true if this computing node is set as orchestrator, false otherwise.
+     */
+    public void setAsCloudOrchestrator(boolean isCloudOrchestrator) {
+        this.isCloudOrchestrator = isCloudOrchestrator;
+        this.cloudOrchestrator = this;
+    }
+
+    /**
+     * Sets the node that orchestrates the Containers on behalf of this one. Used only
+     * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
+     * 
+     * @param orchestrator the node that orchestrates the tasks of this device.
+     * 
+     * @see #isOrchestrator()
+     */
+    public void setCloudOrchestrator(ComputingNode orchestrator) {
+        orchestrator.setAsCloudOrchestrator(true);
+        this.cloudOrchestrator = orchestrator;
+    }
+
+    /**
+     * Sets the node that orchestrates the tasks on behalf of this one. Used only
+     * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
+     * 
+     * @param orchestrator the node that orchestrates the tasks of this device.
+     * 
+     * @see #isOrchestrator()
+     */
+    public void setEdgeOrchestrator(ComputingNode orchestrator) {
+        orchestrator.setAsEdgeOrchestrator(true);
+        this.edgeOrchestrator = orchestrator;
+    }
+
+    
 
     /**
      * Sets the node that orchestrates the tasks on behalf of this one. Used only

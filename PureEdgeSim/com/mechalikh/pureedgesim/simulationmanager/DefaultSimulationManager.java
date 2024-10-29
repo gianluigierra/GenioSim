@@ -414,12 +414,12 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		if (taskFailed(task, 0))
 			return;
 
-		if (SimulationParameters.enableOrchestrators)
-			task.setOrchestrator(task.getEdgeDevice().getOrchestrator());
-		simLog.incrementTasksSent();
+		// if (SimulationParameters.enableOrchestrators)
+		// 	task.setOrchestrator(task.getEdgeDevice().getOrchestrator());
+		// simLog.incrementTasksSent();
 
-		//task.setOrchestrator(task.getEdgeDevice().getEdgeOrchestrator());
-		//simLog.incrementTasksSent();
+		task.setOrchestrator(task.getEdgeDevice().getEdgeOrchestrator());
+		simLog.incrementTasksSent();
 
 		scheduleNow(networkModel, NetworkModel.SEND_REQUEST_FROM_DEVICE_TO_EDGE_ORCH, task);
 	}

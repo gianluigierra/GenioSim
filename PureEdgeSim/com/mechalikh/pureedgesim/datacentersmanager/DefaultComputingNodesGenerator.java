@@ -59,9 +59,13 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	 */
 	public void generateDatacentersAndDevices() {
 
-		// Generate Edge and Cloud data centers.
+		// Generate Cloud data centers.
 		generateDataCenters(SimulationParameters.cloudDataCentersFile, SimulationParameters.TYPES.CLOUD); 
 
+		//Generate SDN device
+		generateSDNDevice(SimulationParameters.SdnFile, SimulationParameters.TYPES.SDN);
+
+		// Generate Edge data centers.
 		generateDataCenters(SimulationParameters.edgeDataCentersFile, SimulationParameters.TYPES.EDGE_DATACENTER); 
 
 		// Generate edge devices.
@@ -70,8 +74,8 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		//Generate ONT devices
 		generateONTDevices(SimulationParameters.OntFile, SimulationParameters.TYPES.ONT);
 
-		//Generate SDN device
-		generateSDNDevice(SimulationParameters.SdnFile, SimulationParameters.TYPES.SDN);
+		//Setto gli orchestratori per tutti i nodi (per il momento commentata finchè non capisco cosa non funziona)
+		setOrchestrators();
 
 		getSimulationManager().getSimulationLogger()
 				.print("%s - Datacenters and devices were generated", getClass().getSimpleName());
@@ -97,6 +101,8 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			ComputingNode computingNode = createSDNNode(SDN_Element, type);
 			allNodesList.add(computingNode);
 			ONTandServer_List.add(computingNode);
+
+			//setto l'SDN nel computingNodesGenerator
 			SDN = computingNode;
 			
 		} catch (Exception e) {
@@ -126,7 +132,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 				ONT_List.add(computingNode);
 				ONTandServer_List.add(computingNode);
 				ONTandVM_List.add(computingNode);
-				//allNodesList.add(computingNode);
+				allNodesList.add(computingNode);
 				//allNodesListSensorsExcluded.add(computingNode);
 			}
 			
@@ -243,17 +249,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 				if (DC.getType() == TYPES.CLOUD) {
 					cloudOnlyList.add(DC);
 					mistAndCloudListSensorsExcluded.add(DC);
-					if (SimulationParameters.enableOrchestrators
-							&& SimulationParameters.deployOrchestrators == "CLOUD") {
-						orchestratorsList.add(DC);
-					}
 				} else {
 					edgeOnlyList.add(DC);
 					mistAndEdgeListSensorsExcluded.add(DC);
-					if (SimulationParameters.enableOrchestrators
-							&& SimulationParameters.deployOrchestrators == "EDGE") {
-						orchestratorsList.add(DC);
-					}
 				}
 				allNodesList.add(DC);
 				allNodesListSensorsExcluded.add(DC);
@@ -309,12 +307,6 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 				int.class, double.class, double.class);
 		ComputingNode computingNode = (ComputingNode) datacenterConstructor.newInstance(getSimulationManager(), mips,
 				numOfCores, storage, ram);
-
-		computingNode.setAsOrchestrator(Boolean
-				.parseBoolean(deviceElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
-
-		if (computingNode.isOrchestrator())
-			orchestratorsList.add(computingNode);
 
 		computingNode.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
 
@@ -434,12 +426,6 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		
 		dataCenter.setType(type);
 
-		dataCenter.setAsOrchestrator(Boolean
-				.parseBoolean(datacenterElement.getElementsByTagName("isOrchestrator").item(0).getTextContent()));
-
-		if (dataCenter.isOrchestrator())
-			orchestratorsList.add(dataCenter);
-
 		dataCenter.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
 
 		if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
@@ -451,13 +437,17 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 					throw new IllegalArgumentException(
 							" Each Edge Data Center must have a different location, check the \"edge_datacenters.xml\" file!");
 
-			dataCenter.setPeriphery(
-					Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
+			// dataCenter.setPeriphery(
+			// 		Boolean.parseBoolean(datacenterElement.getElementsByTagName("periphery").item(0).getTextContent()));
 
 		}
 		else {
 			//Imposto il nome del Cloud
 			dataCenter.setName("CloudDC");
+			//imposto il cloud come orchestratore (nel paradigma nuovo il Cloud è sempre orchestratore del placement dei container)
+			dataCenter.setAsCloudOrchestrator(true);
+			dataCenter.setCloudOrchestrator(dataCenter);
+			orchestratorsList.add(dataCenter);
 		}
 		
 		for(Host host : dataCenter.getHostList()){
@@ -518,10 +508,10 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		
 		sdn.setType(type);
 
-		sdn.setAsOrchestrator(true);
+		sdn.setAsEdgeOrchestrator(true);
+		sdn.setEdgeOrchestrator(sdn);
 
-		if (sdn.isOrchestrator())
-			orchestratorsList.add(sdn);
+		orchestratorsList.add(sdn);
 
 		sdn.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
 
@@ -530,6 +520,21 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		sdn.setName(name);
 
 		return sdn;
+	}
+
+	//Setto gli orchestratori per tutti i nodi della simulazione
+	protected void setOrchestrators(){
+		for(ComputingNode computingNode : simulationManager.getDataCentersManager().getComputingNodesGenerator().getAllNodesList()){
+			for (ComputingNode node : simulationManager.getDataCentersManager().getComputingNodesGenerator().getOrchestratorsList()) {
+				if(node.getType().equals( SimulationParameters.TYPES.SDN)){
+					computingNode.setEdgeOrchestrator(node);
+				}
+				else if(node.getType().equals( SimulationParameters.TYPES.CLOUD)){
+					computingNode.setCloudOrchestrator(node);
+				}
+				
+			}
+		}
 	}
 
 }

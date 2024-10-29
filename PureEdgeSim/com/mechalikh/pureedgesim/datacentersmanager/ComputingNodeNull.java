@@ -110,10 +110,48 @@ public class ComputingNodeNull implements ComputingNode {
 	}
 
 	/**
+	 * 
+	 * Returns false since this Computing Node is not an orchestrator.
+	 * 
+	 * @return false
+	 */
+	@Override
+	public boolean isEdgeOrchestrator() {
+		return false;
+	}
+	
+	/**
+	 * 
+	 * Returns false since this Computing Node is not an orchestrator.
+	 * 
+	 * @return false
+	 */
+	@Override
+	public boolean isCloudOrchestrator() {
+		return false;
+	}
+
+	/**
 	 * Does nothing since this Computing Node is supposed to be null.
 	 */
 	@Override
 	public void setAsOrchestrator(boolean isOrchestrator) {
+		// Do nothing.
+	}
+
+	/**
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	@Override
+	public void setAsCloudOrchestrator(boolean isOrchestrator) {
+		// Do nothing.
+	}
+
+	/**
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	@Override
+	public void setAsEdgeOrchestrator(boolean isOrchestrator) {
 		// Do nothing.
 	}
 
@@ -125,6 +163,28 @@ public class ComputingNodeNull implements ComputingNode {
 	 */
 	@Override
 	public ComputingNode getOrchestrator() {
+		return ComputingNode.NULL;
+	}
+
+	/**
+	 * 
+	 * Returns the singleton instance of ComputingNodeNull as the orchestrator.
+	 * 
+	 * @return The singleton instance of ComputingNodeNull.
+	 */
+	@Override
+	public ComputingNode getEdgeOrchestrator() {
+		return ComputingNode.NULL;
+	}
+
+	/**
+	 * 
+	 * Returns the singleton instance of ComputingNodeNull as the orchestrator.
+	 * 
+	 * @return The singleton instance of ComputingNodeNull.
+	 */
+	@Override
+	public ComputingNode getCloudOrchestrator() {
 		return ComputingNode.NULL;
 	}
 
@@ -559,6 +619,22 @@ public class ComputingNodeNull implements ComputingNode {
 	 */
 	@Override
 	public void setOrchestrator(ComputingNode orchestrator) {
+		// Do nothing.
+	}
+
+	/**
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	@Override
+	public void setEdgeOrchestrator(ComputingNode orchestrator) {
+		// Do nothing.
+	}
+
+	/**
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	@Override
+	public void setCloudOrchestrator(ComputingNode orchestrator) {
 		// Do nothing.
 	}
 
