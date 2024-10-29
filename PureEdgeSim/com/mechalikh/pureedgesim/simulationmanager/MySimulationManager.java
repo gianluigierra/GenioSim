@@ -64,7 +64,7 @@ public class MySimulationManager extends DefaultSimulationManager {
 
         //schedula tutti i task in una botta
 		while(!taskList.isEmpty()){
-			schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_ORCH, taskList.first());
+			schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
 			taskList.remove(taskList.first());
 		}
 
@@ -101,7 +101,7 @@ public class MySimulationManager extends DefaultSimulationManager {
 		simLog.taskSentFromOrchToDest(task);
 
 		// Send the task from the orchestrator to the destination
-		scheduleNow(getNetworkModel(), NetworkModel.SEND_REQUEST_FROM_ORCH_TO_DESTINATION, task);
+		scheduleNow(getNetworkModel(), NetworkModel.SEND_REQUEST_FROM_EDGE_ORCH_TO_DESTINATION, task);
 
 	}
 

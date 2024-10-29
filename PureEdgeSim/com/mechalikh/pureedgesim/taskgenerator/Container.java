@@ -125,6 +125,38 @@ public interface Container extends QueueElement {
 	 */
 	void setPlacementDestination(ComputingNode applicationPlacementLocation);
 
+	/**
+	 * 
+	 * Sets the status of the Container.
+	 * 
+	 * @param status the status of the Container
+	 */
+	void setStatus(Status status);
+
+	/**
+	 * 
+	 * Gets the status of the task.
+	 * 
+	 * @return the status of the task
+	 */
+	Status getStatus();
+
+	/**
+	 * 
+	 * Sets the orchestrator node of the Container.
+	 * 
+	 * @param orchestrator the orchestrator node of the Container
+	 */
+	void setOrchestrator(ComputingNode orchestrator);
+
+	/**
+	 * 
+	 * Gets the orchestrator associated with the Container.
+	 * 
+	 * @return the orchestrator associated with the Container
+	 */
+	ComputingNode getOrchestrator();
+
   	/**
 	 * 
 	 * Gets the ID of the application associated with the Container.

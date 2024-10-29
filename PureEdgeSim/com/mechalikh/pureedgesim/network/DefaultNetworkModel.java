@@ -34,6 +34,7 @@ import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 public class DefaultNetworkModel extends NetworkModel {
 
@@ -44,25 +45,33 @@ public class DefaultNetworkModel extends NetworkModel {
 	@Override
 	public void processEvent(Event ev) {
 		switch (ev.getTag()) {
-		case SEND_REQUEST_FROM_DEVICE_TO_ORCH:
+		case SEND_REQUEST_FROM_DEVICE_TO_EDGE_ORCH:
 			// Send the offloading request to the orchestrator
-			sendRequestFromDeviceToOrch((Task) ev.getData());
+			sendRequestFromDeviceToEdgeOrch((Task) ev.getData());
 			break;
-		case SEND_REQUEST_FROM_ORCH_TO_DESTINATION:
+		case SEND_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH:
+			// Send the placement request to the orchestrator
+			sendRequestFromDeviceToCloudOrch((Container) ev.getData());
+			break;
+		case SEND_REQUEST_FROM_EDGE_ORCH_TO_DESTINATION:
 			// Forward the offloading request from orchestrator to offloading destination
-			sendRequestFromOrchToDest((Task) ev.getData());
+			sendRequestFromEdgeOrchToDest((Task) ev.getData());
+			break;
+		case SEND_REQUEST_FROM_CLOUD_ORCH_TO_DESTINATION:
+			// Forward the placement request from orchestrator to placement destination
+			sendRequestFromCloudOrchToDest((Container) ev.getData());
 			break;
 		case DOWNLOAD_CONTAINER:
 			// Pull the container from the registry
 			addContainer((Task) ev.getData());
 			break;
-		case SEND_RESULT_TO_ORCH:
+		case SEND_RESULT_TO_EDGE_ORCH:
 			// Send the execution results to the orchestrator
-			sendResultFromDevToOrch((Task) ev.getData());
+			sendResultFromDevToEdgeOrch((Task) ev.getData());
 			break;
-		case SEND_RESULT_FROM_ORCH_TO_DEV:
+		case SEND_RESULT_FROM_EDGE_ORCH_TO_DEV:
 			// Transfer the execution results from the orchestrators to the device
-			sendResultFromOrchToDev((Task) ev.getData());
+			sendResultFromEdgeOrchToDev((Task) ev.getData());
 			break;
 		case TRANSFER_FINISHED:
 			// Transfer the execution results from the orchestrators to the device
@@ -112,17 +121,17 @@ public class DefaultNetworkModel extends NetworkModel {
 
 			if (simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id)) {
 				path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id);
-				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
-				// System.out.print("[");
-				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
-				// System.out.print("]");
-				// System.out.println("");
 
 				//it happened that the path had length 0 so it caused an error. In this case we establish a new path
 				if(path.getLength() == 0){
 					path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 					simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
 				}
+				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				// System.out.print("[");
+				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				// System.out.print("]");
+				// System.out.println("");
 
 			} else {
 				path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
@@ -142,7 +151,7 @@ public class DefaultNetworkModel extends NetworkModel {
 
 	}
 
-	public void sendRequestFromOrchToDest(Task task) {
+	public void sendRequestFromEdgeOrchToDest(Task task) {
 		if (task.getOrchestrator() != task.getOffloadingDestination()
 				&& task.getOffloadingDestination() != task.getEdgeDevice())
 
@@ -153,7 +162,11 @@ public class DefaultNetworkModel extends NetworkModel {
 					new TransferProgress(task, task.getFileSizeInBits(), TransferProgress.Type.TASK));
 	}
 
-	public void sendResultFromOrchToDev(Task task) {
+	// TODO-implementare metodo
+	public void sendRequestFromCloudOrchToDest(Container task) {
+	}
+
+	public void sendResultFromEdgeOrchToDev(Task task) {
 		if (task.getOrchestrator() != task.getEdgeDevice())
 			send(task.getOrchestrator(), task.getEdgeDevice(), task, task.getOutputSizeInBits(),
 					TransferProgress.Type.RESULTS_TO_DEV);
@@ -162,12 +175,12 @@ public class DefaultNetworkModel extends NetworkModel {
 
 	}
 
-	public void sendResultFromDevToOrch(Task task) {
+	public void sendResultFromDevToEdgeOrch(Task task) {
 		if (task.getOffloadingDestination() != task.getOrchestrator())
 			send(task.getOffloadingDestination(), task.getOrchestrator(), task, task.getOutputSizeInBits(),
 					TransferProgress.Type.RESULTS_TO_ORCH);
 		else
-			scheduleNow(this, DefaultNetworkModel.SEND_RESULT_FROM_ORCH_TO_DEV, task);
+			scheduleNow(this, DefaultNetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, task);
 
 	}
 
@@ -179,7 +192,8 @@ public class DefaultNetworkModel extends NetworkModel {
 			scheduleNow(simulationManager, DefaultSimulationManager.EXECUTE_TASK, task);
 	}
 
-	public void sendRequestFromDeviceToOrch(Task task) {
+	public void sendRequestFromDeviceToEdgeOrch(Task task) {
+		//if (task.getEdgeDevice() != task.getOrchestrator()) {
 		if (SimulationParameters.enableOrchestrators && task.getEdgeDevice() != task.getOrchestrator()) {
 			send(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),
 					TransferProgress.Type.REQUEST);
@@ -187,8 +201,12 @@ public class DefaultNetworkModel extends NetworkModel {
 		} else // The device orchestrates its tasks by itself, so, send the request directly to
 				// destination
 		{
-			scheduleNow(simulationManager, DefaultSimulationManager.SEND_TASK_FROM_ORCH_TO_DESTINATION, task);
+			scheduleNow(simulationManager, DefaultSimulationManager.SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION, task);
 		}
+	}
+
+	// TODO-implementare metodo
+	public void sendRequestFromDeviceToCloudOrch(Container container) {
 	}
 
 	protected void transferFinished(TransferProgress transfer) {
@@ -254,7 +272,7 @@ public class DefaultNetworkModel extends NetworkModel {
 	}
 
 	protected void returnResultsToDevice(TransferProgress transfer) {
-		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_ORCH_TO_DEV, transfer.getTask());
+		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, transfer.getTask());
 	}
 
 	protected void executeTaskOrDownloadContainer(TransferProgress transfer) {
@@ -271,7 +289,7 @@ public class DefaultNetworkModel extends NetworkModel {
 
 	protected void offloadingRequestRecievedByOrchestrator(TransferProgress transfer) {
 		// Find the offloading destination and execute the task
-		scheduleNow(simulationManager, DefaultSimulationManager.SEND_TASK_FROM_ORCH_TO_DESTINATION, transfer.getTask());
+		scheduleNow(simulationManager, DefaultSimulationManager.SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION, transfer.getTask());
 	}
 
 	

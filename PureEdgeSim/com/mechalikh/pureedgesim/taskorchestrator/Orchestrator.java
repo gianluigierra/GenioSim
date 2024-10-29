@@ -41,7 +41,7 @@ public abstract class Orchestrator extends SimEntity {
 	protected Orchestrator(SimulationManager simulationManager) {
 		super(simulationManager.getSimulation());
 		this.simulationManager = simulationManager;
-		simulationManager.setOrchestrator(this);
+		simulationManager.setEdgeOrchestrator(this);
 		simLog = simulationManager.getSimulationLogger();
 		algorithmName = simulationManager.getScenario().getStringOrchAlgorithm();
 		architectureName = simulationManager.getScenario().getStringOrchArchitecture();

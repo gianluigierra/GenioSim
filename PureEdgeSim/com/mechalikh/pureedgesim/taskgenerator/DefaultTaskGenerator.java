@@ -87,7 +87,7 @@ public class DefaultTaskGenerator extends TaskGenerator {
 	 * @param app    the application type
 	 */
 	protected void generateTasksForDevice(ComputingNode dev, int app) {
-		IntStream.range(0, (int) simulationTime)
+		IntStream.range(1, (int) simulationTime)																//Prima era 0, ho messo 1 per fare iniziare la schedulazione dei task dal clock 1
 				// First get time in seconds
 				.forEach(st -> insert((st * 60)
 						// Then pick up random second in this minute "st". Shift the time by a random

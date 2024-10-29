@@ -45,6 +45,11 @@ public class DefaultContainer extends ContainerAbstract{
    protected Status status = Status.NOT_PLACED;
 
    /**
+	* The orchestrator node that will manage the placement of this Container.
+	*/
+   protected ComputingNode orchestrator = ComputingNode.NULL;
+
+   /**
     * Constructs a DefaultContainer object with a specified Container ID.
     *
     * @param id The ID of the Container.
@@ -157,6 +162,27 @@ public class DefaultContainer extends ContainerAbstract{
     }
 
 	/**
+	 * Returns the orchestrator for the Container. (Always the cloud)
+	 *
+	 * @return The orchestrator for the Container.
+	 */
+	@Override
+	public ComputingNode getOrchestrator() {
+		return this.orchestrator;
+	}
+
+	/**
+	 * Assigns an orchestrator to the Container.
+	 *
+	 * @param orchestrator The orchestrator to be assigned to the task.
+	 */
+
+	@Override
+	public void setOrchestrator(ComputingNode orchestrator) {
+		this.orchestrator = orchestrator;
+	}
+
+	/**
 	 * 
 	 * Returns the ID of the application.
 	 * 
@@ -200,6 +226,28 @@ public class DefaultContainer extends ContainerAbstract{
 	@Override
 	public void setPlacementDestination(ComputingNode applicationPlacementLocation) {
 		this.computingNode = applicationPlacementLocation;
+	}
+
+	/**
+	 * 
+	 * Sets the status of the Container.
+	 * 
+	 * @param status the status of the Container.
+	 */
+	@Override
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	/**
+	 * 
+	 * Returns the status of the Container.
+	 * 
+	 * @return the status of the Container.
+	 */
+	@Override
+	public Status getStatus() {
+		return status;
 	}
 
 }

@@ -55,9 +55,11 @@ public abstract class SimulationManager extends SimEntity {
 	public static final int EXECUTE_TASK = 3;
 	public static final int TRANSFER_RESULTS_TO_ORCH = 4;
 	public static final int RESULT_RETURN_FINISHED = 5;
-	public static final int SEND_TO_ORCH = 6;
+	public static final int SEND_TO_EDGE_ORCH = 6;
+	public static final int SEND_TO_CLOUD_ORCH = 10;
 	public static final int UPDATE_REAL_TIME_CHARTS = 7;
-	public static final int SEND_TASK_FROM_ORCH_TO_DESTINATION = 8;
+	public static final int SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION = 8;
+	public static final int SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM = 11;
 	protected static final int NEXT_BATCH = 9; 
 
 	protected Orchestrator edgeOrchestrator;
@@ -159,7 +161,7 @@ public abstract class SimulationManager extends SimEntity {
 	 * 
 	 * @param edgeOrchestrator the orchestrator.
 	 */
-	public void setOrchestrator(Orchestrator edgeOrchestrator) {
+	public void setEdgeOrchestrator(Orchestrator edgeOrchestrator) {
 		this.edgeOrchestrator = edgeOrchestrator;
 
 	}
