@@ -20,10 +20,15 @@
  **/
 package com.mechalikh.pureedgesim.network;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.CRC32;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -158,6 +163,7 @@ public class InfrastructureGraph {
 			for (int j = 0; j < list.size(); j++) { 
 				ComputingNode to = list.get(j);
 				pathsMap.put(getUniqueId(from.getId(), to.getId()), this.getPath(from, to));
+				//pathsMap.put(getUniqueId(from.getName() + from.getId(), to.getName() + to.getId()), this.getPath(from, to));
 			}
 		}
 	}
@@ -166,4 +172,35 @@ public class InfrastructureGraph {
 	public long getUniqueId(int a, int b) {
 		return (long) ((1 / 2.0) * (a + b) * (a + b + 1)) + b;
 	}
+
+	//questa versione tiene conto del caso nel quale non modifichiamo il SimEntity
+	private long stringToLongHash(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            // Convertiamo i primi 8 byte del SHA-256 in un long
+            long hash = 0;
+            for (int i = 0; i < 8; i++) {
+                hash = (hash << 8) | (hashBytes[i] & 0xFF);
+            }
+            return hash;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+	//Decommentare se si vuole usare la versione con le stringhe
+    // public long getUniqueId(String a, String b) {
+    //     // Usa l'ordine delle stringhe per creare una combinazione distintiva
+    //     String combined = a + "|" + b;
+    //     return stringToLongHash(combined);
+    // }
+    
+    public long getUniqueIdWithOrder(String a, String b) {
+        // Imposta l'ordine e crea una stringa combinata distintiva
+        String combinedOrdered = a.compareTo(b) < 0 ? a + "|" + b : b + "|" + a;
+        return stringToLongHash(combinedOrdered);
+    }
+	
 }

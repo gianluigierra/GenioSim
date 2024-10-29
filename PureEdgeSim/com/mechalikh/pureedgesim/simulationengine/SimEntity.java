@@ -8,9 +8,10 @@ public abstract class SimEntity {
 
 	protected SimEntity(PureEdgeSim simulation) {
 		setSimulator(simulation);
-		id = simulation.entitiesList.stream().filter(getClass()::isInstance).collect(Collectors.toList())
-				.size();
-		setId(id);
+		//id = simulation.entitiesList.stream().filter(getClass()::isInstance).collect(Collectors.toList())
+		id = simulation.entitiesList.stream().collect(Collectors.toList())										//uso questo di sotto per dare un ID univoco a tutti i nodi della simulazione				
+				.size();																						//come effetto collaterale do un ID univoco anche a tutti gli altri simEntity
+		setId(id);																								//questo non sembra però avere effetti negativi
 		simulation.addEntity(this);
 	}
 
