@@ -36,7 +36,6 @@ import com.mechalikh.pureedgesim.simulationengine.OnSimulationStartListener;
 import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 /**
  * The {@code SimulationManager} class represents the default implementation of
@@ -125,12 +124,6 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		simLog.print("%s - Simulation: %d  , iteration: %d", getClass().getSimpleName(), getSimulationId(),
 				getIteration());
 
-		//schedule the containers placeement (all of them)
-		for(int i = containerList.size(); i > 0; i--){
-			schedule(this, containerList.first().getTime() - simulation.clock(), SEND_TO_CLOUD_ORCH, containerList.first());
-			containerList.remove(containerList.first());
-		}
-
 		// Schedule the tasks offloading (first batch).
 		for (int i = 0; i < Math.min(taskList.size(), SimulationParameters.batchSize); i++) {
 			schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
@@ -166,7 +159,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	 */
 	@Override
 	public void processEvent(Event ev) {
-		Task task;
+		Task task = (Task) ev.getData();
 		switch (ev.getTag()) {
 		case NEXT_BATCH:
 			// Schedule this batch.
@@ -178,39 +171,20 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			if (taskList.size() > 0)
 				schedule(this, taskList.first().getTime() - simulation.clock(), NEXT_BATCH);
 			break;
-
 		case SEND_TO_EDGE_ORCH:
 			// Send the offloading request to the closest orchestrator.
-			task = (Task) ev.getData();
 			sendTaskToEdgeOrchestrator(task);
 			sentTasks++;
-			break;
-	
-		case SEND_TO_CLOUD_ORCH:
-			Container container = (Container) ev.getData();
-			System.out.println("Dovrei inviare la richiesta di placement al cloud: " + container.getId());
-			//TODO
-			//sendContainerRequestToCloudOrchestrator(container);
 			break;
 
 		case SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION:
 			// The offlaoding decision was made, send the request from the orchestrator to
 			// the offloading destination.
-			task = (Task) ev.getData();
 			sendFromEdgeOrchToDestination(task);
-			break;
-
-		case SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM:
-			// The placement decision was made, send the request from the orchestrator to
-			// the placement destination.
-
-			// TODO: implementare funzione di placement
-
 			break;
 
 		case EXECUTE_TASK:
 			// Offlaoding request received by the destination, execute the task.
-			task = (Task) ev.getData();
 			if (taskFailed(task, 2))
 				return;
 			task.getOffloadingDestination().submitTask(task);
@@ -219,14 +193,12 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 		case TRANSFER_RESULTS_TO_ORCH:
 			// Task execution finished, transfer the results to the orchestrator.
-			task = (Task) ev.getData();
 			finishedTasks.add(task);
 			sendResultsToOchestrator(task);
 			break;
 
 		case RESULT_RETURN_FINISHED:
 			// Results returned to edge device.
-			task = (Task) ev.getData();
 			if (taskFailed(task, 3))
 				return;
 
@@ -422,16 +394,6 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		simLog.incrementTasksSent();
 
 		scheduleNow(networkModel, NetworkModel.SEND_REQUEST_FROM_DEVICE_TO_EDGE_ORCH, task);
-	}
-
-	/**
-	 * Sends the Container request to the cloud orchestrator in order to make the placement decision.
-	 *
-	 * @param container The container that needs to be placed.
-	 */
-	protected void sendContainerRequestToCloudOrchestrator(Container container) {
-		container.setOrchestrator(container.getEdgeDevice(0).getCloudOrchestrator());
-		scheduleNow(networkModel, NetworkModel.SEND_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH, container);
 	}
 
 	/**

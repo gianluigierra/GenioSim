@@ -182,7 +182,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		// DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
 		// System.out.println("Nodi:");
         // for (ComputingNode node : graph.vertexSet()) {
-        //     System.out.println(" - " + node.getName());
+        //     System.out.println(" - " + node.getName() + ", id " + node.getId());
         // }
 
         // // Stampa tutti gli archi
