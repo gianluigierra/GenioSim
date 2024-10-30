@@ -45,6 +45,11 @@ public class DefaultContainer extends ContainerAbstract{
    protected Status status = Status.NOT_PLACED;
 
    /**
+	* The size of the input file for the task in bits.
+	*/
+   protected long fileSize;
+
+   /**
 	* The orchestrator node that will manage the placement of this Container.
 	*/
    protected ComputingNode orchestrator = ComputingNode.NULL;
@@ -226,6 +231,19 @@ public class DefaultContainer extends ContainerAbstract{
 	@Override
 	public void setPlacementDestination(ComputingNode applicationPlacementLocation) {
 		this.computingNode = applicationPlacementLocation;
+	}
+
+	/**
+	 * 
+	 * Sets the size of the file for the Container and returns this Container.
+	 * 
+	 * @param requestSize the size of the file for the Container.
+	 * @return this Container.
+	 */
+	@Override
+	public Container setFileSizeInBits(long requestSize) {
+		this.fileSize = requestSize;
+		return this;
 	}
 
 	/**
