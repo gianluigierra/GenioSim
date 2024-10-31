@@ -6,6 +6,7 @@ import java.util.List;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
@@ -23,6 +24,7 @@ public class VM extends LocationAwareNode {
 	protected int numberOfCPUCores;
 	protected int availableCores;
 	protected List<Task> tasksQueue = new ArrayList<>();
+	protected List<Container> containerList = new ArrayList<>();
 	protected double availableRam; // in Megabytes
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
@@ -248,6 +250,19 @@ public class VM extends LocationAwareNode {
 			getTasksQueue().add(task);
 	}
 
+	@Override
+	public void submitContainerPlacement(Container container) {
+
+		//TODO devo implementare il metodo
+		containerList.add(container);
+
+		// Update the amount of available storage
+		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+
+		System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement. ContainerList.size = " + containerList.size());
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
+	}
+
 	protected void startExecution(Task task) {
 
 		// Update the CPU utilization.
@@ -304,7 +319,7 @@ public class VM extends LocationAwareNode {
 
 		// Notify the simulation manager that a task has been finished, and it's time to
 		// return the execution results.
-		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_ORCH, e.getData());
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_EDGE_ORCH, e.getData());
 
 		// If there are tasks waiting for execution
 		if (!getTasksQueue().isEmpty()) {

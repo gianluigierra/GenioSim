@@ -28,6 +28,7 @@ import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 /**
  * An interface to be implemented by each class that provides "computing node"
@@ -67,6 +68,15 @@ public interface ComputingNode {
 	 * @return
 	 */
 	void submitTask(Task task);
+
+	/**
+	 * Called when a task has been offloaded to this computing node. The task will
+	 * be added to the execution queue.
+	 * 
+	 * @param task the task to execute.
+	 * @return
+	 */
+	void submitContainerPlacement(Container container);
 
 	/**
 	 * Gets the type of this computing node, e.g.

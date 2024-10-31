@@ -41,6 +41,7 @@ import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink;
 import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.network.TransferProgress;
+import com.mechalikh.pureedgesim.network.ContainerTransferProgress;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters; 
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
@@ -678,6 +679,24 @@ public class SimLog {
 		this.totalTraffic += transfer.getFileSize() / 8000000; // bits to Mbytes
 
 		if (transfer.getTransferType() == TransferProgress.Type.CONTAINER) {
+			this.containersLanUsage += transfer.getLanNetworkUsage();
+			this.containersWanUsage += transfer.getWanNetworkUsage();
+			this.containersManUsage += transfer.getManNetworkUsage();
+			this.containersFiberUsage += transfer.getFiberNetworkUsage();
+		}
+		this.transfersCount++;
+
+	}
+
+	public void updateContainerNetworkUsage(ContainerTransferProgress transfer) {
+		this.totalLanUsage += transfer.getLanNetworkUsage();
+		this.totalManUsage += transfer.getManNetworkUsage();
+		this.totalWanUsage += transfer.getWanNetworkUsage();
+		this.totalFiberUsage += transfer.getFiberNetworkUsage();
+		this.totalBandwidth += transfer.getAverageBandwidth() / 1000000; // bits/s to Mbits/s
+		this.totalTraffic += transfer.getFileSize() / 8000000; // bits to Mbytes
+
+		if (transfer.getTransferType() == ContainerTransferProgress.Type.CONTAINER) {
 			this.containersLanUsage += transfer.getLanNetworkUsage();
 			this.containersWanUsage += transfer.getWanNetworkUsage();
 			this.containersManUsage += transfer.getManNetworkUsage();

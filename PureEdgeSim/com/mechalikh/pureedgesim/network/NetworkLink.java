@@ -39,6 +39,7 @@ public class NetworkLink extends SimEntity {
 	protected double latency = 0;
 	protected double bandwidth = 0;
 	protected List<TransferProgress> transferProgressList = new ArrayList<>();
+	protected List<ContainerTransferProgress> containerRequestTransferProgressList = new ArrayList<>();
 	protected ComputingNode src = ComputingNode.NULL;
 	protected ComputingNode dst = ComputingNode.NULL;
 	protected SimulationManager simulationManager;
@@ -136,6 +137,25 @@ public class NetworkLink extends SimEntity {
 			transferProgressList.get(i).setCurrentBandwidth(allocatedBandwidth);
 			updateTransfer(transferProgressList.get(i));
 		}
+
+		for (int i = 0; i < containerRequestTransferProgressList.size(); i++) {
+			
+			if (!SimulationParameters.BandwidthAllocationOnApplicationType) {
+				allocatedBandwidth = getBandwidth(containerRequestTransferProgressList.size());
+			} else {
+				allocatedBandwidth = getBandwidthOnContainerRequestType(containerRequestTransferProgressList.get(i));
+			}
+			
+			// Allocate bandwidth
+			usedBandwidth += containerRequestTransferProgressList.get(i).getRemainingFileSize();
+			
+			if (this.getType()==NetworkLinkTypes.FIBER) 
+				UpdateContainerRequestBandwidth(containerRequestTransferProgressList.get(i));
+				
+			containerRequestTransferProgressList.get(i).setCurrentBandwidth(allocatedBandwidth);
+			updateContainerRequestTransfer(containerRequestTransferProgressList.get(i));
+		}
+
 	}
 	
 	protected void UpdateBandwidth(TransferProgress T) {
@@ -149,6 +169,21 @@ public class NetworkLink extends SimEntity {
         }
         if (!found) {
             UsedBandwidthList.add(new Bandwidth(T.getTask().getAssociatedAppName(), bandwidth, T.getRemainingFileSize()));
+            //System.out.println("Nuovo oggetto bandwidth relativo all'app" + T.getTask().getAssociatedAppName() + "aggiunto al link: " + this.getId());
+        }		
+	}
+
+	protected void UpdateContainerRequestBandwidth(ContainerTransferProgress T) {
+		boolean found = false;
+        for (Bandwidth bandwidth : UsedBandwidthList) {
+            if (bandwidth.ApplicationName.equals(T.getContainer().getAssociatedAppName())) {
+                bandwidth.usedBandwidth += T.getRemainingFileSize();
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            UsedBandwidthList.add(new Bandwidth(T.getContainer().getAssociatedAppName(), bandwidth, T.getRemainingFileSize()));
             //System.out.println("Nuovo oggetto bandwidth relativo all'app" + T.getTask().getAssociatedAppName() + "aggiunto al link: " + this.getId());
         }		
 	}
@@ -183,6 +218,22 @@ public class NetworkLink extends SimEntity {
 				BandwidthValue = bandwidth*10/100;
 			}
 			
+		}
+	
+		return BandwidthValue;
+	}
+
+	protected double getBandwidthOnContainerRequestType(ContainerTransferProgress task) { 
+		double BandwidthValue = 0;
+		
+		double container_size = task.getContainer().getFileSizeInBits();
+			
+		if (container_size > 1000) {
+			BandwidthValue = bandwidth*50/100;
+		} else if (container_size > 100 && container_size <= 1000) {
+			BandwidthValue = bandwidth*25/100;
+		} else if (container_size <= 100) {
+			BandwidthValue = bandwidth*10/100;
 		}
 	
 		return BandwidthValue;
@@ -227,6 +278,41 @@ public class NetworkLink extends SimEntity {
 		}
 	}
 
+	protected void updateContainerRequestTransfer(ContainerTransferProgress transfer) {
+
+		double oldRemainingSize = transfer.getRemainingFileSize();
+
+		// Update progress (remaining file size)
+		if (SimulationParameters.realisticNetworkModel)
+			transfer.setRemainingFileSize(transfer.getRemainingFileSize()
+					- (SimulationParameters.networkUpdateInterval * transfer.getCurrentBandwidth()));
+		else
+			transfer.setRemainingFileSize(0);
+
+		double transferDelay = (oldRemainingSize - transfer.getRemainingFileSize()) / transfer.getCurrentBandwidth();
+
+		// Update network usage delay
+		if (type == NetworkLinkTypes.LAN)
+			transfer.setLanNetworkUsage(transfer.getLanNetworkUsage() + transferDelay);
+		
+		// Update FIBER network usage delay
+		else if (type == NetworkLinkTypes.FIBER)
+			transfer.setFiberNetworkUsage(transfer.getFiberNetworkUsage() + transferDelay);
+
+		// Update MAN network usage delay
+		else if (type == NetworkLinkTypes.MAN)
+			transfer.setManNetworkUsage(transfer.getManNetworkUsage() + transferDelay);
+
+		// Update WAN network usage delay
+		else if (type == NetworkLinkTypes.WAN)
+			transfer.setWanNetworkUsage(transfer.getWanNetworkUsage() + transferDelay);
+
+		if (transfer.getRemainingFileSize() <= 0) { // Transfer finished
+			transfer.setRemainingFileSize(0); // if < 0 set it to 0
+			containerTransferFinished(transfer);
+		}
+	}
+
 	protected void transferFinished(TransferProgress transfer) {
 
 		this.transferProgressList.remove(transfer);
@@ -247,7 +333,28 @@ public class NetworkLink extends SimEntity {
 		} else {
 			// Still did not reach destination, send it to the next hop
 			transfer.setRemainingFileSize(transfer.getFileSize());
-			transfer.getEdgeList().get(0).addTransfer(transfer);
+			transfer.getEdgeList().get(0).addTaskTransfer(transfer);
+		}
+	}
+
+	protected void containerTransferFinished(ContainerTransferProgress transfer) {
+
+		this.containerRequestTransferProgressList.remove(transfer);
+
+		// Remove the previous hop (data has been transferred one hop)
+		transfer.getVertexList().remove(0);
+		transfer.getEdgeList().remove(0);
+
+		// Data has reached the destination
+		if (transfer.getVertexList().size() == 1) {
+			// Update logger parameters
+			simulationManager.getSimulationLogger().updateContainerNetworkUsage(transfer);
+
+			schedule(simulationManager.getNetworkModel(), latency, NetworkModel.CONTAINER_TRANSFER_FINISHED, transfer);
+		} else {
+			// Still did not reach destination, send it to the next hop
+			transfer.setRemainingFileSize(transfer.getFileSize());
+			transfer.getEdgeList().get(0).addContainerRequestTransfer(transfer);
 		}
 	}
 
@@ -264,11 +371,23 @@ public class NetworkLink extends SimEntity {
 		this.type = type;
 	}
 
-	public void addTransfer(TransferProgress transfer) {
+	public void addTaskTransfer(TransferProgress transfer) {
 		// Used by the energy model to get the total energy consumed by this network
 		// link
 		totalTrasferredData += transfer.getFileSize();
 		transferProgressList.add(transfer);
+
+		if (!scheduled) {
+			scheduleNow(this, UPDATE_PROGRESS);
+			scheduled = true;
+		}
+	}
+
+	public void addContainerRequestTransfer(ContainerTransferProgress transfer) {
+		// Used by the energy model to get the total energy consumed by this network
+		// link
+		totalTrasferredData += transfer.getFileSize();
+		containerRequestTransferProgressList.add(transfer);
 
 		if (!scheduled) {
 			scheduleNow(this, UPDATE_PROGRESS);

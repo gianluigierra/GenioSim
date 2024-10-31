@@ -57,105 +57,85 @@ public class DefaultNetworkModel extends NetworkModel {
 			// Forward the offloading request from orchestrator to offloading destination
 			sendRequestFromEdgeOrchToDest((Task) ev.getData());
 			break;
-		case SEND_REQUEST_FROM_CLOUD_ORCH_TO_DESTINATION:
+		case SEND_CONTAINER_FROM_CLOUD_ORCH_TO_DESTINATION:
 			// Forward the placement request from orchestrator to placement destination
-			sendRequestFromCloudOrchToDest((Container) ev.getData());
+			sendContainerFromCloudOrchToDest((Container) ev.getData());
 			break;
 		case DOWNLOAD_CONTAINER:
 			// Pull the container from the registry
-			addContainer((Task) ev.getData());
+			//addContainer((Task) ev.getData());
+			addContainer2((Container) ev.getData());
 			break;
 		case SEND_RESULT_TO_EDGE_ORCH:
 			// Send the execution results to the orchestrator
 			sendResultFromDevToEdgeOrch((Task) ev.getData());
 			break;
+		case SEND_RESULT_TO_CLOUD_ORCH:
+			// Send the execution results to the orchestrator
+			sendResultFromDevToCloudOrch((Container) ev.getData());
+			break;
 		case SEND_RESULT_FROM_EDGE_ORCH_TO_DEV:
 			// Transfer the execution results from the orchestrators to the device
 			sendResultFromEdgeOrchToDev((Task) ev.getData());
 			break;
+		case SEND_RESULT_FROM_CLOUD_ORCH_TO_DEV:
+			// Transfer the execution results from the orchestrators to the device
+			sendResultFromCloudOrchToDev((Container) ev.getData());
+			break;	
 		case TRANSFER_FINISHED:
 			// Transfer the execution results from the orchestrators to the device
 			transferFinished((TransferProgress) ev.getData());
+			break;
+		case CONTAINER_TRANSFER_FINISHED:
+			// Transfer the execution results from the orchestrators to the device
+			containerTransferFinished((ContainerTransferProgress) ev.getData());
 			break;
 		default:
 			break;
 		}
 	}
 
-	public void send(ComputingNode from, ComputingNode to, Task task, double fileSize, TransferProgress.Type type) {
+	//invia la richiesta di offloading del task verso la destinazione
+	public void sendTask(ComputingNode from, ComputingNode to, Task task, double fileSize, TransferProgress.Type type) {
 		List<ComputingNode> vertexList = new ArrayList<>(5);
 		List<NetworkLink> edgeList = new ArrayList<>(5);
 
-		// If both are edge devices (one hop far from each other), send directly.
-		if (from.getType() == TYPES.EDGE_DEVICE && to.getType() == TYPES.EDGE_DEVICE) {
-			from.getCurrentLink(LinkOrientation.DEVICE_TO_DEVICE).setDst(to);
-			vertexList.addAll(List.of(from, to));
-			edgeList.add(from.getCurrentLink(LinkOrientation.DEVICE_TO_DEVICE));
+		GraphPath<ComputingNode, NetworkLink> path;
+		long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(), to.getId());
 
-		} // Otherwise, if the first is a mobile edge device
-		else if (from.getType() == TYPES.EDGE_DEVICE && to.getType() == TYPES.EDGE_DATACENTER) { 
-			long id = simulationManager.getDataCentersManager().getTopology()
-					.getUniqueId(from.getCurrentLink(LinkOrientation.UP_LINK).getDst().getId(), to.getId());
-			GraphPath<ComputingNode, NetworkLink> path = simulationManager.getDataCentersManager().getTopology()
-					.getPathsMap().get(id);
-			vertexList.add(from);
-			vertexList.addAll(path.getVertexList());
-			edgeList.add(from.getCurrentLink(LinkOrientation.UP_LINK));
-			edgeList.addAll(path.getEdgeList());
+		if (simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id)) {
+			path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id);
 
-		} // Else, if the second is a mobile edge device
-		else if (from.getType() == TYPES.EDGE_DATACENTER && to.getType() == TYPES.EDGE_DEVICE) {
-			long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(),
-					to.getCurrentLink(LinkOrientation.DOWN_LINK).getSrc().getId());
-			GraphPath<ComputingNode, NetworkLink> path = simulationManager.getDataCentersManager().getTopology()
-					.getPathsMap().get(id);
-			vertexList.addAll(path.getVertexList());
-			vertexList.add(from);
-			edgeList.addAll(path.getEdgeList());
-			edgeList.add(to.getCurrentLink(LinkOrientation.DOWN_LINK)); 
-			
-		} 
-		else { // Otherwise, if one of them is and edge device but not mobile, or the other is a cloud, or any other cases.
-			GraphPath<ComputingNode, NetworkLink> path;
-			long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(), to.getId());
-
-			if (simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id)) {
-				path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id);
-
-				//it happened that the path had length 0 so it caused an error. In this case we establish a new path
-				if(path.getLength() == 0){
-					path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
-					simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
-				}
-				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
-				// System.out.print("[");
-				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
-				// System.out.print("]");
-				// System.out.println("");
-
-			} else {
+			//it happened that the path had length 0 so it caused an error. In this case we establish a new path
+			if(path.getLength() == 0){
 				path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
-				// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
-				// System.out.print("[");
-				// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
-				// System.out.print("]");
-				// System.out.println("");
 			}
-			vertexList.addAll(path.getVertexList());
-			edgeList.addAll(path.getEdgeList());
-			
+			// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+			// System.out.print("[");
+			// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+			// System.out.print("]");
+			// System.out.println("");
+		} else {
+			path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+			simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+			// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+			// System.out.print("[");
+			// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+			// System.out.print("]");
+			// System.out.println("");
 		}
-		edgeList.get(0).addTransfer(
-				new TransferProgress(task, fileSize, type).setVertexList(vertexList).setEdgeList(edgeList));
-
+		vertexList.addAll(path.getVertexList());
+		edgeList.addAll(path.getEdgeList());
+		
+		edgeList.get(0).addTaskTransfer(new TransferProgress(task, fileSize, type).setVertexList(vertexList).setEdgeList(edgeList));
 	}
 
 	public void sendRequestFromEdgeOrchToDest(Task task) {
 		if (task.getOrchestrator() != task.getOffloadingDestination()
 				&& task.getOffloadingDestination() != task.getEdgeDevice())
 
-			send(task.getOrchestrator(), task.getOffloadingDestination(), task, task.getFileSizeInBits(),
+			sendTask(task.getOrchestrator(), task.getOffloadingDestination(), task, task.getFileSizeInBits(),
 					TransferProgress.Type.TASK);
 		else // The device will execute the task locally
 			executeTaskOrDownloadContainer(
@@ -163,50 +143,102 @@ public class DefaultNetworkModel extends NetworkModel {
 	}
 
 	// TODO-implementare metodo
-	public void sendRequestFromCloudOrchToDest(Container task) {
+	public void sendContainerFromCloudOrchToDest(Container container) {
+		if (container.getOrchestrator() != container.getPlacementDestination()
+				&& container.getPlacementDestination() != container.getEdgeDevice(0))
+
+			sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.REQUEST_TO_DOWNLOAD);
+		else // The device will download the container locally
+			executeTaskOrDownloadContainer2(
+					new ContainerTransferProgress(container, container.getFileSizeInBits(), ContainerTransferProgress.Type.REQUEST_TO_DOWNLOAD));
 	}
 
 	public void sendResultFromEdgeOrchToDev(Task task) {
 		if (task.getOrchestrator() != task.getEdgeDevice())
-			send(task.getOrchestrator(), task.getEdgeDevice(), task, task.getOutputSizeInBits(),
+			sendTask(task.getOrchestrator(), task.getEdgeDevice(), task, task.getOutputSizeInBits(),
 					TransferProgress.Type.RESULTS_TO_DEV);
 		else
-			scheduleNow(simulationManager, DefaultSimulationManager.RESULT_RETURN_FINISHED, task);
+			scheduleNow(simulationManager, DefaultSimulationManager.TASK_RESULT_RETURN_FINISHED, task);
 
+	}
+
+	//TODO implementa questa funzione
+	public void sendResultFromCloudOrchToDev(Container container) {
+		sendContainer(container.getOrchestrator(), container.getEdgeDevice(0), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_DEV);
 	}
 
 	public void sendResultFromDevToEdgeOrch(Task task) {
 		if (task.getOffloadingDestination() != task.getOrchestrator())
-			send(task.getOffloadingDestination(), task.getOrchestrator(), task, task.getOutputSizeInBits(),
+			sendTask(task.getOffloadingDestination(), task.getOrchestrator(), task, task.getOutputSizeInBits(),
 					TransferProgress.Type.RESULTS_TO_ORCH);
 		else
 			scheduleNow(this, DefaultNetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, task);
 
 	}
 
+	//TODO implementa questa funzione
+	public void sendResultFromDevToCloudOrch(Container container) {
+		sendContainer(container.getPlacementDestination(), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_ORCH);
+	}
+
 	public void addContainer(Task task) {
 		if (task.getRegistry() != task.getOffloadingDestination())
-			send(task.getRegistry(), task.getOffloadingDestination(), task, task.getContainerSizeInBits(),
+			sendTask(task.getRegistry(), task.getOffloadingDestination(), task, task.getContainerSizeInBits(),
 					TransferProgress.Type.CONTAINER);
 		else
 			scheduleNow(simulationManager, DefaultSimulationManager.EXECUTE_TASK, task);
 	}
 
-	public void sendRequestFromDeviceToEdgeOrch(Task task) {
-		if (task.getEdgeDevice() != task.getOrchestrator()) {
-		//if (SimulationParameters.enableOrchestrators && task.getEdgeDevice() != task.getOrchestrator()) {
-			send(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),
-					TransferProgress.Type.REQUEST);
+	// TODO-implementare metodo
+	public void addContainer2(Container container) {
+		sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getContainerSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
+	}
 
-		} else // The device orchestrates its tasks by itself, so, send the request directly to
-				// destination
-		{
-			scheduleNow(simulationManager, DefaultSimulationManager.SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION, task);
+	public void sendRequestFromDeviceToEdgeOrch(Task task) {
+		sendTask(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),TransferProgress.Type.REQUEST);
+	}
+
+	//invia la richiesta di placement del container verso il cloud
+	public void sendContainer(ComputingNode from, ComputingNode to, Container container, double fileSize, ContainerTransferProgress.Type type){
+		List<ComputingNode> vertexList = new ArrayList<>(5);
+		List<NetworkLink> edgeList = new ArrayList<>(5);GraphPath<ComputingNode, NetworkLink> path;
+		
+		//long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getName() + from.getId(), to.getName() + to.getId());
+		long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(), to.getId());
+
+		if (simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id)) {
+			path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id);
+
+			//it happened that the path had length 0 so it caused an error. In this case we establish a new path
+			if(path.getLength() == 0){
+				path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+			}
+			// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+			// System.out.print("[");
+			// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+			// System.out.print("]");
+			// System.out.println("");
+
+		} else {
+			path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+			simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+			// System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+			// System.out.print("[");
+			// for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+			// System.out.print("]");
+			// System.out.println("");
 		}
+		vertexList.addAll(path.getVertexList());
+		edgeList.addAll(path.getEdgeList());
+
+		edgeList.get(0).addContainerRequestTransfer(
+				new ContainerTransferProgress(container, fileSize, type).setVertexList(vertexList).setEdgeList(edgeList));
 	}
 
 	// TODO-implementare metodo
 	public void sendRequestFromDeviceToCloudOrch(Container container) {
+		sendContainer(container.getEdgeDevice(container.getEdgeDevices().size() - 1), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.REQUEST);
 	}
 
 	protected void transferFinished(TransferProgress transfer) {
@@ -252,6 +284,39 @@ public class DefaultNetworkModel extends NetworkModel {
 
 	}
 
+	protected void containerTransferFinished(ContainerTransferProgress transfer) {
+
+		// If it is a placement request that is sent to the orchestrator
+		if (transfer.getTransferType() == ContainerTransferProgress.Type.REQUEST) {
+			// in case this node is the orchestrator
+
+			//if (transfer.getVertexList().get(0) == transfer.getContainer().getOrchestrator()) 
+			//	updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getEdgeDevice(0), transfer.getContainer().getOrchestrator());
+
+			offloadingRequestRecievedByCloudOrchestrator(transfer);
+		}
+		// If it is a Container (or placement request) that is sent to the destination
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.REQUEST_TO_DOWNLOAD) {
+			// in case this node is the destination
+			executeTaskOrDownloadContainer2(transfer);
+		}
+		// If the container has been downloaded, then execute the task now
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.CONTAINER) {
+			containerDownloadFinished2(transfer);
+		}
+		// If the transfer of execution results to the orchestrator has finished
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.RESULTS_TO_ORCH) {
+			returnResultsToDevice2(transfer);
+			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getPlacementDestination(), transfer.getContainer().getOrchestrator());
+		}
+		// Results transferred to the device
+		else {
+			resultsReturnedToDevice2(transfer);
+			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getOrchestrator(), transfer.getContainer().getEdgeDevice(0));
+		}
+
+	}
+
 	protected void updateEdgeDevicesRemainingEnergy(TransferProgress transfer, ComputingNode origin,
 			ComputingNode destination) {
 		if (origin != ComputingNode.NULL && origin.getType() == TYPES.EDGE_DEVICE) {
@@ -267,14 +332,26 @@ public class DefaultNetworkModel extends NetworkModel {
 		scheduleNow(simulationManager, DefaultSimulationManager.EXECUTE_TASK, transfer.getTask());
 	}
 
+	protected void containerDownloadFinished2(ContainerTransferProgress transfer) {
+		scheduleNow(simulationManager, DefaultSimulationManager.DOWNLOAD_CONTAINER, transfer.getContainer());
+	}
+
 	protected void resultsReturnedToDevice(TransferProgress transfer) {
-		scheduleNow(simulationManager, DefaultSimulationManager.RESULT_RETURN_FINISHED, transfer.getTask());
+		scheduleNow(simulationManager, DefaultSimulationManager.TASK_RESULT_RETURN_FINISHED, transfer.getTask());
+	}
+
+	protected void resultsReturnedToDevice2(ContainerTransferProgress transfer) {
+		scheduleNow(simulationManager, DefaultSimulationManager.PLACEMENT_RESULT_RETURN_FINISHED, transfer.getContainer());
 	}
 
 	protected void returnResultsToDevice(TransferProgress transfer) {
 		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, transfer.getTask());
+	}	
+	
+	protected void returnResultsToDevice2(ContainerTransferProgress transfer) {
+		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_CLOUD_ORCH_TO_DEV, transfer.getContainer());
 	}
-
+	
 	protected void executeTaskOrDownloadContainer(TransferProgress transfer) {
 		if (SimulationParameters.enableRegistry && "CLOUD".equals(SimulationParameters.registryMode)
 				&& !(transfer.getTask().getOffloadingDestination()).getType().equals(TYPES.CLOUD)) {
@@ -287,9 +364,18 @@ public class DefaultNetworkModel extends NetworkModel {
 			scheduleNow(simulationManager, DefaultSimulationManager.EXECUTE_TASK, transfer.getTask());
 	}
 
+	protected void executeTaskOrDownloadContainer2(ContainerTransferProgress transfer) {
+		scheduleNow(this, DefaultNetworkModel.DOWNLOAD_CONTAINER, transfer.getContainer());
+	}
+
 	protected void offloadingRequestRecievedByOrchestrator(TransferProgress transfer) {
 		// Find the offloading destination and execute the task
 		scheduleNow(simulationManager, DefaultSimulationManager.SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION, transfer.getTask());
+	}
+
+	protected void offloadingRequestRecievedByCloudOrchestrator(ContainerTransferProgress transfer) {
+		// Find the placement destination and download the container
+		scheduleNow(simulationManager, DefaultSimulationManager.SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM, transfer.getContainer());
 	}
 
 	

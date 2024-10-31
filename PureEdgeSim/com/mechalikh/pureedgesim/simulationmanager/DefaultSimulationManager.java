@@ -191,13 +191,13 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			edgeOrchestrator.notifyOrchestratorOfTaskExecution(task);
 			break;
 
-		case TRANSFER_RESULTS_TO_ORCH:
+		case TRANSFER_RESULTS_TO_EDGE_ORCH:
 			// Task execution finished, transfer the results to the orchestrator.
 			finishedTasks.add(task);
 			sendResultsToOchestrator(task);
 			break;
 
-		case RESULT_RETURN_FINISHED:
+		case TASK_RESULT_RETURN_FINISHED:
 			// Results returned to edge device.
 			if (taskFailed(task, 3))
 				return;
@@ -284,7 +284,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		if (task.getEdgeDevice() != task.getOffloadingDestination())
 			scheduleNow(getNetworkModel(), NetworkModel.SEND_RESULT_TO_EDGE_ORCH, task);
 		else // The task has been executed locally / no offloading
-			scheduleNow(this, RESULT_RETURN_FINISHED, task);
+			scheduleNow(this, TASK_RESULT_RETURN_FINISHED, task);
 
 		// Update tasks execution and waiting delays
 		simLog.getTasksExecutionInfos(task);

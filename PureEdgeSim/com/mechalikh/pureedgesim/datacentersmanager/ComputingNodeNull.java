@@ -6,6 +6,7 @@ import com.mechalikh.pureedgesim.energy.EnergyModelComputingNode;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 /**
@@ -657,6 +658,10 @@ public class ComputingNodeNull implements ComputingNode {
 	@Override
 	public void setCurrentLink(NetworkLink link, LinkOrientation linkType) {
 		// Do nothing.
+	}
+
+	@Override
+	public void submitContainerPlacement(Container container) {
 	}
 
 }

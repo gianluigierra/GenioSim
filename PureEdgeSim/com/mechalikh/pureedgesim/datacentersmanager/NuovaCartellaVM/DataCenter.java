@@ -6,6 +6,7 @@ import java.util.List;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
@@ -322,6 +323,13 @@ public class DataCenter extends LocationAwareNode {
 		this.sentTasks++;
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
+	}
+
+	@Override
+	public void submitContainerPlacement(Container container) {
+
+		//TODO devo implementare il metodo
+		System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement");
 	}
 
 	protected void startExecution(Task task) {

@@ -27,6 +27,7 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 /**
  * This computing node class used by the simulator by default. PureEdgeSim's
@@ -263,6 +264,13 @@ public class DefaultComputingNode extends LocationAwareNode {
 			getTasksQueue().add(task);
 	}
 
+	@Override
+	public void submitContainerPlacement(Container container) {
+
+		//TODO devo implementare il metodo
+		System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement");
+	}
+
 	protected void startExecution(Task task) {
 
 		// Update the CPU utilization.
@@ -316,7 +324,7 @@ public class DefaultComputingNode extends LocationAwareNode {
 
 		// Notify the simulation manager that a task has been finished, and it's time to
 		// return the execution results.
-		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_ORCH, e.getData());
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_EDGE_ORCH, e.getData());
 
 		// If there are tasks waiting for execution
 		if (!getTasksQueue().isEmpty()) {
