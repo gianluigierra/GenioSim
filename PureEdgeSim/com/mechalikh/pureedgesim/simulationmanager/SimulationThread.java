@@ -216,9 +216,9 @@ public class SimulationThread {
 
 		// Initialize the Container orchestrator
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Container Orchestrator...");
-		//Constructor<?> orchestratorConstructor = simulation.orchestrator.getConstructor(SimulationManager.class);
-		//orchestratorConstructor.newInstance(simulationManager);
-		//SimLog.println(this.getClass().getSimpleName() + " - All modules were successfully launched...");
+		Constructor<?> cloudOrchestratorConstructor = simulation.cloudOrchestrator.getConstructor(SimulationManager.class);
+		cloudOrchestratorConstructor.newInstance(simulationManager);
+		SimLog.println(this.getClass().getSimpleName() + " - All modules were successfully launched...");
 		
 		// Generate tasks list
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task Generator...");
