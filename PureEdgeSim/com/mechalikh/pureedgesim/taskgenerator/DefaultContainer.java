@@ -248,6 +248,18 @@ public class DefaultContainer extends ContainerAbstract{
 
 	/**
 	 * 
+	 * Gets the size of the file for the Container and returns this Container.
+	 * 
+	 * @param requestSize the size of the file for the Container.
+	 * @return this Container.
+	 */
+	@Override
+	public double getFileSizeInBits() {
+		return this.fileSize;
+	}
+
+	/**
+	 * 
 	 * Sets the status of the Container.
 	 * 
 	 * @param status the status of the Container.

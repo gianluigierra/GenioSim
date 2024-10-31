@@ -136,6 +136,15 @@ public interface Container extends QueueElement {
 
 	/**
 	 * 
+	 * Gets the file size of the Container request in bits.
+	 * 
+	 * @param requestSize the file size of the task request to set in bits
+	 * @return the updated Task object
+	 */
+	double getFileSizeInBits();
+
+	/**
+	 * 
 	 * Sets the status of the Container.
 	 * 
 	 * @param status the status of the Container
