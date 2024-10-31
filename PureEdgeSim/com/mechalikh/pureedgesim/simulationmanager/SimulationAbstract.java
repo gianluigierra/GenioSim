@@ -36,7 +36,9 @@ import com.mechalikh.pureedgesim.taskgenerator.DefaultContainerGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.TaskGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.ContainerGenerator;
 import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultContainerOrchestrator;
 import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.ContainerOrchestrator;
 
 /**
  * An abstract class that represents the simulation environment
@@ -85,6 +87,13 @@ public abstract class SimulationAbstract {
 	 * @see #setCustomEdgeOrchestrator(Class)
 	 */
 	protected Class<? extends Orchestrator> orchestrator = DefaultOrchestrator.class;
+
+	/**
+	 * The CloudOrchestrator class that is used in the simulation.
+	 * 
+	 * @see #setCustomEdgeOrchestrator(Class)
+	 */
+	protected Class<? extends ContainerOrchestrator> cloudOrchestrator = DefaultContainerOrchestrator.class;
 	
 	/**
 	 * The Network Model class that is used in the simulation.
