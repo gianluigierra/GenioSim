@@ -79,6 +79,15 @@ public class DefaultTaskGenerator extends TaskGenerator {
 		return this.getTaskList();
 	}
 
+	public FutureQueue<Task> generateNewTasks(ComputingNode computingNode) {
+		// Get simulation time in minutes (excluding the current simulation time)
+		simulationTime = (SimulationParameters.simulationDuration / 60) - simulationManager.getSimulation().clockInMinutes();
+
+		generateTasksForDevice(computingNode, computingNode.getApplicationType());
+
+		return this.getTaskList();
+	}
+
 	/**
 	 * Generates tasks that will be offloaded during simulation for the given device
 	 * and application.

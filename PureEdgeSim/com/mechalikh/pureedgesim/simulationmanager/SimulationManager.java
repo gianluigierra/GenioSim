@@ -32,6 +32,7 @@ import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskorchestrator.ContainerOrchestrator;
 import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 
 /**
@@ -53,8 +54,11 @@ public abstract class SimulationManager extends SimEntity {
 	protected static final int PRINT_LOG = 1;
 	protected static final int SHOW_PROGRESS = 2;
 	public static final int EXECUTE_TASK = 3;
-	public static final int TRANSFER_RESULTS_TO_ORCH = 4;
-	public static final int RESULT_RETURN_FINISHED = 5;
+	public static final int DOWNLOAD_CONTAINER = 13;
+	public static final int TRANSFER_RESULTS_TO_EDGE_ORCH = 4;
+	public static final int TRANSFER_RESULTS_TO_CLOUD_ORCH = 14;
+	public static final int TASK_RESULT_RETURN_FINISHED = 5;
+	public static final int PLACEMENT_RESULT_RETURN_FINISHED = 15;
 	public static final int SEND_TO_EDGE_ORCH = 6;
 	public static final int SEND_TO_CLOUD_ORCH = 10;
 	public static final int UPDATE_REAL_TIME_CHARTS = 7;
@@ -63,6 +67,7 @@ public abstract class SimulationManager extends SimEntity {
 	protected static final int NEXT_BATCH = 9; 
 
 	protected Orchestrator edgeOrchestrator;
+	protected ContainerOrchestrator cloudOrchestrator;
 	protected DataCentersManager dataCentersManager;
 	protected SimulationVisualizer simulationVisualizer;
 	protected PureEdgeSim simulation;
@@ -130,6 +135,21 @@ public abstract class SimulationManager extends SimEntity {
 	public void setTaskList(FutureQueue<Task> taskList) {
 		this.taskList = taskList;
 	}
+
+	/**
+	 * Adds tasks to the list of ordered offlaoding requests
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationThread#loadModels(DefaultSimulationManager
+	 *      simulationManager)
+	 * 
+	 * @param taskList the ordered list of offlaoding requests.
+	 */
+	public void addTaskList(FutureQueue<Task> taskList) {
+		for(int i = taskList.size(); i > 0; i--){
+			this.taskList.add(taskList.first());
+			taskList.remove(taskList.first());
+		}
+	}
 	
 	/**
 	 * Sets the list of ordered plcaement requests
@@ -163,6 +183,20 @@ public abstract class SimulationManager extends SimEntity {
 	 */
 	public void setEdgeOrchestrator(Orchestrator edgeOrchestrator) {
 		this.edgeOrchestrator = edgeOrchestrator;
+
+	}
+
+	/**
+	 * Sets the Cloudorchestrator that is used in this simulation. Used when placing
+	 * the containers.
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationThread#loadModels(DefaultSimulationManager
+	 *      simulationManager)
+	 * 
+	 * @param cloudOrchestrator the Cloudorchestrator.
+	 */
+	public void setCloudOrchestrator(ContainerOrchestrator cloudOrchestrator) {
+		this.cloudOrchestrator = cloudOrchestrator;
 
 	}
 

@@ -60,7 +60,7 @@ public class ProgettoGenio {
 	    sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
 
 		//cambio il simulationManager con quello modificato da me
-		//sim.setCustomSimulationManager(MySimulationManager.class);
+		sim.setCustomSimulationManager(MySimulationManager.class);
 
 		//inizia la simulazione
 		sim.launchSimulation();
@@ -72,7 +72,7 @@ public class ProgettoGenio {
         List<Integer> rewardsList = new ArrayList<>();
         List<Double> failureRateList = new ArrayList<>();
         double avgFailureRate = 0;
-		int numberOfIterations = 5;
+		int numberOfIterations = 1;
 		String algName = "";
 
 		//10 iterazioni dell'algoritmo
