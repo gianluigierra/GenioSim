@@ -29,14 +29,18 @@ import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 public abstract class Orchestrator extends SimEntity {
 	public List<ComputingNode> nodeList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
+	protected List<Container> containerList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
 	protected SimulationManager simulationManager;
 	protected SimLog simLog;
 	protected String algorithmName;
 	protected String architectureName;
 	protected String[] architectureLayers;
+
+	protected static boolean printDebug = false;
 
 	protected Orchestrator(SimulationManager simulationManager) {
 		super(simulationManager.getSimulation());
@@ -174,7 +178,9 @@ public abstract class Orchestrator extends SimEntity {
 
 	protected void assignTaskToComputingNode(Task task, String[] architectureLayers) {
 
-		int nodeIndex = findComputingNode(architectureLayers, task);
+		int nodeIndex = 
+			//findComputingNode(architectureLayers, task);
+			findVmAssociatedWithTask(task);
 
 		if (nodeIndex != -1) {
 			ComputingNode node = nodeList.get(nodeIndex);
@@ -184,6 +190,7 @@ public abstract class Orchestrator extends SimEntity {
 				e.printStackTrace();
 			}
 
+			if(printDebug) System.out.println("ORCHESTRATORE EDGE: ho associato la " + nodeList.get(nodeIndex).getName() + " al task generato dal " + task.getEdgeDevice().getName());
 			// Send this task to this computing node
 			task.setOffloadingDestination(node);
 
@@ -270,6 +277,30 @@ public abstract class Orchestrator extends SimEntity {
 				);
 		}
 		else return offloadingpossible;
+	}
+
+	public void setContainerToVM(Container container){
+		//System.out.println("Sono l'SDN e ho ricevuto la richiesta di associare il container " + container.getId());
+		containerList.add(container);
+	}
+
+	public int findVmAssociatedWithTask(Task task){
+		//Ciclo tra tutti i container
+		for(Container container : containerList){
+			//se il nome dell'app associata al task ==  a quello associato al container
+			if(task.getAssociatedAppName().equals(container.getAssociatedAppName())){
+				//ciclo tra tutti gli edge device di quel container
+				for(ComputingNode edgeDevice : container.getEdgeDevices()){
+					//se il dispositivo che ha generato il container == dispositivo che ha generato il task
+					if(task.getEdgeDevice().equals(edgeDevice))
+						//prelevo la VM associata a quel container
+						for(int i = 0; i < nodeList.size(); i++)
+							if(nodeList.get(i).equals(container.getPlacementDestination()))
+								return i;	
+				}
+			}
+		}
+		return -1;
 	}
 
 	public abstract void resultsReturned(Task task);

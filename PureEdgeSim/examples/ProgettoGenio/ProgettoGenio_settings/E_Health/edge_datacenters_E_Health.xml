@@ -14,13 +14,13 @@
 				<cores>10</cores>
 				<mips>50000</mips>
 				<ram>64000</ram>
-				<storage>1000000</storage>
+				<storage>1000000</storage> <!-- in MB -->
 				<VMs>
 					<VM>
 						<cores>3</cores>
 						<mips>50000</mips>
-						<ram>19200</ram>
-						<storage>300000</storage>
+						<ram>19200</ram> <!-- in MB -->
+						<storage>300000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>

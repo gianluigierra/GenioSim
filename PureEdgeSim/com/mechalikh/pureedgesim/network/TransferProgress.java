@@ -27,7 +27,7 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public class TransferProgress {
 	public enum Type {
-		TASK, CONTAINER, RESULTS_TO_DEV, RESULTS_TO_ORCH, REQUEST
+		TASK, RESULTS_TO_DEV, RESULTS_TO_ORCH, REQUEST
 	}
 
 	protected Task task;

@@ -115,14 +115,14 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		}
 
 		//Connect each ONT to the cloud data center using WAN
-		// for(ComputingNode ONTDevice : computingNodesGenerator.getONT_List()) {
-		// 	NetworkLink ONTup;
-		// 	NetworkLink ONTdown;
-		// 	ONTup = new NetworkLinkWanUp(ONTDevice, wanNode, simulationManager, NetworkLinkTypes.WAN);
-		// 	ONTdown = new NetworkLinkWanDown(wanNode, ONTDevice, simulationManager, NetworkLinkTypes.WAN);
-		// 	infrastructureTopology.addLink(ONTup);
-		// 	infrastructureTopology.addLink(ONTdown);
-		// }
+		for(ComputingNode ONTDevice : computingNodesGenerator.getONT_List()) {
+			NetworkLink ONTup;
+			NetworkLink ONTdown;
+			ONTup = new NetworkLinkWanUp(ONTDevice, wanNode, simulationManager, NetworkLinkTypes.WAN);
+			ONTdown = new NetworkLinkWanDown(wanNode, ONTDevice, simulationManager, NetworkLinkTypes.WAN);
+			infrastructureTopology.addLink(ONTup);
+			infrastructureTopology.addLink(ONTdown);
+		}
 		
 		// Generate the topology of edge data centers from an XML file
 		generateTopologyFromXmlFile();
@@ -179,6 +179,7 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		
 		
 		//QUESTI DUE SOTTO SERVONO PER STAMPARE LA TOPOLOGIA
+		
 		// DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
 		// System.out.println("Nodi:");
         // for (ComputingNode node : graph.vertexSet()) {

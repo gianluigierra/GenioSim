@@ -274,7 +274,7 @@ public class SimLog {
 				+ " seconds (The total traffic: " + decimalFormat.format(totalTraffic) + " (MBytes) )");
 		print("                                                                         " + "  Wan="
 				+ padLeftSpaces(decimalFormat.format(totalWanUsage), 14) + " seconds ("
-				+ decimalFormat.format(totalWanUsage * 100 / (totalLanUsage + totalManUsage + totalWanUsage))
+				+ decimalFormat.format(totalWanUsage * 100 / (totalLanUsage + totalManUsage + totalWanUsage + totalFiberUsage))
 				+ " %% of total usage, WAN used when downloading containers="
 				+ decimalFormat.format(totalWanUsage == 0 ? 0 : containersWanUsage * 100 / totalWanUsage)
 				+ " %% of WAN usage )");
@@ -284,12 +284,14 @@ public class SimLog {
 				+ " %% of total usage, MAN used when downloading containers="
 				+ decimalFormat.format(totalManUsage == 0 ? 0 : containersManUsage * 100 / totalManUsage)
 				+ " %% of MAN usage )");
-		print("		Fiber= "+ padLeftSpaces(decimalFormat.format(totalFiberUsage), 14) + " seconds ("
+		print("                                                                         " + "  Fiber="
+				+ padLeftSpaces(decimalFormat.format(totalFiberUsage), 14) + " seconds ("
 				+ decimalFormat.format(totalFiberUsage * 100 / (totalLanUsage + totalManUsage + totalWanUsage + totalFiberUsage))
 				+ " %% of total usage, Fiber used when downloading containers="
 				+ decimalFormat.format(totalFiberUsage == 0 ? 0 : containersFiberUsage * 100 / totalFiberUsage)
 				+ " %% of Fiber usage )");
-		print("		Lan= "+ padLeftSpaces(decimalFormat.format(totalLanUsage), 14) + " seconds ("
+		print("                                                                         " + "  Lan= "
+				+ padLeftSpaces(decimalFormat.format(totalLanUsage), 14) + " seconds ("
 				+ decimalFormat.format(totalLanUsage * 100 / (totalLanUsage + totalManUsage + totalWanUsage + totalFiberUsage))
 				+ " %% of total usage, LAN used when downloading containers="
 				+ decimalFormat.format(containersLanUsage * 100 / totalLanUsage) + " %% of LAN usage )");
@@ -677,14 +679,6 @@ public class SimLog {
 		this.totalFiberUsage += transfer.getFiberNetworkUsage();
 		this.totalBandwidth += transfer.getAverageBandwidth() / 1000000; // bits/s to Mbits/s
 		this.totalTraffic += transfer.getFileSize() / 8000000; // bits to Mbytes
-
-		if (transfer.getTransferType() == TransferProgress.Type.CONTAINER) {
-			this.containersLanUsage += transfer.getLanNetworkUsage();
-			this.containersWanUsage += transfer.getWanNetworkUsage();
-			this.containersManUsage += transfer.getManNetworkUsage();
-			this.containersFiberUsage += transfer.getFiberNetworkUsage();
-		}
-		this.transfersCount++;
 
 	}
 

@@ -183,11 +183,12 @@ public abstract class ContainerOrchestrator extends SimEntity {
 				e.printStackTrace();
 			}
 
+			if(Orchestrator.printDebug) System.out.println("ORCHESTRATORE CLOUD: ho associato la " + nodeList.get(nodeIndex).getName() + " al container generato dal " + container.getEdgeDevice(0).getName());
 			// Send this task to this computing node
 			container.setPlacementDestination(node);
 
 			// Application has been deployed
-			container.getEdgeDevice(0).setApplicationPlacementLocation(node);
+			container.getEdgeDevice(container.getEdgeDevices().size() - 1).setApplicationPlacementLocation(node);
 			simLog.deepLog(simulationManager.getSimulation().clock() + ": " + this.getClass() + " Task: " + container.getId()
 					+ " assigned to " + node.getType() + " Computing Node: " + node.getId());
 
@@ -216,8 +217,12 @@ public abstract class ContainerOrchestrator extends SimEntity {
 		return false;
 	}
 
-	public boolean offloadingIsPossible(Container container, ComputingNode node, String[] architectureLayers) {					//modificato per visibilità degli agenti DQN, era protected
-		return true;
+	public boolean placementIsPossible(Container container, ComputingNode node, String[] architectureLayers) {					//modificato per visibilità degli agenti DQN, era protected
+		if(container.getContainerSizeInMBytes() <= node.getAvailableRam() && container.getContainerSizeInMBytes() <= node.getAvailableStorage())
+			return true;
+		else
+			return false;
+		
 	}
 
 	public abstract void resultsReturned(Container container);

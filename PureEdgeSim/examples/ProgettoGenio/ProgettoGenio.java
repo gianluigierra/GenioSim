@@ -57,7 +57,7 @@ public class ProgettoGenio {
 		}
 
         //cambio l'orchestratore con quello creatto da me
-	    sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
+	    //sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
 
 		//cambio il simulationManager con quello modificato da me
 		sim.setCustomSimulationManager(MySimulationManager.class);

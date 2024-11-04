@@ -185,7 +185,7 @@ public class MySimulationManager extends SimulationManager implements OnSimulati
 		case SEND_TO_CLOUD_ORCH:
 			container = (Container) ev.getData();
 			//TODO
-			System.out.println("Inviata la richiesta di placement al cloud: " + container.getId());
+			//System.out.println("Inviata la richiesta di placement al cloud: " + container.getId());
 			sendContainerRequestToCloudOrchestrator(container);
 			break;
 		case SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION:
@@ -212,7 +212,7 @@ public class MySimulationManager extends SimulationManager implements OnSimulati
 		case DOWNLOAD_CONTAINER:
 			// Placemenet request received by the destination, place the container.
 			container = (Container) ev.getData();
-			container.getPlacementDestination().submitContainerPlacement(container);;
+			container.getPlacementDestination().submitContainerPlacement(container);
 			cloudOrchestrator.notifyOrchestratorOfContainerExecution(container);
 			break;
 
@@ -227,6 +227,11 @@ public class MySimulationManager extends SimulationManager implements OnSimulati
 			// Task execution finished, transfer the results to the orchestrator.
 			//TODO implementare il metodo
 			sendResultsToCloudOchestrator((Container) ev.getData());
+			break;
+		case RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
+			//Container placement has finished and i notified the orchestrator.
+			//TODO implementare il metodo
+			edgeOrchestrator.setContainerToVM((Container) ev.getData());
 			break;
 		case TASK_RESULT_RETURN_FINISHED:
 			// Results returned to edge device.
@@ -459,13 +464,13 @@ public class MySimulationManager extends SimulationManager implements OnSimulati
 			simLog.incrementFailedBeacauseDeviceDead(task);
 			return setFailed(task, phase);
 		}
-		// If storage and ram are not sufficient to perform the task
-		if (phase == 2 && (task.getOffloadingDestination().getAvailableStorage() < task.getContainerSizeInMBytes()
-				|| task.getOffloadingDestination().getAvailableRam() < task.getContainerSizeInMBytes())) {
-			task.setFailureReason(Task.FailureReason.INSUFFICIENT_RESOURCES);
-			simLog.incrementTasksFailedLackOfRessources(task);
-			return setFailed(task, phase);
-		}
+		// If storage and ram are not sufficient to perform the task.															// //non si può verificare perchè istanzio i container prima
+		// if (phase == 2 && (task.getOffloadingDestination().getAvailableStorage() < task.getContainerSizeInMBytes()			// //di quando istanzio i task
+		// 		|| task.getOffloadingDestination().getAvailableRam() < task.getContainerSizeInMBytes())) {
+		// 	task.setFailureReason(Task.FailureReason.INSUFFICIENT_RESOURCES);
+		// 	simLog.incrementTasksFailedLackOfRessources(task);
+		// 	return setFailed(task, phase);
+		// }
 		// A simple representation of task failure due to
 		// device mobility, if the offloading destination location doesn't match
 		// the edge device location (that generated this task)

@@ -57,6 +57,7 @@ public abstract class SimulationManager extends SimEntity {
 	public static final int DOWNLOAD_CONTAINER = 13;
 	public static final int TRANSFER_RESULTS_TO_EDGE_ORCH = 4;
 	public static final int TRANSFER_RESULTS_TO_CLOUD_ORCH = 14;
+	public static final int RESULTS_FROM_CLOUD_TO_EDGE_ORCH = 16;
 	public static final int TASK_RESULT_RETURN_FINISHED = 5;
 	public static final int PLACEMENT_RESULT_RETURN_FINISHED = 15;
 	public static final int SEND_TO_EDGE_ORCH = 6;

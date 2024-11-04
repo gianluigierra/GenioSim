@@ -237,12 +237,12 @@ public class VM extends LocationAwareNode {
 		task.setArrivalTime(getSimulation().clock());
 
 		// Update the amount of available storage
-		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
+		//this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
 
 		this.Host.submitTask(task);
 
 		// If a CPU core and enough RAM are available, execute task directly
-		if (availableCores > 0 && this.getAvailableRam() > task.getContainerSizeInMBytes()) {
+		if (availableCores > 0 && this.getAvailableRam() >= getAssociatedContainerSizeInMBytes(task)) {
 			startExecution(task);
 		}
 		// Otherwise, add it to the execution queue
@@ -254,12 +254,13 @@ public class VM extends LocationAwareNode {
 	public void submitContainerPlacement(Container container) {
 
 		//TODO devo implementare il metodo
+		container.setStatus(Container.Status.PLACED);
 		containerList.add(container);
 
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
 
-		System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement. ContainerList.size = " + containerList.size());
+		//System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement. ContainerList.size = " + containerList.size());
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
 	}
 
@@ -268,7 +269,8 @@ public class VM extends LocationAwareNode {
 		// Update the CPU utilization.
 		addCpuUtilization(task);
 		// Update the amount of RAM.
-		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
+		//setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
+		setAvailableRam(this.getAvailableRam() - getAssociatedContainerSizeInMBytes(task));
 		// Update the number of available cores.
 		availableCores--;
 
@@ -303,14 +305,23 @@ public class VM extends LocationAwareNode {
 		return mipsPerCore;
 	}
 
+	double getAssociatedContainerSizeInMBytes(Task task){
+		for(Container container : containerList)
+			for(ComputingNode computingnode : container.getEdgeDevices())
+				if(task.getEdgeDevice().equals(computingnode))
+					return container.getContainerSizeInMBytes();
+		return 0.0;
+	}
+
 	protected void executionFinished(Event e) {
 
 		// The execution of one task has been finished, free one more CPU core.
 		availableCores++;
 		// Free the RAM that has been used by the finished task.
-		setAvailableRam(this.getAvailableRam() + ((Task) e.getData()).getContainerSizeInMBytes());
+		//setAvailableRam(this.getAvailableRam() + ((Task) e.getData()).getContainerSizeInMBytes());
+		setAvailableRam(this.getAvailableRam() + getAssociatedContainerSizeInMBytes((Task) e.getData()));
 		// Free the storage that has been used by the finished task.
-		setAvailableStorage(this.getAvailableStorage() + ((Task) e.getData()).getContainerSizeInMBytes());
+		//setAvailableStorage(this.getAvailableStorage() + ((Task) e.getData()).getContainerSizeInMBytes());
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
 

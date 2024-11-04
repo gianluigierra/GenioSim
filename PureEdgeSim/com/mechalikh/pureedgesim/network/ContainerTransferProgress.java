@@ -27,7 +27,7 @@ import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 public class ContainerTransferProgress{
 	public enum Type {
-		REQUEST_TO_DOWNLOAD, CONTAINER, RESULTS_TO_DEV, RESULTS_TO_ORCH, REQUEST
+		CONTAINER, RESULTS_TO_DEV, RESULTS_TO_ORCH, RESULT_FROM_CLOUD_TO_EDGE, REQUEST
 	}
 
 	protected Container container;

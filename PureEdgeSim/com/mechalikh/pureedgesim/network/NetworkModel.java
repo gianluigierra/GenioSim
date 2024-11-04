@@ -47,6 +47,7 @@ public abstract class NetworkModel extends SimEntity {
 	public static final int SEND_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH = 14;
 	public static final int SEND_RESULT_TO_EDGE_ORCH = 6;
 	public static final int SEND_RESULT_TO_CLOUD_ORCH = 16;
+	public static final int SEND_RESULT_FROM_CLOUD_TO_EDGE_ORCH = 18;
 	public static final int SEND_RESULT_FROM_EDGE_ORCH_TO_DEV = 7;
 	public static final int SEND_RESULT_FROM_CLOUD_ORCH_TO_DEV = 17;
 	// the list where the current (and the previous)

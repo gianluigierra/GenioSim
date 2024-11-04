@@ -59,7 +59,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		ComputingNode node; // get best computing node for this task
 		for (int i = 0; i < nodeList.size(); i++) {
 			node = nodeList.get(i);
-			if (offloadingIsPossible(container, node, architecture)) {
+			if (placementIsPossible(container, node, architecture)) {
 				// the weight below represent the priority, the less it is, the more it is //
 				// suitable for offlaoding, you can change it as you want
 				double weight = 0.0;
@@ -95,7 +95,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		int selected = -1;
 		int minTasksCount = -1; // Computing node with minimum assigned tasks.
 		for (int i = 0; i < nodeList.size(); i++) {
-			if (offloadingIsPossible(container, nodeList.get(i), architecture)
+			if (placementIsPossible(container, nodeList.get(i), architecture)
 					&& (minTasksCount == -1 || minTasksCount > historyMap.get(i))) {
 				minTasksCount = historyMap.get(i);
 				// if this is the first time,
@@ -115,13 +115,13 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
         double bestnumberofcores = 0;
         for(int i = 0; i < nodeList.size(); i++){
             //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
-            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(container, nodeList.get(i), architecture)){
+            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && placementIsPossible(container, nodeList.get(i), architecture)){
                 bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
                 bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
                 selected = i;
             }
             //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
-            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(container, nodeList.get(i), architecture)){
+            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && placementIsPossible(container, nodeList.get(i), architecture)){
                 bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
                 bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
                 selected = i;
@@ -133,8 +133,9 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 
 	@Override
 	public void resultsReturned(Container container) {
-		// Do something with the task that has been finished
-		System.out.println("Sono il nodo e sono stato notificato del download del container " + container.getId() + " da parte del nodo " + container.getPlacementDestination().getName());
+		// Viene triggerato quando il nodo dovrebbe avere ricevuto la notifica del download del container.
+
+		//System.out.println("Sono il nodo e sono stato notificato del download del container " + container.getId() + " da parte del nodo " + container.getPlacementDestination().getName());
 	}
  
 	@Override
@@ -145,7 +146,9 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 
 	@Override
 	public void notifyOrchestratorOfContainerExecution(Container container) {
-		System.out.println("Sono l'orchestratore e sono stato notificato del download del container " + container.getId() + " da parte del nodo " + container.getPlacementDestination().getName());
+		//Arriva quando l'orchestratore viene notificato del placement del container
+		
+		//System.out.println("Sono l'orchestratore e sono stato notificato del download del container " + container.getId() + " da parte del nodo " + container.getPlacementDestination().getName());
 	}
 
 }
