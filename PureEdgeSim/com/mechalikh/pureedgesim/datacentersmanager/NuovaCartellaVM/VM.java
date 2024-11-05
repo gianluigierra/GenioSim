@@ -253,15 +253,28 @@ public class VM extends LocationAwareNode {
 	@Override
 	public void submitContainerPlacement(Container container) {
 
-		//TODO devo implementare il metodo
 		container.setStatus(Container.Status.PLACED);
-		containerList.add(container);
 
-		// Update the amount of available storage
-		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+		//se il container è del tipo shared allora aggiungo l'edge device al container già piazzato
+		if(container.getSharedContainer())
+			for(Container cont : containerList)
+				if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
+					cont.addEdgeDevice(container.getEdgeDevice(container.getEdgeDevices().size()-1));
+		//altrimenti
+		else{
+			// Aggiungo il container alla lista
+			containerList.add(container);
+			// Update the amount of available storage
+			this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+		}
 
 		//System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement. ContainerList.size = " + containerList.size());
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
+	}
+	
+	@Override
+	public List<Container> getContainerList(){
+		return this.containerList;
 	}
 
 	protected void startExecution(Task task) {

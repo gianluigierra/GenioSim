@@ -49,7 +49,7 @@ public class ApplicationFileParser extends XmlFileParser {
 				Element appElement = (Element) appNode;
 				isAttributePresent(appElement, "name");				//MODIFICA MIA, c'era scritto attribtue...
 
-				for (String element : List.of("type", "latency", "usage_percentage", "container_size", "request_size",
+				for (String element : List.of("type", "latency", "usage_percentage", "container_size", "container_request_size", "shared", "request_size",
 						"results_size", "task_length", "rate"))
 					isElementPresent(appElement, element);
 
@@ -60,6 +60,13 @@ public class ApplicationFileParser extends XmlFileParser {
 				// The size of the container (bits).
 				long containerSize = (long) (8000 * assertDouble(appElement, "container_size", value -> (value > 0),
 						condition + appElement.getAttribute("name") + application + file));
+
+				// Average request size (bits).
+				long containerRequestSize = (long) (8000 * assertDouble(appElement, "container_request_size", value -> (value > 0),
+						condition + appElement.getAttribute("name") + application + file));
+
+				// If the container can be shared.
+				boolean sharedContainer = Boolean.parseBoolean(appElement.getElementsByTagName("shared").item(0).getTextContent());
 
 				// Average request size (bits).
 				long requestSize = (long) (8000 * assertDouble(appElement, "request_size", value -> (value > 0),
@@ -89,7 +96,7 @@ public class ApplicationFileParser extends XmlFileParser {
 
 				// Save applications parameters.
 				SimulationParameters.applicationList.add(new Application(name, type, rate, usagePercentage, latency,
-						containerSize, requestSize, resultsSize, taskLength));
+						containerSize, containerRequestSize, sharedContainer, requestSize, resultsSize, taskLength));
 			}
 
 		} catch (Exception e) {

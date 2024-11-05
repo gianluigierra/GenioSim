@@ -22,6 +22,8 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
@@ -31,15 +33,30 @@ import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();
+	public Map<Integer, List<Container>> ContainerMap = new LinkedHashMap<>();
 
 	public DefaultContainerOrchestrator(SimulationManager simulationManager) {
 		super(simulationManager);
 		// Initialize the history map
-		for (int i = 0; i < nodeList.size(); i++)
+		for (int i = 0; i < nodeList.size(); i++){
 			historyMap.put(i, 0);
+			ContainerMap.put(i, new ArrayList<Container>());
+		}
 	}
 
 	protected int findComputingNode(String[] architecture, Container container) {
+
+		//se il container è del tipo "shared"
+		if(container.getSharedContainer())
+			//controlla tra tutti i nodi 
+			for(int i = 0; i < nodeList.size(); i++)
+				//se è presente un container con lo stesso nome di App di quello appena arrivato
+				for(Container cont : ContainerMap.get(i))
+					if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
+						//returno la VM verso la quale è stato piazzato quel container
+						return i;
+		
+		//altrimenti piazzo il container
 		if ("ROUND_ROBIN".equals(algorithmName)) {
 			return roundRobin(architecture, container);
 		} else if ("TRADE_OFF".equals(algorithmName)) {
@@ -85,8 +102,10 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 				}
 			}
 		}
-		if (selected != -1)
+		if (selected != -1){
 			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
+			ContainerMap.get(selected).add(container);
+		}
 		// node
 		return selected;
 	}
@@ -105,6 +124,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 		// Assign the tasks to the obtained computing node.
 		historyMap.put(selected, minTasksCount + 1);
+		ContainerMap.get(selected).add(container);
 
 		return selected;
 	}
@@ -127,7 +147,10 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
                 selected = i;
             }
         }
-        if("GREEDY".equals(algorithmName)) historyMap.put(selected, historyMap.get(selected) + 1);
+        if("GREEDY".equals(algorithmName)){
+			historyMap.put(selected, historyMap.get(selected) + 1);
+			ContainerMap.get(selected).add(container);
+		}
         return selected;
     }
 

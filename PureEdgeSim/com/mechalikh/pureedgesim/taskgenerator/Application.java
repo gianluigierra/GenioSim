@@ -51,6 +51,16 @@ public class Application {
 	protected long containerSize;
 
 	/**
+	 * whether the container that this application runs in can be shared across multiple devices
+	 */
+	protected boolean sharedContainer;
+
+	/**
+	 * The size of the request of the container that this application runs in, in bits
+	 */
+	protected long containerRequestSize;
+
+	/**
 	 * The size of the request that is sent to the application, in bits
 	 */
 	protected long requestSize;
@@ -99,7 +109,7 @@ public class Application {
 	 * @param taskLength      the length of time it takes for the application to
 	 *                        execute, in MI (Mega-Instructions)
 	 */
-	public Application(String name, String type, int rate, double usagePercentage, double latency, long containerSize,
+	public Application(String name, String type, int rate, double usagePercentage, double latency, long containerSize, long containerRequestSize, boolean shared,
 			long requestSize, long resultsSize, double taskLength) {
 		setName(name);
 		setType(type);
@@ -107,6 +117,8 @@ public class Application {
 		setUsagePercentage(usagePercentage);
 		setLatency(latency);
 		setContainerSize(containerSize);
+		setContainerRequestSize(containerRequestSize);
+		setSharedContainer(shared);
 		setRequestSize(requestSize);
 		setResultsSize(resultsSize);
 		setTaskLength(taskLength);
@@ -166,6 +178,46 @@ public class Application {
 	 */
 	public void setContainerSize(long containerSize) {
 		this.containerSize = containerSize;
+	}
+
+	/**
+	 * 
+	 * Returns the size of the request in bits.
+	 * 
+	 * @return the size of the request in bits
+	 */
+	public long getContainerRequestSize() {
+		return containerRequestSize;
+	}
+
+	/**
+	 * 
+	 * Sets the size of the request in bits.
+	 * 
+	 * @param containerRequestSize the size of the request in bits
+	 */
+	public void setContainerRequestSize(long containerRequestSize) {
+		this.containerRequestSize = containerRequestSize;
+	}
+
+	/**
+	 * 
+	 * Returns wether the container can be shared or not.
+	 * 
+	 * @return the boolean
+	 */
+	public boolean getSharedContainer() {
+		return sharedContainer;
+	}
+
+	/**
+	 * 
+	 * Sets wether the container can be shared or not.
+	 * 
+	 * @param sharedContainer the boolean
+	 */
+	public void setSharedContainer(boolean sharedContainer) {
+		this.sharedContainer = sharedContainer;
 	}
 
 	/**

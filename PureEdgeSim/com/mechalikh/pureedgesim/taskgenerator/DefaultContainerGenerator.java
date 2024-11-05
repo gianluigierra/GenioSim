@@ -75,9 +75,13 @@ public class DefaultContainerGenerator extends ContainerGenerator {
 	protected void insert(int time, int app, ComputingNode dev) {
 		Application appParams = SimulationParameters.applicationList.get(app);                  
 		long containerSize = appParams.getContainerSizeInBits();
+		long containerRequestSize = appParams.getContainerRequestSize();
+		boolean sharedContainer = appParams.getSharedContainer();
 		String Name = appParams.getName();
 
-		Container container = createContainer(++id).setAssociatedAppName(Name).setContainerSizeInBits(containerSize).setApplicationID(app).addEdgeDevice(dev);
+		Container container = createContainer(++id).setAssociatedAppName(Name).setContainerSizeInBits(containerSize)
+												   .setFileSizeInBits(containerRequestSize).setSharedContainer(sharedContainer)
+												   .setApplicationID(app).addEdgeDevice(dev);
 
 		time += 0;
 		container.setTime(time);

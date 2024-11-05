@@ -49,6 +49,11 @@ public class DefaultContainer extends ContainerAbstract{
 	*/
    protected long fileSize;
 
+	/**
+	 * Wether the container must be shared or not
+	 */
+	protected boolean sharedContainer;
+
    /**
 	* The orchestrator node that will manage the placement of this Container.
 	*/
@@ -256,6 +261,31 @@ public class DefaultContainer extends ContainerAbstract{
 	@Override
 	public double getFileSizeInBits() {
 		return this.fileSize;
+	}
+
+	/**
+	 * 
+	 * Sets wether the container must be shared among edge devices.
+	 * 
+	 * @param sharedContainer.
+	 * @return this Container.
+	 */
+	@Override
+	public Container setSharedContainer(boolean sharedContainer) {
+		this.sharedContainer = sharedContainer;
+		return this;
+	}
+
+	/**
+	 * 
+	 * Gets wether the container must be shared among edge devices.
+	 * 
+	 * @param requestSize.
+	 * @return this Container.
+	 */
+	@Override
+	public boolean getSharedContainer() {
+		return this.sharedContainer;
 	}
 
 	/**

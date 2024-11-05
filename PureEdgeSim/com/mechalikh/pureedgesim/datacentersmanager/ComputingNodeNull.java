@@ -1,6 +1,8 @@
 package com.mechalikh.pureedgesim.datacentersmanager;
 
 import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.mechalikh.pureedgesim.energy.EnergyModelComputingNode;
 import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
@@ -662,6 +664,12 @@ public class ComputingNodeNull implements ComputingNode {
 
 	@Override
 	public void submitContainerPlacement(Container container) {
+	}
+	
+	@Override
+	public List<Container> getContainerList(){
+		List<Container> lista = new ArrayList<Container>();
+		return lista;
 	}
 
 }

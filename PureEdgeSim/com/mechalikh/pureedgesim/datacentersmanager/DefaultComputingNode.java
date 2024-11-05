@@ -270,6 +270,13 @@ public class DefaultComputingNode extends LocationAwareNode {
 		//TODO devo implementare il metodo
 		System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement");
 	}
+	
+	@Override
+	public List<Container> getContainerList(){
+		List<Container> lista = new ArrayList<Container>();
+		return lista;
+	}
+
 
 	protected void startExecution(Task task) {
 

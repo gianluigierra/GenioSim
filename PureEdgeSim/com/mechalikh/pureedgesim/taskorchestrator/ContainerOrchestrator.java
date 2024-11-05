@@ -183,7 +183,7 @@ public abstract class ContainerOrchestrator extends SimEntity {
 				e.printStackTrace();
 			}
 
-			if(Orchestrator.printDebug) System.out.println("ORCHESTRATORE CLOUD: ho associato la " + nodeList.get(nodeIndex).getName() + " al container generato dal " + container.getEdgeDevice(0).getName());
+			if(Orchestrator.printDebug) System.out.println("ORCHESTRATORE CLOUD: ho associato la " + nodeList.get(nodeIndex).getName() + " al container generato dal " + container.getEdgeDevice(0).getName() + ", shared = " + container.getSharedContainer());
 			// Send this task to this computing node
 			container.setPlacementDestination(node);
 

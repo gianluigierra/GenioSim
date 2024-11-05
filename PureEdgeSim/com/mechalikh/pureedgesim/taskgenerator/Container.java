@@ -145,6 +145,24 @@ public interface Container extends QueueElement {
 
 	/**
 	 * 
+	 * Sets wether the container must be shared among edge devices.
+	 * 
+	 * @param sharedContainer.
+	 * @return this Container.
+	 */
+	Container setSharedContainer(boolean sharedContainer);
+
+	/**
+	 * 
+	 * Gets wether the container must be shared among edge devices.
+	 * 
+	 * @param requestSize.
+	 * @return this Container.
+	 */
+	public boolean getSharedContainer();
+
+	/**
+	 * 
 	 * Sets the status of the Container.
 	 * 
 	 * @param status the status of the Container

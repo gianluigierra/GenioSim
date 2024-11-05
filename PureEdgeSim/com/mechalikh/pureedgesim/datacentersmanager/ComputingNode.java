@@ -79,6 +79,13 @@ public interface ComputingNode {
 	void submitContainerPlacement(Container container);
 
 	/**
+	 * To get the containers placed on this compuingNode
+	 * 
+	 * @return
+	 */
+	List<Container> getContainerList();
+
+	/**
 	 * Gets the type of this computing node, e.g.
 	 * {@link SimulationParameters.TYPES#CLOUD},
 	 * {@link SimulationParameters.TYPES#EDGE_DATACENTER}, or
