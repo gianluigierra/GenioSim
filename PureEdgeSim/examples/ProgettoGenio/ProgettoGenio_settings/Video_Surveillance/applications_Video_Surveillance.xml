@@ -1,13 +1,13 @@
 <applications>
-<application name="Video_Surveillance">
+	<application name="Smart Lights">
 		<type>Normal</type>
-		<rate>60</rate>
+		<rate>2</rate>
 		<usage_percentage>100</usage_percentage>
-		<latency>0.2</latency> <!-- a great number represents no latency-sensitivity -->
-		<container_size>500</container_size>
-		<request_size>750</request_size>
-		<results_size>500</results_size>
-		<task_length>5000</task_length>
+		<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
+		<container_size>10</container_size>
+		<request_size>1</request_size>
+		<results_size>10</results_size>
+		<task_length>500</task_length>
 	</application>
 </applications>
 

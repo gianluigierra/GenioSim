@@ -4,7 +4,7 @@
 		<rate>60</rate>
 		<usage_percentage>100</usage_percentage>
 		<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
-		<container_size>1000000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
+		<container_size>6400000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 		<request_size>10</request_size> <!-- La size della request rappresentata in KB -->
 		<results_size>10</results_size> <!-- La size del risultato rappresentato in KB -->
 		<task_length>1000</task_length>

@@ -73,31 +73,34 @@ public class Example7CustomNetworkModel extends DefaultNetworkModel {
 		super(simulationManager);
 	}
 
-	@Override
-	protected void transferFinished(TransferProgress transfer) {
-		if (transfer.getTransferType() == TransferProgress.Type.TASK && SimulationParameters.enableRegistry
-				&& "CACHE".equals(SimulationParameters.registryMode)) {
-			// the offloading request has been received, now pull the container in order to
-			// execute the task
-			pullContainer(transfer.getTask());
 
-			updateEdgeDevicesRemainingEnergy(transfer, transfer.getTask().getEdgeDevice(),
-					transfer.getTask().getOffloadingDestination());
+	//NON ERA COMMENTATA, COMMENTATA PERCHE' DAVA ERRORE DAL MOMENTO CHE UTILIZZA DEI METODI ELIMINATI
 
-		} else if (transfer.getTransferType() == TransferProgress.Type.CONTAINER) {
+	// @Override
+	// protected void transferFinished(TransferProgress transfer) {
+	// 	if (transfer.getTransferType() == TransferProgress.Type.TASK && SimulationParameters.enableRegistry
+	// 			&& "CACHE".equals(SimulationParameters.registryMode)) {
+	// 		// the offloading request has been received, now pull the container in order to
+	// 		// execute the task
+	// 		pullContainer(transfer.getTask());
 
-			// the container has been downloaded, keep it in cache
-			keepReplica(transfer.getTask());
+	// 		updateEdgeDevicesRemainingEnergy(transfer, transfer.getTask().getEdgeDevice(),
+	// 				transfer.getTask().getOffloadingDestination());
 
-			// execute the task
-			containerDownloadFinished(transfer);
+	// 	} else if (transfer.getTransferType() == TransferProgress.Type.CONTAINER) {
 
-			updateEdgeDevicesRemainingEnergy(transfer, transfer.getTask().getRegistry(),
-					transfer.getTask().getEdgeDevice());
+	// 		// the container has been downloaded, keep it in cache
+	// 		keepReplica(transfer.getTask());
 
-		} else // use the default method to handle everything else
-			super.transferFinished(transfer);
-	}
+	// 		// execute the task
+	// 		containerDownloadFinished(transfer);
+
+	// 		updateEdgeDevicesRemainingEnergy(transfer, transfer.getTask().getRegistry(),
+	// 				transfer.getTask().getEdgeDevice());
+
+	// 	} else // use the default method to handle everything else
+	// 		super.transferFinished(transfer);
+	// }
 
 	private void keepReplica(Task task) {
 

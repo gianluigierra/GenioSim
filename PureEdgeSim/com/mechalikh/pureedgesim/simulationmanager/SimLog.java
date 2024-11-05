@@ -411,9 +411,9 @@ public class SimLog {
 
 		print("Energy Consumption per network                                          :  WAN="
 				+ padLeftSpaces(decimalFormat.format(wan), 14) + " Wh");
-		print("		FIBER= "
-				+ padLeftSpaces(decimalFormat.format(fiber), 14) + " Wh ");
-		print("		MAN= "
+		print("                                                                           FIBER="
+				+ padLeftSpaces(decimalFormat.format(fiber), 12) + " Wh ");
+		print("                                                                           WAN="
 				+ padLeftSpaces(decimalFormat.format(man), 14) + " Wh ");
 		print("                                                                           LAN="
 				+ padLeftSpaces(decimalFormat.format(lan), 14) + " Wh ");
