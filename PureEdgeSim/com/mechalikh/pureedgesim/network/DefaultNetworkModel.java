@@ -148,7 +148,10 @@ public class DefaultNetworkModel extends NetworkModel {
 	}
 
 	public void sendContainerFromCloudOrchToDest(Container container) {
-		sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getContainerSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
+		//se il container non è già stato piazzato allora invio tutto il container
+		if(container.getStatus().equals(Container.Status.NOT_PLACED)) sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getContainerSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
+		//se il container è già stato piazzato poichè è "shared" allora non invio tutto il container ma solo la request
+		else sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
 	}
 
 	public void sendResultFromEdgeOrchToDev(Task task) {

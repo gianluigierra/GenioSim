@@ -28,7 +28,7 @@ public class ProgettoGenio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// cambio la modalità di esecuzione
-		String exampleMode = "Video_Surveillance";
+		String exampleMode = "E_Health";
 
 		switch (exampleMode) {
 			case "Smart_Lights":

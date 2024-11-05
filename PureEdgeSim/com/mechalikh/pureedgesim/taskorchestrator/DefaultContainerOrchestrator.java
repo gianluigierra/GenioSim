@@ -52,9 +52,12 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			for(int i = 0; i < nodeList.size(); i++)
 				//se è presente un container con lo stesso nome di App di quello appena arrivato
 				for(Container cont : ContainerMap.get(i))
-					if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
+					if(cont.getAssociatedAppName().equals(container.getAssociatedAppName())){
+						//setto il container come PLACED
+						container.setStatus(Container.Status.PLACED);
 						//returno la VM verso la quale è stato piazzato quel container
 						return i;
+					}
 		
 		//altrimenti piazzo il container
 		if ("ROUND_ROBIN".equals(algorithmName)) {

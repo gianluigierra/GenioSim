@@ -24,7 +24,7 @@
 		<container>
 			<container_size>1000000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
-			<shared>false</shared> <!-- se il container deve essere usato da più edge device diversi -->
+			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
 		</container>
 		<task>
 			<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
