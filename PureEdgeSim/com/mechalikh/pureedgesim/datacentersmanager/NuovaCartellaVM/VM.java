@@ -277,6 +277,7 @@ public class VM extends LocationAwareNode {
 			containerList.add(container);
 			// Update the amount of available storage
 			this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+			this.Host.submitContainerPlacement(container);
 		}
 
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
