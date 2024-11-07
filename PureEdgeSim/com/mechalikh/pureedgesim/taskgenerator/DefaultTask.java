@@ -234,37 +234,6 @@ public class DefaultTask extends TaskAbstract {
 	}
 
 	/**
-	 * Sets the container size for the task in bits.
-	 *
-	 * @param containerSize The container size in bits.
-	 */
-	@Override
-	public Task setContainerSizeInBits(long containerSize) {
-		this.containerSize = containerSize;
-		return this;
-	}
-
-	/**
-	 * Returns the container size for the task in bits.
-	 *
-	 * @return The container size in bits.
-	 */
-	@Override
-	public long getContainerSizeInBits() {
-		return containerSize;
-	}
-
-	/**
-	 * Returns the container size for the task in megabytes.
-	 *
-	 * @return The container size in megabytes.
-	 */
-	@Override
-	public double getContainerSizeInMBytes() {
-		return containerSize / 8000000.0;
-	}
-
-	/**
 	 * Returns the orchestrator for the task. If no orchestrator has been set, the
 	 * edge device is set as the orchestrator.
 	 *
@@ -288,29 +257,6 @@ public class DefaultTask extends TaskAbstract {
 	@Override
 	public void setOrchestrator(ComputingNode orchestrator) {
 		this.orchestrator = orchestrator;
-	}
-
-	/**
-	 * 
-	 * Returns the computing node registry.
-	 * 
-	 * @return the computing node registry.
-	 */
-	@Override
-	public ComputingNode getRegistry() {
-		return registry;
-	}
-
-	/**
-	 * 
-	 * Sets the computing node registry.
-	 * 
-	 * @param registry the computing node registry.
-	 */
-	@Override
-	public Task setRegistry(ComputingNode registry) {
-		this.registry = registry;
-		return this;
 	}
 
 	/**

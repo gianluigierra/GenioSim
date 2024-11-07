@@ -28,7 +28,7 @@ public class ProgettoGenio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// cambio la modalità di esecuzione
-		String exampleMode = "E_Health";
+		String exampleMode = "Video_Surveillance";
 
 		switch (exampleMode) {
 			case "Smart_Lights":
@@ -58,9 +58,6 @@ public class ProgettoGenio {
 
         //cambio l'orchestratore con quello creatto da me
 	    //sim.setCustomEdgeOrchestrator(CustomOrchestrator.class);
-
-		//cambio il simulationManager con quello modificato da me
-		sim.setCustomSimulationManager(MySimulationManager.class);
 
 		//inizia la simulazione
 		sim.launchSimulation();

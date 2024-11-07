@@ -215,53 +215,11 @@ public interface Task extends QueueElement {
 
 	/**
 	 * 
-	 * Sets the container size of the task in bits.
-	 * 
-	 * @param containerSize the container size to set in bits
-	 * @return the updated Task object
-	 */
-	Task setContainerSizeInBits(long containerSize);
-
-	/**
-	 * 
-	 * Gets the container size of the task in bits.
-	 * 
-	 * @return the container size of the task in bits
-	 */
-	long getContainerSizeInBits();
-
-	/**
-	 * 
-	 * Gets the container size of the task in megabytes.
-	 * 
-	 * @return the container size of the task in megabytes
-	 */
-	double getContainerSizeInMBytes();
-
-	/**
-	 * 
 	 * Gets the orchestrator associated with the task.
 	 * 
 	 * @return the orchestrator associated with the task
 	 */
 	ComputingNode getOrchestrator();
-
-	/**
-	 * 
-	 * Gets the registry associated with the task.
-	 * 
-	 * @return the registry associated with the task
-	 */
-	ComputingNode getRegistry();
-
-	/**
-	 * 
-	 * Sets the registry associated with the task.
-	 * 
-	 * @param registry the registry to set
-	 * @return the updated Task object
-	 */
-	Task setRegistry(ComputingNode registry);
 
 	/**
 	 * 
