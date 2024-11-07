@@ -343,7 +343,7 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			
 		} else if (type == SimulationParameters.TYPES.ONT){
 			String name = deviceElement.getAttribute("name");
-			computingNode.setName(name + "id " + ONTcount);
+			computingNode.setName(name + " " + ONTcount);
 			
 			//set ONT location near the edge device 
 			double xPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getXPos() + random.nextInt(2)+1;

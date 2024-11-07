@@ -51,6 +51,7 @@ public class DefaultComputingNode extends LocationAwareNode {
 	protected int numberOfCPUCores;
 	protected int availableCores;
 	protected List<Task> tasksQueue = new ArrayList<>();
+	protected List<Container> containerList = new ArrayList<>();
 	protected double availableRam; // in Megabytes
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
@@ -253,10 +254,10 @@ public class DefaultComputingNode extends LocationAwareNode {
 		task.setArrivalTime(getSimulation().clock());
 
 		// Update the amount of available storage
-		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
+		//this.setAvailableStorage(this.availableStorage - getAssociatedContainerSizeInMBytes(task));
 
 		// If a CPU core and enough RAM are available, execute task directly
-		if (availableCores > 0 && this.getAvailableRam() > task.getContainerSizeInMBytes()) {
+		if (availableCores > 0 && this.getAvailableRam() > getAssociatedContainerSizeInMBytes(task)) {
 			startExecution(task);
 		}
 		// Otherwise, add it to the execution queue
@@ -267,23 +268,44 @@ public class DefaultComputingNode extends LocationAwareNode {
 	@Override
 	public void submitContainerPlacement(Container container) {
 
-		//TODO devo implementare il metodo
-		System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement");
+		container.setStatus(Container.Status.PLACED);
+
+		//se il container è del tipo shared allora aggiungo l'edge device al container già piazzato
+		if(container.getSharedContainer())
+			for(Container cont : containerList)
+				if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
+					cont.addEdgeDevice(container.getEdgeDevice(container.getEdgeDevices().size()-1));
+		//altrimenti
+		else{
+			// Aggiungo il container alla lista
+			containerList.add(container);
+			// Update the amount of available storage
+			this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+		}
+
+		//System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement. ContainerList.size = " + containerList.size());
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
+	}
+
+	double getAssociatedContainerSizeInMBytes(Task task){
+		for(Container container : containerList)
+			for(ComputingNode computingnode : container.getEdgeDevices())
+				if(task.getEdgeDevice().equals(computingnode))
+					return container.getContainerSizeInMBytes();
+		return 0.0;
 	}
 	
 	@Override
 	public List<Container> getContainerList(){
-		List<Container> lista = new ArrayList<Container>();
-		return lista;
+		return this.containerList;
 	}
-
 
 	protected void startExecution(Task task) {
 
 		// Update the CPU utilization.
 		addCpuUtilization(task);
 		// Update the amount of RAM.
-		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
+		setAvailableRam(this.getAvailableRam() - getAssociatedContainerSizeInMBytes(task));
 		// Update the number of available cores.
 		availableCores--;
 		// Record when the execution has started.
@@ -320,9 +342,9 @@ public class DefaultComputingNode extends LocationAwareNode {
 		// The execution of one task has been finished, free one more CPU core.
 		availableCores++;
 		// Free the RAM that has been used by the finished task.
-		setAvailableRam(this.getAvailableRam() + ((Task) e.getData()).getContainerSizeInMBytes());
+		setAvailableRam(this.getAvailableRam() + getAssociatedContainerSizeInMBytes((Task) e.getData()));
 		// Free the storage that has been used by the finished task.
-		setAvailableStorage(this.getAvailableStorage() + ((Task) e.getData()).getContainerSizeInMBytes());
+		//setAvailableStorage(this.getAvailableStorage() + getAssociatedContainerSizeInMBytes((Task) e.getData()));
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
 
