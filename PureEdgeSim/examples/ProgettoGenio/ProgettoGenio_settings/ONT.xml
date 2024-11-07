@@ -4,10 +4,10 @@
 		<idleConsumption>0</idleConsumption>
 		<maxConsumption>0</maxConsumption>
 		<isOrchestrator>false</isOrchestrator>
-		<cores>0</cores>
-		<mips>0</mips>
-		<ram>0</ram>
-		<storage>0</storage>
+		<cores>4</cores>
+		<mips>6000</mips>
+		<ram>6400</ram> <!-- Valore in MB -->
+		<storage>100000</storage> <!-- Valore in MB -->
 	</ONTDevice>
 	<network_links>
 		<!-- To create a topology add links here. See example 3 -->

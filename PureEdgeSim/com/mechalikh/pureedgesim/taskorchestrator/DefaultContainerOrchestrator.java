@@ -91,7 +91,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					weight = 1.8; // this
 					// is the cloud, it consumes more energy and results in high latency, so //
 					// better to avoid it
-				} else if (node.getType() == SimulationParameters.TYPES.EDGE_DEVICE) {
+				} else if (node.getType() == SimulationParameters.TYPES.ONT) {
 					weight = 1.3;// this is an edge
 					// device, it results in an extremely low latency, but may // consume more
 					// energy.

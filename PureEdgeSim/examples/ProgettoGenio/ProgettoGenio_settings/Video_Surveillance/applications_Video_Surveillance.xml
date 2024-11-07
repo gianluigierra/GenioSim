@@ -5,7 +5,7 @@
 		<rate>2</rate>
 		<usage_percentage>80</usage_percentage>
 		<container>
-			<container_size>200000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
+			<container_size>20000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>false</shared> <!-- se il container deve essere usato da più edge device diversi -->
 		</container>
@@ -22,7 +22,7 @@
 		<rate>60</rate>
 		<usage_percentage>20</usage_percentage>
 		<container>
-			<container_size>1000000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
+			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
 		</container>

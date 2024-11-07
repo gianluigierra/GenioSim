@@ -59,26 +59,25 @@ public abstract class Orchestrator extends SimEntity {
 	public void initialize() {
 		if ("CLOUD_ONLY".equals(architectureName)) {
 			cloudOnly();
-		} else if ("MIST_ONLY".equals(architectureName)) {
-			mistOnly();
+		} else if ("FAR_EDGE_ONLY".equals(architectureName)) {
+			farEdgeOnly();
 		} else if ("EDGE_AND_CLOUD".equals(architectureName)) {
 			edgeAndCloud();
 		} else if ("ALL".equals(architectureName)) {
 			all();
 		} else if ("EDGE_ONLY".equals(architectureName)) {
 			edgeOnly();
-		} else if ("MIST_AND_CLOUD".equals(architectureName)) {
-			mistAndCloud();
-		} else if ("MIST_AND_EDGE".equals(architectureName)) {
-			mistAndEdge();
+		} else if ("FAR_EDGE_AND_CLOUD".equals(architectureName)) {
+			farEdgeAndCloud();
+		} else if ("FAR_EDGE_AND_EDGE".equals(architectureName)) {
+			farEdgeAndEdge();
 		}
 	}
 
-	// If the orchestration scenario is MIST_ONLY send Tasks only to edge devices
-	protected void mistOnly() {
-		architectureLayers = new String[]{ "Mist" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getMistOnlyListSensorsExcluded();
+	// If the orchestration scenario is FAR_EDGE_ONLY send Tasks only to edge devices
+	protected void farEdgeOnly() {
+		architectureLayers = new String[]{ "Far_Edge" };
+		nodeList.addAll(simulationManager.getDataCentersManager().getComputingNodesGenerator().getONT_List());
 		
 	}
 
@@ -104,15 +103,11 @@ public abstract class Orchestrator extends SimEntity {
 		}		
 	}
 
-	// If the orchestration scenario is MIST_AND_CLOUD send Tasks only to edge
+	// If the orchestration scenario is FAR_EDGE_AND_CLOUD send Tasks only to edge
 	// devices or cloud virtual machines (vms)
-	protected void mistAndCloud() {
-		architectureLayers = new String[] { "Cloud", "Mist" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getMistAndCloudListSensorsExcluded();
-		for(ComputingNode node : nodeList)
-			if(node.getType() == SimulationParameters.TYPES.CLOUD)
-				nodeList.remove(node);
+	protected void farEdgeAndCloud() {
+		architectureLayers = new String[] { "Cloud", "Far_Edge" };
+		nodeList.addAll(simulationManager.getDataCentersManager().getComputingNodesGenerator().getONT_List());
 		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getCloudOnlyList()){
 			for(Host host : datacenter.getHostList()){
 				nodeList.addAll(host.getVMList());
@@ -131,15 +126,11 @@ public abstract class Orchestrator extends SimEntity {
 		}
 	}
 
-	// If the orchestration scenario is MIST_AND_Edge send Tasks only to edge
+	// If the orchestration scenario is FAR_EDGE_AND_Edge send Tasks only to edge
 	// devices or Fog virtual machines (vms)
-	protected void mistAndEdge() {
-		architectureLayers = new String[] { "Mist", "Edge" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getMistAndEdgeListSensorsExcluded();
-		for(ComputingNode node : nodeList)
-			if(node.getType() == SimulationParameters.TYPES.EDGE_DATACENTER)
-				nodeList.remove(node);
+	protected void farEdgeAndEdge() {
+		architectureLayers = new String[] { "Far_Edge", "Edge" };
+		nodeList.addAll(simulationManager.getDataCentersManager().getComputingNodesGenerator().getONT_List());
 		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
 			for(Host host : datacenter.getHostList()){
 				nodeList.addAll(host.getVMList());
@@ -150,17 +141,8 @@ public abstract class Orchestrator extends SimEntity {
 	// If the orchestration scenario is ALL send Tasks to any virtual machine (vm)
 	// or device
 	protected void all() {
-		architectureLayers = new String[]{ "Cloud", "Edge", "Mist" };
-		nodeList = simulationManager.getDataCentersManager().getComputingNodesGenerator()
-				.getAllNodesListSensorsExcluded();		
-				
-		for(ComputingNode node : nodeList)
-		if(node.getType() == SimulationParameters.TYPES.CLOUD)
-			nodeList.remove(node);
-
-		for(ComputingNode node : nodeList)
-		if(node.getType() == SimulationParameters.TYPES.EDGE_DATACENTER)
-			nodeList.remove(node);
+		architectureLayers = new String[]{ "Cloud", "Edge", "Far_Edge" };
+		nodeList.addAll(simulationManager.getDataCentersManager().getComputingNodesGenerator().getONT_List());	
 
 		for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
 			for(Host host : datacenter.getHostList()){
