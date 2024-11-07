@@ -30,6 +30,7 @@ public class Host extends LocationAwareNode {
 	protected int numberOfCPUCores;
 	protected int availableCores;
 	protected List<Task> tasksQueue = new ArrayList<>();
+	protected List<Container> containerList = new ArrayList<>();
 	protected double availableRam; // in Megabytes
 	protected double ram; // in Megabytes
 	protected static final int EXECUTION_FINISHED = 2;
@@ -317,13 +318,19 @@ public class Host extends LocationAwareNode {
 		//incremento i sentTasks per calcolare il failureRate
 		this.sentTasks++;
 		// Update the amount of available storage
-		this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
+		//this.setAvailableStorage(this.availableStorage - task.getContainerSizeInMBytes());
 
 		this.DataCenter.submitTask(task);
 	}
 
 	@Override
 	public void submitContainerPlacement(Container container) {
+		// Aggiungo il container alla lista
+		containerList.add(container);
+		// Update the amount of available storage
+		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+
+		this.DataCenter.submitContainerPlacement(container);
 	}
 	
 	@Override
@@ -332,11 +339,19 @@ public class Host extends LocationAwareNode {
 		return lista;
 	}
 
+	double getAssociatedContainerSizeInMBytes(Task task){
+		for(Container container : containerList)
+			for(ComputingNode computingnode : container.getEdgeDevices())
+				if(task.getEdgeDevice().equals(computingnode))
+					return container.getContainerSizeInMBytes();
+		return 0.0;
+	}
+
 	protected void startExecution(Task task) {
 		// Update the CPU utilization.
 		addCpuUtilization(task);
 		// Update the amount of RAM.
-		setAvailableRam(this.getAvailableRam() - task.getContainerSizeInMBytes());
+		setAvailableRam(this.getAvailableRam() - getAssociatedContainerSizeInMBytes(task));
 		// Update the number of available cores.
 		availableCores--;
 
@@ -370,9 +385,9 @@ public class Host extends LocationAwareNode {
 		// The execution of one task has been finished, free one more CPU core.
 		availableCores++;
 		// Free the RAM that has been used by the finished task.
-		setAvailableRam(this.getAvailableRam() + ((Task) e.getData()).getContainerSizeInMBytes());
+		setAvailableRam(this.getAvailableRam() + getAssociatedContainerSizeInMBytes((Task) e.getData()));
 		// Free the storage that has been used by the finished task.
-		setAvailableStorage(this.getAvailableStorage() + ((Task) e.getData()).getContainerSizeInMBytes());
+		//setAvailableStorage(this.getAvailableStorage() + ((Task) e.getData()).getContainerSizeInMBytes());
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
 

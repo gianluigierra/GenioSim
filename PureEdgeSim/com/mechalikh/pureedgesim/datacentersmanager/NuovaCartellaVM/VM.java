@@ -250,16 +250,27 @@ public class VM extends LocationAwareNode {
 			getTasksQueue().add(task);
 	}
 
+	private boolean isContainerApplicationInList(Container container){
+		for(Container cont : containerList)
+			if(container.getAssociatedAppName().equals(cont.getAssociatedAppName()))
+				return true;
+		return false;
+	}
+
 	@Override
 	public void submitContainerPlacement(Container container) {
 
 		container.setStatus(Container.Status.PLACED);
 
-		//se il container è del tipo shared allora aggiungo l'edge device al container già piazzato
-		if(container.getSharedContainer())
+		//se il container è del tipo shared ed è già stato piazzato allora aggiungo l'edge device al container già piazzato
+		if(container.getSharedContainer() && isContainerApplicationInList(container)){
 			for(Container cont : containerList)
-				if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
+				if(cont.getAssociatedAppName().equals(container.getAssociatedAppName())){
 					cont.addEdgeDevice(container.getEdgeDevice(container.getEdgeDevices().size()-1));
+					//associo il container precedente a quello già piazzato
+					container = cont;
+				}
+		}
 		//altrimenti
 		else{
 			// Aggiungo il container alla lista
@@ -268,7 +279,6 @@ public class VM extends LocationAwareNode {
 			this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
 		}
 
-		//System.out.println("Sono il dispositivo " + this.getName() + " e ho ricevuto la richiesta di placement. ContainerList.size = " + containerList.size());
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
 	}
 	
@@ -319,10 +329,14 @@ public class VM extends LocationAwareNode {
 	}
 
 	double getAssociatedContainerSizeInMBytes(Task task){
+		//per ogni container nella lista
 		for(Container container : containerList)
+			//controlla tra i suoi edgeDevice
 			for(ComputingNode computingnode : container.getEdgeDevices())
+				//se vi è uno che corrisponde al generatore del task
 				if(task.getEdgeDevice().equals(computingnode))
 					return container.getContainerSizeInMBytes();
+
 		return 0.0;
 	}
 

@@ -126,14 +126,16 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			}
 		}
 		// Assign the tasks to the obtained computing node.
-		historyMap.put(selected, minTasksCount + 1);
-		ContainerMap.get(selected).add(container);
+		if (selected != -1){
+			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
+			ContainerMap.get(selected).add(container);
+		}
 
 		return selected;
 	}
 
 	protected int greedyChoice(String[] architecture, Container container){
-        int selected = 0;
+        int selected = -1;
         double bestfit = Double.MAX_VALUE;
         double bestnumberofcores = 0;
         for(int i = 0; i < nodeList.size(); i++){
@@ -150,10 +152,11 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
                 selected = i;
             }
         }
-        if("GREEDY".equals(algorithmName)){
-			historyMap.put(selected, historyMap.get(selected) + 1);
+        if (selected != -1){
+			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
 			ContainerMap.get(selected).add(container);
 		}
+
         return selected;
     }
 
