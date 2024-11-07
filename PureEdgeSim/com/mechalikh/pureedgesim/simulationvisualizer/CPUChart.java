@@ -41,7 +41,7 @@ public class CPUChart extends Chart {
 	// Lists to store CPU usage and time
 	protected List<Double> cloudUsage = new ArrayList<>(
 			(int) (SimulationParameters.simulationDuration / SimulationParameters.updateInterval));
-	protected List<Double> mistUsage = new ArrayList<>(
+	protected List<Double> farEdgeUsage = new ArrayList<>(
 			(int) (SimulationParameters.simulationDuration / SimulationParameters.updateInterval));
 	protected List<Double> edgeUsage = new ArrayList<>(
 			(int) (SimulationParameters.simulationDuration / SimulationParameters.updateInterval));
@@ -68,7 +68,7 @@ public class CPUChart extends Chart {
 	public void update() {
 		int currentTimeValue = (int) simulationManager.getSimulation().clock();
 		currentTime.add((double) currentTimeValue);
-		edgeDevicesCpuUsage();
+		ontDevicesCpuUsage();
 		edgeDataCentersCpuUsage();
 		cloudCpuUsage();
 	}
@@ -76,15 +76,15 @@ public class CPUChart extends Chart {
 	/**
 	 * Calculates and adds the average CPU usage for edge devices to the chart.
 	 */
-	protected void edgeDevicesCpuUsage() {
+	protected void ontDevicesCpuUsage() {
 		// Only if Mist computing is used
-		if (simulationManager.getScenario().getStringOrchArchitecture().contains("MIST")
+		if (simulationManager.getScenario().getStringOrchArchitecture().contains("FAR")
 				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
-			List<ComputingNode> mistOnlyList = computingNodesGenerator.getMistOnlyListSensorsExcluded();
-			double mistUsageValue = mistOnlyList.stream().mapToDouble(ComputingNode::getAvgCpuUtilization).average()
+			List<ComputingNode> farEdgeOnlyList = computingNodesGenerator.getONT_List();
+			double farEdgeValue = farEdgeOnlyList.stream().mapToDouble(ComputingNode::getAvgCpuUtilization).average()
 					.orElse(0.0);
-			mistUsage.add(mistUsageValue);
-			updateSeries(getChart(), "Mist", toArray(currentTime), toArray(mistUsage), SeriesMarkers.NONE, Color.BLACK);
+			farEdgeUsage.add(farEdgeValue);
+			updateSeries(getChart(), "Far_Edge", toArray(currentTime), toArray(farEdgeUsage), SeriesMarkers.NONE, Color.BLACK);
 		}
 	}
 
@@ -93,7 +93,7 @@ public class CPUChart extends Chart {
 	 */
 	protected void edgeDataCentersCpuUsage() {
 		// Only if Edge computing is used
-		if (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE")
+		if ((simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR"))
 				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 			List<DataCenter> edgeOnlyList = computingNodesGenerator.getEdgeOnlyList();
 			double edgeUsageValue = edgeOnlyList.stream().mapToDouble(ComputingNode::getAvgCpuUtilization).average()

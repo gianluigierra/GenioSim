@@ -71,7 +71,7 @@ public class VmTasksChart extends Chart {
 
     protected void VmEdgeTasksUsage(Map<String, Double> VmEdgeTasksUsage) {
 
-        if (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+        if ((simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR") ) ||  simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 		    List<VM> VMedgeOnlyList = new ArrayList<>();
 
             for(DataCenter DC : computingNodesGenerator.getEdgeOnlyList())

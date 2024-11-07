@@ -73,8 +73,16 @@ public class SimulationVisualizer {
         Chart VmCPUChart = new VmCPUChart("VmCPU", "Time (s)", "Utilization (%)", simulationManager);
         Chart HostCPUChart = new HostCPUChart("HostCPU", "Time (s)", "Utilization (%)", simulationManager);
         Chart VmTasksChart = new VmTasksChart("VM Tasks success rate", "Time (s)", "Success rate (%)", simulationManager);
-        charts.addAll(List.of(mapChart, tasksSuccessChart, VmTasksChart, networkUtilizationChart, cpuUtilizationChart, VmCPUChart));
 
+        charts.addAll(List.of(mapChart, tasksSuccessChart, networkUtilizationChart, cpuUtilizationChart));
+
+        //se ci stanno di mezzo le VM
+        if( (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR")) 
+            || (simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD")) || simulationManager.getScenario().getStringOrchArchitecture().contains("ALL")){
+            charts.removeAll(charts);
+            charts.addAll(List.of(mapChart, tasksSuccessChart, VmTasksChart, networkUtilizationChart, cpuUtilizationChart, VmCPUChart));
+        }
+    
         /**
         // Add network utilization chart if the useOneSharedWanLink parameter is true
         if (SimulationParameters.useOneSharedWanLink) {

@@ -70,7 +70,7 @@ public class VmCPUChart extends Chart {
 
     protected void VmEdgeCpuUsage(Map<String, Double> VmEdgeCpuUsage) {
 
-        if (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+        if ((simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR") ) || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 		    List<VM> VMedgeOnlyList = new ArrayList<>();
 
             for(DataCenter DC : computingNodesGenerator.getEdgeOnlyList())

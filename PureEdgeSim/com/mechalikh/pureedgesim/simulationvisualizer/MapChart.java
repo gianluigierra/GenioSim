@@ -101,6 +101,35 @@ public class MapChart extends Chart {
 	}
 
 	/**
+	 * Updates the map with the current ONT devices and their status.
+	 */
+	protected void updateONTDevices() {
+		List<Double> xIdleDevices = new ArrayList<>();
+		List<Double> yIdleDevices = new ArrayList<>();
+		List<Double> xActiveDevices = new ArrayList<>();
+		List<Double> yActiveDevices = new ArrayList<>();
+
+		for (ComputingNode node : computingNodesGenerator.getONT_List()) {
+			ComputingNode device = node;
+			double xPos = device.getMobilityModel().getCurrentLocation().getXPos();
+			double yPos = device.getMobilityModel().getCurrentLocation().getYPos();
+
+			if (device.isIdle()) {
+				xIdleDevices.add(xPos);
+				yIdleDevices.add(yPos);
+			} else {
+				xActiveDevices.add(xPos);
+				yActiveDevices.add(yPos);
+			}
+		}
+
+		updateSeries(getChart(), "Idle ONT devices", toArray(xIdleDevices), toArray(yIdleDevices), SeriesMarkers.CROSS,
+				Color.GREEN);
+		updateSeries(getChart(), "Active ONT devices", toArray(xActiveDevices), toArray(yActiveDevices),
+				SeriesMarkers.CROSS, Color.red);
+	}
+
+	/**
 	 * 
 	 * Updates the map with information about edge devices, edge data centers and
 	 * cloud CPU utilization.
@@ -108,6 +137,8 @@ public class MapChart extends Chart {
 	public void update() {
 		// Add edge devices to map and display their CPU utilization
 		updateEdgeDevices();
+		// Add ONT devices to map and display their CPU utilization
+		updateONTDevices();
 		// Add edge data centers to the map and display their CPU utilization
 		updateEdgeDataCenters();
 		// Add cloud data centers to the map and display their CPU utilization
