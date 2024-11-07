@@ -8,8 +8,4 @@ public class Router extends DefaultComputingNode {
 		super(simulationManager, 0, 0, 0, 0);
 	}
 
-	@Override
-	public void setApplicationPlacementLocation(ComputingNode node) {
-		// Do nothing
-	}
 }

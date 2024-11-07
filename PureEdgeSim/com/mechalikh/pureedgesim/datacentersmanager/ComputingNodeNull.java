@@ -288,47 +288,6 @@ public class ComputingNodeNull implements ComputingNode {
 	public void setPeriphery(boolean periphery) {
 		// Do nothing.
 	}
-
-	/**
-	 * Does nothing since this Computing Node is supposed to be null.
-	 */
-	@Override
-	public void setApplicationPlacementLocation(ComputingNode node) {
-		// Do nothing.
-	}
-
-	/**
-	 * 
-	 * Returns the null Computing Node since it has no application placed on another
-	 * computing node.
-	 * 
-	 * @return The null Computing Node.
-	 */
-	@Override
-	public ComputingNode getApplicationPlacementLocation() {
-		return ComputingNode.NULL;
-	}
-
-	/**
-	 * 
-	 * Returns false since it cannot request application placements.
-	 * 
-	 * @return False.
-	 */
-	@Override
-	public boolean isApplicationPlaced() {
-		return false;
-	}
-
-	/**
-	 * 
-	 * Does nothing since it cannot request application placements.
-	 */
-	@Override
-	public void setApplicationPlaced(boolean isApplicationPlaced) {
-		// Do nothing.
-	}
-
 	
 	/**
 	 * empty

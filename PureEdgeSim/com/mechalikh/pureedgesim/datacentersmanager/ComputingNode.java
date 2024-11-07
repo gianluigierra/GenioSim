@@ -371,43 +371,6 @@ public interface ComputingNode {
 	void setPeriphery(boolean peripheral);
 
 	/**
-	 * Sets where the application of this edge device has been placed. Used only
-	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
-	 * 
-	 * @param node the computing node that executes the tasks of this device.
-	 */
-	void setApplicationPlacementLocation(ComputingNode node);
-
-	/**
-	 * Gets where the application of this edge device has been placed. Used only
-	 * when the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
-	 * 
-	 * @return the computing node that executes the tasks of this device.
-	 */
-	ComputingNode getApplicationPlacementLocation();
-
-	/**
-	 * Gets if the application of this edge device has been placed. Used only when
-	 * the type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
-	 * 
-	 * @return true if the application of this edge device has been placed.
-	 * @see #setApplicationPlaced(boolean)
-	 */
-	boolean isApplicationPlaced();
-
-	/**
-	 * Sets if the application of this edge device has been placed. It is
-	 * automatically set to false when this device moves away from the node where
-	 * its application has been placed previously. Used only when the type of this
-	 * node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
-	 * 
-	 * @see #setApplicationPlacementLocation(ComputingNode)
-	 * @param isApplicationPlaced true if the application of this edge device has
-	 *                            been placed.
-	 */
-	void setApplicationPlaced(boolean isApplicationPlaced);
-
-	/**
 	 * Gets the number of CPU cores this computing node has.
 	 * 
 	 * @return the number of cores.

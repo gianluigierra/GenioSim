@@ -512,12 +512,6 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 		task.getOffloadingDestination().incrementTasksFailed();									//aggiunto per visualizzare in tempo reale i task falliti dalle VM
 
-		// Since the task has been failed, its application should be placed on another
-		// location next time, to avoid the failure of future tasks
-		// So, let's tell the orchestrator that the application is no more placed and it
-		// should find another location for future tasks.
-		task.getEdgeDevice().setApplicationPlaced(false);
-
 		// Return the execution results, only if the task has been sent to the
 		// orchestrator previously.
 		if (phase > 1)

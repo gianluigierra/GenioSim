@@ -273,7 +273,6 @@ public class DQNOrchestrator_vecchissimo extends DefaultOrchestrator {
 		task.setOffloadingDestination(node);
 
 		// Application has been deployed
-		task.getEdgeDevice().setApplicationPlacementLocation(node);
 		simLog.deepLog(simulationManager.getSimulation().clock() + ": " + this.getClass() + " Task: " + task.getId() + " assigned to " + node.getType() + " Computing Node: " + node.getId());
     }
 

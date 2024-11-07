@@ -392,16 +392,4 @@ public class DataCenter extends LocationAwareNode {
 
 	}
 
-	@Override
-	public void setApplicationPlacementLocation(ComputingNode node) {
-		this.applicationPlacementLocation = node;
-		this.isApplicationPlaced = true;
-		if ((node.getType() == SimulationParameters.TYPES.EDGE_DEVICE) && (this != node)) {
-			simulationManager.getDataCentersManager().getTopology().removeLink(currentDeviceToDeviceWifiLink);
-			currentDeviceToDeviceWifiLink.setDst(node);
-			simulationManager.getDataCentersManager().getTopology().addLink(currentDeviceToDeviceWifiLink);
-		}
-
-	}
-
 }

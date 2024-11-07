@@ -149,7 +149,6 @@ public abstract class ContainerOrchestrator extends SimEntity {
 			container.setPlacementDestination(node);
 
 			// Application has been deployed
-			container.getEdgeDevice(container.getEdgeDevices().size() - 1).setApplicationPlacementLocation(node);
 			simLog.deepLog(simulationManager.getSimulation().clock() + ": " + this.getClass() + " Task: " + container.getId()
 					+ " assigned to " + node.getType() + " Computing Node: " + node.getId());
 

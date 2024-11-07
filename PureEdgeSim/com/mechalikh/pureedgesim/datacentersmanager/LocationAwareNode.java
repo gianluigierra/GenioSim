@@ -28,7 +28,6 @@ public abstract class LocationAwareNode extends EnergyAwareNode {
 	protected MobilityModel mobilityModel = MobilityModel.NULL;
 	protected boolean peripheral = false;
 	protected ComputingNode applicationPlacementLocation = ComputingNode.NULL;
-	protected boolean isApplicationPlaced = false;
 
 	protected LocationAwareNode(SimulationManager simulationManager) {
 		super(simulationManager);
@@ -53,11 +52,6 @@ public abstract class LocationAwareNode extends EnergyAwareNode {
 	protected void connectWith(ComputingNode closestEdgeDataCenter) {
 		getCurrentLink(LinkOrientation.UP_LINK).setDst(closestEdgeDataCenter);
 		getCurrentLink(LinkOrientation.DOWN_LINK).setSrc(closestEdgeDataCenter);
-
-		if (getCurrentLink(LinkOrientation.DEVICE_TO_DEVICE).getDst() != ComputingNode.NULL && getMobilityModel()
-				.distanceTo(getCurrentLink(LinkOrientation.DEVICE_TO_DEVICE).getDst()) >= SimulationParameters.edgeDataCentersRange) {
-			setApplicationPlaced(false);
-		}
 	}
 
 	@Override
@@ -115,14 +109,6 @@ public abstract class LocationAwareNode extends EnergyAwareNode {
 
 	public ComputingNode getApplicationPlacementLocation() {
 		return this.applicationPlacementLocation;
-	}
-
-	public boolean isApplicationPlaced() {
-		return isApplicationPlaced;
-	}
-
-	public void setApplicationPlaced(boolean isApplicationPlaced) {
-		this.isApplicationPlaced = isApplicationPlaced;
 	}
 
 }
