@@ -20,11 +20,7 @@
  **/
 package com.mechalikh.pureedgesim.simulationmanager;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.network.NetworkModel;
@@ -36,6 +32,7 @@ import com.mechalikh.pureedgesim.simulationengine.OnSimulationStartListener;
 import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 /**
  * The {@code SimulationManager} class represents the default implementation of
@@ -124,13 +121,19 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		simLog.print("%s - Simulation: %d  , iteration: %d", getClass().getSimpleName(), getSimulationId(),
 				getIteration());
 
+		//schedule the containers placeement (all of them)
+		for(int i = containerList.size(); i > 0; i--){
+			schedule(this, containerList.first().getTime() - simulation.clock(), SEND_TO_CLOUD_ORCH, containerList.first());
+			containerList.remove(containerList.first());
+		}
+
 		// Schedule the tasks offloading (first batch).
 		for (int i = 0; i < Math.min(taskList.size(), SimulationParameters.batchSize); i++) {
 			schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
 			taskList.remove(taskList.first());
 		}
 
-		// Schedule the offlaoding of next batch
+		// // Schedule the offlaoding of next batch
 		if (taskList.size() > 0)
 			schedule(this, taskList.first().getTime() - simulation.clock(), NEXT_BATCH);
 
@@ -159,7 +162,8 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	 */
 	@Override
 	public void processEvent(Event ev) {
-		Task task = (Task) ev.getData();
+		Task task;
+		Container container;
 		switch (ev.getTag()) {
 		case NEXT_BATCH:
 			// Schedule this batch.
@@ -173,37 +177,85 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			break;
 		case SEND_TO_EDGE_ORCH:
 			// Send the offloading request to the closest orchestrator.
+			task = (Task) ev.getData();
 			sendTaskToEdgeOrchestrator(task);
 			sentTasks++;
 			break;
 
+		case SEND_TO_CLOUD_ORCH:
+			container = (Container) ev.getData();
+			//TODO
+			//System.out.println("Inviata la richiesta di placement al cloud: " + container.getId());
+			sendContainerRequestToCloudOrchestrator(container);
+			break;
 		case SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION:
 			// The offlaoding decision was made, send the request from the orchestrator to
 			// the offloading destination.
+			task = (Task) ev.getData();
 			sendFromEdgeOrchToDestination(task);
 			break;
 
+		case SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM:
+			// The placement decision was made, send the request from the orchestrator to
+			// the placement destination.
+			// TODO: implementare funzione di placement
+			sendFromCloudOrchToDestination((Container) ev.getData());
+			break;
 		case EXECUTE_TASK:
 			// Offlaoding request received by the destination, execute the task.
+			task = (Task) ev.getData();
 			if (taskFailed(task, 2))
 				return;
 			task.getOffloadingDestination().submitTask(task);
 			edgeOrchestrator.notifyOrchestratorOfTaskExecution(task);
 			break;
+		case DOWNLOAD_CONTAINER:
+			// Placemenet request received by the destination, place the container.
+			container = (Container) ev.getData();
+			container.getPlacementDestination().submitContainerPlacement(container);
+			cloudOrchestrator.notifyOrchestratorOfContainerExecution(container);
+			break;
 
 		case TRANSFER_RESULTS_TO_EDGE_ORCH:
 			// Task execution finished, transfer the results to the orchestrator.
+			task = (Task) ev.getData();
 			finishedTasks.add(task);
-			sendResultsToOchestrator(task);
+			sendResultsToEdgeOchestrator(task);
 			break;
 
+		case TRANSFER_RESULTS_TO_CLOUD_ORCH:
+			// Task execution finished, transfer the results to the orchestrator.
+			//TODO implementare il metodo
+			sendResultsToCloudOchestrator((Container) ev.getData());
+			break;
+		case RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
+			//Container placement has finished and i notified the orchestrator.
+			//TODO implementare il metodo
+			edgeOrchestrator.setContainerToVM((Container) ev.getData());
+			break;
 		case TASK_RESULT_RETURN_FINISHED:
 			// Results returned to edge device.
+			task = (Task) ev.getData();
 			if (taskFailed(task, 3))
 				return;
 
 			edgeOrchestrator.resultsReturned(task);
 			tasksCount++;
+			break;
+
+		case PLACEMENT_RESULT_RETURN_FINISHED:
+			// Results returned to edge device.
+			container = (Container) ev.getData();
+
+			cloudOrchestrator.resultsReturned(container);
+
+			// DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
+			// FutureQueue<Task> taskList = tasksGenerator.generate2(container.getEdgeDevice(0));
+			// this.addTaskList(taskList);
+			// for (int i = 0; i < taskList.size(); i++) {
+			// 	schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
+			// 	taskList.remove(taskList.first());
+			// }
 			break;
 
 		case SHOW_PROGRESS:
@@ -277,7 +329,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	 *
 	 * @param task The task that has been executed.
 	 */
-	protected void sendResultsToOchestrator(Task task) {
+	protected void sendResultsToEdgeOchestrator(Task task) {
 		if (taskFailed(task, 2))
 			return;
 		// If the task was offloaded
@@ -288,58 +340,15 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 		// Update tasks execution and waiting delays
 		simLog.getTasksExecutionInfos(task);
-		DecimalFormat decimalFormat= new DecimalFormat("0.0000000000");
-		String scenary= scenario.getStringOrchArchitecture();
-		String outputFilesName = SimulationParameters.outputFolder + "/" + simLog.simStartTime;
-		//System.out.println("GetActualCpuTime: " + task.getActualCpuTime());
-		//System.out.println("GetWaitingTime: " + task.getWatingTime());
-		//System.out.println("GetActualNetworkTime: " + task.getActualNetworkTime());
-		//System.out.println("GetDelay: " + task.getTotalDelay());
-		if ((scenary.equals("CLOUD_ONLY") || scenary.equals("EDGE_ONLY")) && false){					//decommentare per avere grafici latency
-			
-			double delay=task.getTotalDelay();
-			double utilization_time_edge=simLog.getCurCpuUtilizationForNodeType(TYPES.EDGE_DATACENTER);
-			double bandwidth = simLog.totalBandwidth/1000000;
-		
-			
-			String outputLatencyFilesNameL= outputFilesName + "/EDGE_ONLY";
-			String outputLatencyFilesNameU= outputFilesName + "/EDGE_ONLY";
-			String outputLatencyFilesNameB= outputFilesName + "/EDGE_ONLY";
-			
-			
-			new File(outputLatencyFilesNameL).mkdirs();
-			
-			outputLatencyFilesNameB += "/BandwidthAllocationValues.csv";
-			
-			try (BufferedWriter writer2 = new BufferedWriter(new FileWriter(outputLatencyFilesNameB, true))) {
-				String valueString = decimalFormat.format(bandwidth) + "\n";
-				writer2.write(valueString);
-			} catch (IOException e) {
-				System.err.println("Errore durante la scrittura nel file CSV: " + e.getMessage());
-			}
-			
-			outputLatencyFilesNameL += "/LatencyTimes.csv";
-			try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLatencyFilesNameL, true))) {
-				// Converti il valore double in una stringa e scrivila nel file CSV
-				String valueString = decimalFormat.format(delay) + "\n";
-				writer.write(valueString);
-				//System.out.println("Valore double scritto con successo nel file CSV.");
-			} catch (IOException e) {
-				//System.err.println("Errore durante la scrittura nel file CSV: " + e.getMessage());
-				//System.out.println("Current node/task utilization CPU time :"+ simLog.getCurCpuUtilizationForNodeType(SimulationParameters.TYPES.CLOUD));
-			}
-			
-			outputLatencyFilesNameU += "/UtilizationPercentages.csv";
-			try (BufferedWriter writer1 = new BufferedWriter(new FileWriter(outputLatencyFilesNameU, true))) {
-				// Converti il valore double in una stringa e scrivila nel file CSV
-				String valueString = decimalFormat.format(utilization_time_edge) + "\n";
-				writer1.write(valueString);
-				//System.out.println("Valore double scritto con successo nel file CSV.");
-			} catch (IOException e) {
-				//System.err.println("Errore durante la scrittura nel file CSV: " + e.getMessage());
-				//System.out.println("Current node/task utilization CPU time :"+ simLog.getCurCpuUtilizationForNodeType(SimulationParameters.TYPES.CLOUD));
-			}	
-		}
+	}
+
+	/**
+	 * Returns the Container placement execution to the orchestrator.
+	 *
+	 * @param container The container that has been placed.
+	 */
+	protected void sendResultsToCloudOchestrator(Container container) {
+		scheduleNow(getNetworkModel(), NetworkModel.SEND_RESULT_TO_CLOUD_ORCH, container);
 	}
 
 	/**
@@ -350,25 +359,18 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	protected void sendFromEdgeOrchToDestination(Task task) {
 		if (taskFailed(task, 1))
 			return;
+			
+		// Find the resource node for executing the task.
+		edgeOrchestrator.orchestrate(task);
 
-		// If the application is not placed yet.
-		if (!task.getEdgeDevice().isApplicationPlaced()) {
-			// Find the best resource node for executing the task.
-			edgeOrchestrator.orchestrate(task);
+		// Stop if no resource is available for this task, the offloading is failed.
+		if (task.getOffloadingDestination() == ComputingNode.NULL) {
 
-			// Stop if no resource is available for this task, the offloading is failed.
-			if (task.getOffloadingDestination() == ComputingNode.NULL) {
-
-				task.setFailureReason(Task.FailureReason.NO_OFFLOADING_DESTINATIONS);
-				simLog.incrementTasksFailedLackOfRessources(task);
-				tasksCount++;
-				return;
-			}
-
-		} else
-			// The application has already been placed, so send the task directly to that
-			// computing node.
-			task.setOffloadingDestination(task.getEdgeDevice().getApplicationPlacementLocation());
+			task.setFailureReason(Task.FailureReason.NO_OFFLOADING_DESTINATIONS);
+			simLog.incrementTasksFailedLackOfRessources(task);
+			tasksCount++;
+			return;
+		}
 
 		simLog.taskSentFromOrchToDest(task);
 
@@ -377,6 +379,23 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 	}
 
+	/**
+	 * Sends the Container from the orchestrator to the placement destination.
+	 *
+	 * @param task The task that has been offlaoded.
+	 */
+	protected void sendFromCloudOrchToDestination(Container container) {
+			
+		// Find the best resource node for executing the task.
+		cloudOrchestrator.orchestrate(container);
+
+		//simLog.taskSentFromOrchToDest(task);
+
+		// Send the task from the orchestrator to the destination
+		scheduleNow(getNetworkModel(), NetworkModel.SEND_CONTAINER_FROM_CLOUD_ORCH_TO_DESTINATION, container);
+
+	}
+	
 	/**
 	 * Sends the task to the orchestrator in order to make the offloading decision.
 	 *
@@ -394,6 +413,16 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		simLog.incrementTasksSent();
 
 		scheduleNow(networkModel, NetworkModel.SEND_REQUEST_FROM_DEVICE_TO_EDGE_ORCH, task);
+	}
+
+	/**
+	 * Sends the Container request to the cloud orchestrator in order to make the placement decision.
+	 *
+	 * @param container The container that needs to be placed.
+	 */
+	protected void sendContainerRequestToCloudOrchestrator(Container container) {
+		container.setOrchestrator(container.getEdgeDevice(0).getCloudOrchestrator());
+		scheduleNow(networkModel, NetworkModel.SEND_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH, container);
 	}
 
 	/**
@@ -435,13 +464,13 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			simLog.incrementFailedBeacauseDeviceDead(task);
 			return setFailed(task, phase);
 		}
-		// If storage and ram are not sufficient to perform the task
-		if (phase == 2 && (task.getOffloadingDestination().getAvailableStorage() < task.getContainerSizeInMBytes()
-				|| task.getOffloadingDestination().getAvailableRam() < task.getContainerSizeInMBytes())) {
-			task.setFailureReason(Task.FailureReason.INSUFFICIENT_RESOURCES);
-			simLog.incrementTasksFailedLackOfRessources(task);
-			return setFailed(task, phase);
-		}
+		// If storage and ram are not sufficient to perform the task.															// //non si può verificare perchè istanzio i container prima
+		// if (phase == 2 && (task.getOffloadingDestination().getAvailableStorage() < task.getContainerSizeInMBytes()			// //di quando istanzio i task
+		// 		|| task.getOffloadingDestination().getAvailableRam() < task.getContainerSizeInMBytes())) {
+		// 	task.setFailureReason(Task.FailureReason.INSUFFICIENT_RESOURCES);
+		// 	simLog.incrementTasksFailedLackOfRessources(task);
+		// 	return setFailed(task, phase);
+		// }
 		// A simple representation of task failure due to
 		// device mobility, if the offloading destination location doesn't match
 		// the edge device location (that generated this task)
