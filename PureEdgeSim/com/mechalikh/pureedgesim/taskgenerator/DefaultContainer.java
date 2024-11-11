@@ -40,6 +40,11 @@ public class DefaultContainer extends ContainerAbstract{
    protected int applicationID;
 
    /**
+	* The reason of failure for the task, if any.
+	*/
+   protected FailureReason failureReason;
+
+   /**
     * The status of the Container.
     */
    protected Status status = Status.NOT_PLACED;
@@ -214,6 +219,29 @@ public class DefaultContainer extends ContainerAbstract{
 		this.applicationID = applicationID;
 		return this;
     }
+
+	/**
+	 * 
+	 * Returns the failure reason of the Container.
+	 * 
+	 * @return the failure reason of the Container.
+	 */
+	@Override
+	public FailureReason getFailureReason() {
+		return failureReason;
+	}
+
+	/**
+	 * 
+	 * Sets the failure reason of the task and updates its status to "FAILED".
+	 * 
+	 * @param reason the failure reason of the task.
+	 */
+	@Override
+	public void setFailureReason(FailureReason reason) {
+		this.setStatus(Container.Status.NOT_PLACED);
+		this.failureReason = reason;
+	}
 
 	/**
 	 * 

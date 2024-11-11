@@ -135,59 +135,7 @@ public class DefaultNetworkModel extends NetworkModel {
 		
 		edgeList.get(0).addTaskTransfer(new TransferProgress(task, fileSize, type).setVertexList(vertexList).setEdgeList(edgeList));
 	}
-
-	public void sendRequestFromEdgeOrchToDest(Task task) {
-		if (task.getOrchestrator() != task.getOffloadingDestination()
-				&& task.getOffloadingDestination() != task.getEdgeDevice())
-
-			sendTask(task.getOrchestrator(), task.getOffloadingDestination(), task, task.getFileSizeInBits(),
-					TransferProgress.Type.TASK);
-		else // The device will execute the task locally
-			executeTaskOrDownloadContainer(
-					new TransferProgress(task, task.getFileSizeInBits(), TransferProgress.Type.TASK));
-	}
-
-	public void sendContainerFromCloudOrchToDest(Container container) {
-		//se il container non è già stato piazzato allora invio tutto il container
-		if(container.getStatus().equals(Container.Status.NOT_PLACED)) sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getContainerSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
-		//se il container è già stato piazzato poichè è "shared" allora non invio tutto il container ma solo la request
-		else sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
-	}
-
-	public void sendResultFromEdgeOrchToDev(Task task) {
-		if (task.getOrchestrator() != task.getEdgeDevice())
-			sendTask(task.getOrchestrator(), task.getEdgeDevice(), task, task.getOutputSizeInBits(),
-					TransferProgress.Type.RESULTS_TO_DEV);
-		else
-			scheduleNow(simulationManager, DefaultSimulationManager.TASK_RESULT_RETURN_FINISHED, task);
-
-	}
-
-	public void sendResultFromCloudOrchToDev(Container container) {
-		sendContainer(container.getOrchestrator(), container.getEdgeDevice(0), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_DEV);
-	}
-
-	public void sendResultFromDevToEdgeOrch(Task task) {
-		if (task.getOffloadingDestination() != task.getOrchestrator())
-			sendTask(task.getOffloadingDestination(), task.getOrchestrator(), task, task.getOutputSizeInBits(),
-					TransferProgress.Type.RESULTS_TO_ORCH);
-		else
-			scheduleNow(this, DefaultNetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, task);
-
-	}
-
-	public void sendResultFromDevToCloudOrch(Container container) {
-		sendContainer(container.getPlacementDestination(), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_ORCH);
-	}
-
-	public void sendResultFromCloudToEdgeOrch(Container container) {
-		sendContainer(container.getOrchestrator(), container.getEdgeDevices().get(0).getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE);
-	}
-
-	public void sendRequestFromDeviceToEdgeOrch(Task task) {
-		sendTask(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),TransferProgress.Type.REQUEST);
-	}
-
+	
 	//invia la richiesta di placement del container verso il cloud
 	public void sendContainer(ComputingNode from, ComputingNode to, Container container, double fileSize, ContainerTransferProgress.Type type){
 		List<ComputingNode> vertexList = new ArrayList<>(5);
@@ -228,10 +176,6 @@ public class DefaultNetworkModel extends NetworkModel {
 
 		edgeList.get(0).addContainerRequestTransfer(
 				new ContainerTransferProgress(container, fileSize, type).setVertexList(vertexList).setEdgeList(edgeList));
-	}
-
-	public void sendRequestFromDeviceToCloudOrch(Container container) {
-		sendContainer(container.getEdgeDevice(container.getEdgeDevices().size() - 1), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.REQUEST);
 	}
 
 	protected void transferFinished(TransferProgress transfer) {
@@ -304,6 +248,62 @@ public class DefaultNetworkModel extends NetworkModel {
 
 	}
 
+	public void sendRequestFromEdgeOrchToDest(Task task) {
+		if (task.getOrchestrator() != task.getOffloadingDestination()
+				&& task.getOffloadingDestination() != task.getEdgeDevice())
+
+			sendTask(task.getOrchestrator(), task.getOffloadingDestination(), task, task.getFileSizeInBits(),
+					TransferProgress.Type.TASK);
+		else // The device will execute the task locally
+			executeTaskOrDownloadContainer(
+					new TransferProgress(task, task.getFileSizeInBits(), TransferProgress.Type.TASK));
+	}
+
+	public void sendContainerFromCloudOrchToDest(Container container) {
+		//se il container non è già stato piazzato allora invio tutto il container
+		if(container.getStatus().equals(Container.Status.NOT_PLACED)) sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getContainerSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
+		//se il container è già stato piazzato poichè è "shared" allora non invio tutto il container ma solo la request
+		else sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
+	}
+
+	public void sendResultFromEdgeOrchToDev(Task task) {
+		if (task.getOrchestrator() != task.getEdgeDevice())
+			sendTask(task.getOrchestrator(), task.getEdgeDevice(), task, task.getOutputSizeInBits(),
+					TransferProgress.Type.RESULTS_TO_DEV);
+		else
+			scheduleNow(simulationManager, DefaultSimulationManager.TASK_RESULT_RETURN_FINISHED, task);
+
+	}
+
+	public void sendResultFromCloudOrchToDev(Container container) {
+		sendContainer(container.getOrchestrator(), container.getEdgeDevice(0), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_DEV);
+	}
+
+	public void sendResultFromDevToEdgeOrch(Task task) {
+		if (task.getOffloadingDestination() != task.getOrchestrator())
+			sendTask(task.getOffloadingDestination(), task.getOrchestrator(), task, task.getOutputSizeInBits(),
+					TransferProgress.Type.RESULTS_TO_ORCH);
+		else
+			scheduleNow(this, DefaultNetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, task);
+
+	}
+
+	public void sendResultFromDevToCloudOrch(Container container) {
+		sendContainer(container.getPlacementDestination(), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_ORCH);
+	}
+
+	public void sendRequestFromDeviceToEdgeOrch(Task task) {
+		sendTask(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),TransferProgress.Type.REQUEST);
+	}
+	
+	public void sendRequestFromDeviceToCloudOrch(Container container) {
+		sendContainer(container.getEdgeDevice(container.getEdgeDevices().size() - 1), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.REQUEST);
+	}
+
+	public void sendResultFromCloudToEdgeOrch(Container container) {
+		sendContainer(container.getOrchestrator(), container.getEdgeDevices().get(0).getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE);
+	}
+
 	protected void updateEdgeDevicesRemainingEnergy(TransferProgress transfer, ComputingNode origin,
 			ComputingNode destination) {
 		if (origin != ComputingNode.NULL && origin.getType() == TYPES.EDGE_DEVICE) {
@@ -364,6 +364,5 @@ public class DefaultNetworkModel extends NetworkModel {
 		// Find the placement destination and download the container
 		scheduleNow(simulationManager, DefaultSimulationManager.SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM, transfer.getContainer());
 	}
-
 	
 }

@@ -369,6 +369,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			task.setFailureReason(Task.FailureReason.NO_OFFLOADING_DESTINATIONS);
 			simLog.incrementTasksFailedLackOfRessources(task);
 			tasksCount++;
+			failedTasksCount++;
 			return;
 		}
 
@@ -388,6 +389,14 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			
 		// Find the best resource node for executing the task.
 		cloudOrchestrator.orchestrate(container);
+
+		// Stop if no resource is available for this task, the offloading is failed.
+		if (container.getPlacementDestination() == ComputingNode.NULL) {
+
+			container.setFailureReason(Container.FailureReason.NO_PLACEMENT_DESTINATIONS);
+			System.out.println("Non ho trovato destinazione di placement per il container " + container.getId() + " con size: " + container.getContainerSizeInBits());
+			return;
+		}
 
 		//simLog.taskSentFromOrchToDest(task);
 
@@ -533,7 +542,5 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			RANGE = SimulationParameters.edgeDataCentersRange;
 		return (distance < RANGE);
 	}
-
-	
 
 }

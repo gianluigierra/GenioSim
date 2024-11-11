@@ -153,8 +153,7 @@ public abstract class ContainerOrchestrator extends SimEntity {
 					+ " assigned to " + node.getType() + " Computing Node: " + node.getId());
 
 		}
-		else
-			throw new IllegalArgumentException(getClass().getSimpleName() + "No computing node was found eligible for Container Placement");
+
 	}
 
 	protected void checkComputingNode(ComputingNode computingNode) {

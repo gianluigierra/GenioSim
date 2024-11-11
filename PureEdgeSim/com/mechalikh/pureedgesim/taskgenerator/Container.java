@@ -7,6 +7,13 @@ import java.util.List;
 
 public interface Container extends QueueElement {
 
+	/**
+	 * Enumeration for failure reasons of a Task.
+	 */
+	enum FailureReason {
+		NO_PLACEMENT_DESTINATIONS, INSUFFICIENT_RESOURCES
+	}
+
     /**
 	 * Enumeration for status of a Container.
 	 */
@@ -209,6 +216,22 @@ public interface Container extends QueueElement {
 	 * @return the updated Container object
 	 */
 	Container setApplicationID(int applicationID);
+	
+	/**
+	* 
+	* Gets the reason for task failure.
+	* 
+	* @return the reason for task failure
+	*/
+   FailureReason getFailureReason();
+
+   /**
+	* 
+	* Sets the reason for task failure.
+	* 
+	* @param reason the reason for task failure to set
+	*/
+   void setFailureReason(FailureReason reason);
 
     /**
 	 * 
