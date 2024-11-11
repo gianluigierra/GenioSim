@@ -33,6 +33,8 @@ import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
+import com.mechalikh.pureedgesim.simulationengine.FutureQueue;
 
 /**
  * The {@code SimulationManager} class represents the default implementation of
@@ -115,7 +117,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	@Override
 	public void onSimulationStart() {
 		// Initialize logger variables.
-		simLog.setGeneratedTasks(taskList.size());
+		//simLog.setGeneratedTasks(taskList.size());							//TASK GENERATOR: decommentare questo per generare i task a inizio sim
 		simLog.setCurrentOrchPolicy(scenario.getStringOrchArchitecture());
 
 		simLog.print("%s - Simulation: %d  , iteration: %d", getClass().getSimpleName(), getSimulationId(),
@@ -127,15 +129,16 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			containerList.remove(containerList.first());
 		}
 
-		// Schedule the tasks offloading (first batch).
-		for (int i = 0; i < Math.min(taskList.size(), SimulationParameters.batchSize); i++) {
-			schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
-			taskList.remove(taskList.first());
-		}
+		//TASK GENERATOR: decommentare sotto  per generare i task a inizio sim
+		// // Schedule the tasks offloading (first batch).
+		// for (int i = 0; i < Math.min(taskList.size(), SimulationParameters.batchSize); i++) {
+		// 	schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
+		// 	taskList.remove(taskList.first());
+		// }
 
 		// // Schedule the offlaoding of next batch
-		if (taskList.size() > 0)
-			schedule(this, taskList.first().getTime() - simulation.clock(), NEXT_BATCH);
+		// if (taskList.size() > 0)
+		// 	schedule(this, taskList.first().getTime() - simulation.clock(), NEXT_BATCH);
 
 		// Scheduling the end of the simulation.
 		schedule(this, SimulationParameters.simulationDuration, PRINT_LOG);
@@ -249,18 +252,21 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 			cloudOrchestrator.resultsReturned(container);
 
-			// DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
-			// FutureQueue<Task> taskList = tasksGenerator.generate2(container.getEdgeDevice(0));
-			// this.addTaskList(taskList);
-			// for (int i = 0; i < taskList.size(); i++) {
-			// 	schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
-			// 	taskList.remove(taskList.first());
-			// }
+			DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
+			FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(container.getEdgeDevice(container.getEdgeDevices().size()-1));
+			simLog.setGeneratedTasks(simLog.getGeneratedTasks() + taskListProvvisoria.size());
+			//this.addTaskList(taskList);
+			for (int i = taskListProvvisoria.size(); i > 0; i--) {
+				schedule(this, taskListProvvisoria.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskListProvvisoria.first());
+				taskListProvvisoria.remove(taskListProvvisoria.first());
+			}
 			break;
 
 		case SHOW_PROGRESS:
 			// Calculate the simulation progress.
-			int progress = 100 * tasksCount / simLog.getGeneratedTasks();
+			int progress;
+			if(simLog.getGeneratedTasks() > 0) progress = 100 * tasksCount / simLog.getGeneratedTasks();
+			else progress = 0;
 			if (oldProgress != progress) {
 				oldProgress = progress;
 				if (progress % 10 == 0 || (progress % 10 < 5) && lastWrittenNumber + 10 < progress) {

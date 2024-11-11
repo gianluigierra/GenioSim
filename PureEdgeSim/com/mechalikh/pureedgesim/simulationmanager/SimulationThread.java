@@ -224,7 +224,8 @@ public class SimulationThread {
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task Generator...");
 		Constructor<?> tasksGeneratorConstructor = simulation.tasksGenerator.getConstructor(SimulationManager.class);
 		TaskGenerator tasksGenerator = (TaskGenerator) tasksGeneratorConstructor.newInstance(simulationManager);
-		FutureQueue<Task> taskList = tasksGenerator.generate();
+		//FutureQueue<Task> taskList = tasksGenerator.generate();							//TASK GENERATOR: decommentare questo e commentare sotto per generare i task a inizio sim
+		FutureQueue<Task> taskList = new FutureQueue<>();
 		simulationManager.setTaskList(taskList);
 
 		// Initialize the Task orchestrator

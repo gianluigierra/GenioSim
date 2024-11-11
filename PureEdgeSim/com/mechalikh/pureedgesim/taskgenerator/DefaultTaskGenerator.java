@@ -79,13 +79,34 @@ public class DefaultTaskGenerator extends TaskGenerator {
 		return this.getTaskList();
 	}
 
+	/**
+	 * Generates a queue of tasks for the node which container got placed.
+	 *
+	 * @return a queue of tasks
+	 */
 	public FutureQueue<Task> generateNewTasks(ComputingNode computingNode) {
 		// Get simulation time in minutes (excluding the current simulation time)
 		simulationTime = (SimulationParameters.simulationDuration / 60) - simulationManager.getSimulation().clockInMinutes();
 
-		generateTasksForDevice(computingNode, computingNode.getApplicationType());
+		generateTasksForDeviceFromZero(computingNode, computingNode.getApplicationType());
 
 		return this.getTaskList();
+	}
+
+	/**
+	 * Generates tasks that will be offloaded during simulation for the given device
+	 * and application.
+	 * 
+	 * @param device the device to generate tasks for
+	 * @param app    the application type
+	 */
+	protected void generateTasksForDeviceFromZero(ComputingNode dev, int app) {
+		IntStream.range(0, (int) simulationTime)																//Prima era 0, ho messo 1 per fare iniziare la schedulazione dei task dal clock 1
+				// First get time in seconds
+				.forEach(st -> insert((st * 60)
+						// Then pick up random second in this minute "st". Shift the time by a random
+						// value
+						+ random.nextInt(15), app, dev));
 	}
 
 	/**
