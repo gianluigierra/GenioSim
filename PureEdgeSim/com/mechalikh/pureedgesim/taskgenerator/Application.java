@@ -21,6 +21,9 @@
  **/
 package com.mechalikh.pureedgesim.taskgenerator;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * This class represents an application that can be executed on a computing
  * node.
@@ -39,6 +42,11 @@ public class Application {
 	 * The rate at which requests are generated for this application
 	 */
 	protected int rate;
+	
+	/**
+	 * The users associated with this App
+	 */
+	protected List<User> Users = new ArrayList<>();
 
 	/**
 	 * The latency of the application, in seconds
@@ -158,6 +166,24 @@ public class Application {
 	 */
 	public void setRate(int rate) {
 		this.rate = rate;
+	}
+
+	/**
+	 * Adds a User to this application
+	 *
+	 * @param user the user which makes requests of this application
+	 */
+	public void addUser(User user) {
+		this.Users.add(user);
+	}
+
+	/**
+	 * Adds a User to this application
+	 *
+	 * @param user the user which makes requests of this application
+	 */
+	public List<User> getUsersList() {
+		return this.Users;
 	}
 
 	/**

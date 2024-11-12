@@ -26,6 +26,7 @@ import com.mechalikh.pureedgesim.network.TransferProgress;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract.Files;
 import com.mechalikh.pureedgesim.taskgenerator.Application;
+import com.mechalikh.pureedgesim.taskgenerator.User;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public class SimulationParameters {
@@ -36,6 +37,14 @@ public class SimulationParameters {
 	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomFilePath(String path, Files file) 
 	 */
 	public static String simulationParametersFile = "PureEdgeSim/settings/simulation_parameters.properties";
+
+	/**
+	 * The path to the users characteristics file.
+	 * 
+	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract#setCustomFilePath(String,
+	 *      Files)
+	 */
+	public static String userFile = "PureEdgeSim/settings/users.xml";
 
 	/**
 	 * The path to the applications characteristics file.
@@ -606,6 +615,14 @@ public class SimulationParameters {
 	 * @see com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator#generate()
 	 */
 	public static List<Application> applicationList;
+
+	/**
+	 * The list of Users.
+	 * 
+	 * @see com.mechalikh.pureedgesim.scenariomanager.ApplicationFileParser
+	 * @see com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator#generate()
+	 */
+	public static List<User> usersList;
 
 	/**
 	 * After the end of the simulation time, some tasks may still have not executed yet, 

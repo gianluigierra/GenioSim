@@ -50,7 +50,7 @@ public abstract class SimulationAbstract {
 
 	//MODIFICA MIA, prima non era presente ONT_FILE, SDN_FILE
 	public enum Files {
-		SIMULATION_PARAMETERS, APPLICATIONS_FILE, EDGE_DATACENTERS_FILE, EDGE_DEVICES_FILE, CLOUD_FILE, ONT_FILE, SDN_FILE
+		SIMULATION_PARAMETERS, APPLICATIONS_FILE, EDGE_DATACENTERS_FILE, EDGE_DEVICES_FILE, CLOUD_FILE, ONT_FILE, SDN_FILE, USERS_FILE
 	}
 
 	/**
@@ -268,6 +268,15 @@ public abstract class SimulationAbstract {
 	}
 
 	/**
+	 * Allows to specifically set the users.xml file.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setUsersXML(String settingsFolder, String UsersXML){
+		setCustomFilePath(settingsFolder + UsersXML, Files.USERS_FILE);
+	}
+
+	/**
 	 * Allows to specifically set the edge_datacenters.xml file.
 	 * 
 	 * @param settingsFolder the new settings folder to use.
@@ -313,6 +322,9 @@ public abstract class SimulationAbstract {
 			break;																		//
 		case SDN_FILE:																	//MODIFICA MIA
 			SimulationParameters.SdnFile = path;										//prima questo case non era presente
+			break;																		//
+		case USERS_FILE:																	//MODIFICA MIA
+			SimulationParameters.userFile = path;										//prima questo case non era presente
 			break;																		//
 		default:
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown file type");

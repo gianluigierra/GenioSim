@@ -31,6 +31,8 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 
 import com.mechalikh.pureedgesim.scenariomanager.ApplicationFileParser;
+import com.mechalikh.pureedgesim.scenariomanager.NewApplicationFileParser;
+import com.mechalikh.pureedgesim.scenariomanager.UsersFileParser;
 import com.mechalikh.pureedgesim.scenariomanager.DatacentersParser;
 import com.mechalikh.pureedgesim.scenariomanager.EdgeDevicesParser;
 import com.mechalikh.pureedgesim.scenariomanager.ONTParser;
@@ -180,7 +182,9 @@ public class Simulation extends SimulationAbstract {
 				&& new DatacentersParser(SimulationParameters.edgeDataCentersFile, TYPES.EDGE_DATACENTER).parse()
 				&& new DatacentersParser(SimulationParameters.cloudDataCentersFile, TYPES.CLOUD).parse()
 				&& new ParametersParser(SimulationParameters.simulationParametersFile).parse()
-				&& new ApplicationFileParser(SimulationParameters.applicationFile).parse());
+				//&& new ApplicationFileParser(SimulationParameters.applicationFile).parse());
+				&& new UsersFileParser(SimulationParameters.userFile).parse()
+				&& new NewApplicationFileParser(SimulationParameters.applicationFile).parse());
 	}
 
 	/**
