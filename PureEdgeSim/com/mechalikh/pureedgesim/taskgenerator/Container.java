@@ -148,7 +148,7 @@ public interface Container extends QueueElement {
 	 * @param requestSize the file size of the task request to set in bits
 	 * @return the updated Task object
 	 */
-	double getFileSizeInBits();
+	long getFileSizeInBits();
 
 	/**
 	 * 

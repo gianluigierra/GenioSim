@@ -28,6 +28,7 @@ import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskgenerator.DefaultContainer;
 
 /**
  * This computing node class used by the simulator by default. PureEdgeSim's
@@ -294,7 +295,10 @@ public class DefaultComputingNode extends LocationAwareNode {
 			this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
 		}
 
-		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
+		//creo container provvisorio per specificare l'ultimo edge device aggiunto
+		Container container_provvisorio = new DefaultContainer(container);
+							 
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container_provvisorio);
 	}
 
 	double getAssociatedContainerSizeInMBytes(Task task){

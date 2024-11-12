@@ -77,6 +77,7 @@ public abstract class SimulationManager extends SimEntity {
 	protected SimLog simLog;
 	protected NetworkModel networkModel;
 	protected List<Task> finishedTasks = new ArrayList<>();
+	protected List<Container> placedContainers = new ArrayList<>();
 	protected Scenario scenario;
 	protected FutureQueue<Task> taskList;
 	protected FutureQueue<Container> containerList;
@@ -137,21 +138,6 @@ public abstract class SimulationManager extends SimEntity {
 		this.taskList = taskList;
 	}
 
-	/**
-	 * Adds tasks to the list of ordered offlaoding requests
-	 * 
-	 * @see com.mechalikh.pureedgesim.simulationmanager.SimulationThread#loadModels(DefaultSimulationManager
-	 *      simulationManager)
-	 * 
-	 * @param taskList the ordered list of offlaoding requests.
-	 */
-	public void addTaskList(FutureQueue<Task> taskList) {
-		for(int i = taskList.size(); i > 0; i--){
-			this.taskList.add(taskList.first());
-			taskList.remove(taskList.first());
-		}
-	}
-	
 	/**
 	 * Sets the list of ordered plcaement requests
 	 * 

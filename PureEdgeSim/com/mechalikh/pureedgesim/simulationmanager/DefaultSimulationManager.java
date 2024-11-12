@@ -249,14 +249,21 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		case PLACEMENT_RESULT_RETURN_FINISHED:
 			// Results returned to edge device.
 			container = (Container) ev.getData();
-
+			placedContainers.add(container);
 			cloudOrchestrator.resultsReturned(container);
 
+			//inizio a generare i task per l'edge device che ha ottenuto il placement
 			DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
+
+			//Alternativa a quanto fatto col costruttore DefaultContainer nella VM e nel DefaultComputingNode
+			//ComputingNode edgeDevice = container.getEdgeDevice(0);
+			//container.getEdgeDevices().remove(0);			
+			//FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(edgeDevice);
+			//container.addEdgeDevice(edgeDevice);
+
 			FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(container.getEdgeDevice(container.getEdgeDevices().size()-1));
 			simLog.setGeneratedTasks(simLog.getGeneratedTasks() + taskListProvvisoria.size());
-			//this.addTaskList(taskList);
-			for (int i = taskListProvvisoria.size(); i > 0; i--) {
+			while(!taskListProvvisoria.isEmpty()){
 				schedule(this, taskListProvvisoria.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskListProvvisoria.first());
 				taskListProvvisoria.remove(taskListProvvisoria.first());
 			}

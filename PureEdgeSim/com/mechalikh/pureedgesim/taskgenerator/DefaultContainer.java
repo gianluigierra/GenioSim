@@ -69,8 +69,28 @@ public class DefaultContainer extends ContainerAbstract{
     *
     * @param id The ID of the Container.
     */
-    protected DefaultContainer(int id) {
+    public DefaultContainer(int id) {
         super(id);
+    }
+
+	/**
+    * Constructs a DefaultContainer object with a Container
+    *
+    * @param container The container to copy.
+    */
+    public DefaultContainer(Container container) {
+        super(container.getId());
+		this.addEdgeDevice(container.getEdgeDevice(container.getEdgeDevices().size()-1));
+		this.setApplicationID(container.getApplicationID());
+		this.setAssociatedAppName(container.getAssociatedAppName());
+		this.setContainerSizeInBits(container.getContainerSizeInBits());					 
+		this.setFileSizeInBits(container.getFileSizeInBits());
+		this.setOrchestrator(container.getOrchestrator());
+		this.setPlacementDestination(container.getPlacementDestination());
+		this.setSerial(container.getSerial());
+		this.setSharedContainer(container.getSharedContainer());
+		this.setStatus(container.getStatus());
+		this.setTime(container.getTime());
     }
 
 	/**
@@ -287,7 +307,7 @@ public class DefaultContainer extends ContainerAbstract{
 	 * @return this Container.
 	 */
 	@Override
-	public double getFileSizeInBits() {
+	public long getFileSizeInBits() {
 		return this.fileSize;
 	}
 
