@@ -23,5 +23,29 @@
         <duration>10</duration> <!--Time in minutes-->
         <interval>3</interval> <!--Time in minutes-->
 	</user>
+
+    <user type="4">
+		<access_pattern>random</access_pattern>
+        <rate>60</rate> <!-- requests per minute -->
+        <start>10</start> <!--Time in minutes-->
+        <duration>infinity</duration> <!--Time in minutes-->
+        <interval>60</interval> <!--Time in minutes-->
+	</user>
+
+    <user type="5">
+		<access_pattern>random</access_pattern>
+        <rate>60</rate> <!-- requests per minute -->
+        <start>20</start> <!--Time in minutes-->
+        <duration>3</duration> <!--Time in minutes-->
+        <interval>20</interval> <!--Time in minutes-->
+	</user> 
+    
+    <user type="6">
+		<access_pattern>random</access_pattern>
+        <rate>1</rate> <!-- requests per minute -->
+        <start>20</start> <!--Time in minutes-->
+        <duration>3</duration> <!--Time in minutes-->
+        <interval>100</interval> <!--Time in minutes-->
+	</user>
     
 </users>

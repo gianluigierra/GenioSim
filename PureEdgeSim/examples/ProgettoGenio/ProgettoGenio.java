@@ -42,6 +42,7 @@ public class ProgettoGenio {
 			case "E_Health":
 				sim.setSimulationParameterProperties(settingsPath, "E_Health/simulation_parameters_E_Health.properties");
 				sim.setApplicationsXML(settingsPath, "E_Health/applications_E_Health.xml");
+				sim.setUsersXML(settingsPath, "E_Health/users.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "E_Health/edge_datacenters_E_Health.xml");
 				sim.setCloudDatacentersXML(settingsPath, "E_Health/cloud_E_Health.xml");
 				sim.setSimulationName(exampleMode);
@@ -50,6 +51,7 @@ public class ProgettoGenio {
 			case "Video_Surveillance":
 				sim.setSimulationParameterProperties(settingsPath, "Video_Surveillance/simulation_parameters_Video_Surveillance.properties");
 				sim.setApplicationsXML(settingsPath, "Video_Surveillance/applications_Video_Surveillance.xml");
+				sim.setUsersXML(settingsPath, "E_Health/users.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "Video_Surveillance/edge_datacenters_Video_Surveillance.xml");
 				sim.setCloudDatacentersXML(settingsPath, "Video_Surveillance/cloud_Video_Surveillance.xml");
 				sim.setSimulationName(exampleMode);
