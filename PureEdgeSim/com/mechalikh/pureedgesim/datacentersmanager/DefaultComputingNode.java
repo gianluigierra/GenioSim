@@ -23,7 +23,6 @@ package com.mechalikh.pureedgesim.datacentersmanager;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
@@ -41,6 +40,7 @@ import com.mechalikh.pureedgesim.taskgenerator.DefaultContainer;
  */
 public class DefaultComputingNode extends LocationAwareNode {
 	protected int applicationType;
+	protected int user;
 	protected boolean isSensor = false;
 	protected double availableStorage = 0; // in Megabytes
 	protected double storage = 0; // in Megabytes
@@ -117,6 +117,14 @@ public class DefaultComputingNode extends LocationAwareNode {
 
 	public void setApplicationType(int applicationType) {
 		this.applicationType = applicationType;
+	}
+
+	public int getUser(){
+		return this.user;
+	}
+
+	public void setUser(int user){
+		this.user = user;
 	}
 
 	public double getAvailableStorage() {
@@ -299,6 +307,23 @@ public class DefaultComputingNode extends LocationAwareNode {
 		Container container_provvisorio = new DefaultContainer(container);
 							 
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container_provvisorio);
+	}
+
+	@Override
+	public void submitContainerUnPlacement(Container container) {
+		// rimuovo il container dalla lista
+		removeContainer(container);
+		// Update the amount of available storage
+		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
+	}
+	
+	private void removeContainer(Container container){
+		for(Container cont : containerList){
+			if(cont.getId() == container.getId()){
+				containerList.remove(cont);
+				return;
+			}
+		}
 	}
 
 	double getAssociatedContainerSizeInMBytes(Task task){

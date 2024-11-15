@@ -3,17 +3,16 @@ package com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
 
 
 public class SDN extends LocationAwareNode {
 	protected int applicationType;
+	protected int user;
 	protected boolean isSensor = false;
 	protected double availableStorage = 0; // in Megabytes
 	protected double storage = 0; // in Megabytes
@@ -80,13 +79,19 @@ public class SDN extends LocationAwareNode {
 	public void setNumberOfCPUCores(int numberOfCPUCores) {
 		this.numberOfCPUCores = numberOfCPUCores;
 	}
-
+	
 	public int getApplicationType() {
-		return applicationType;
+		return -1;
 	}
 
 	public void setApplicationType(int applicationType) {
-		this.applicationType = applicationType;
+	}
+
+	public int getUser(){
+		return -1;
+	}
+
+	public void setUser(int user){
 	}
 
 	public double getAvailableStorage() {
@@ -223,6 +228,11 @@ public class SDN extends LocationAwareNode {
 	@Override
 	public void submitContainerPlacement(Container container) {
 	}
+
+	@Override
+	public void submitContainerUnPlacement(Container container) {
+	}
+	
 	
 	@Override
 	public List<Container> getContainerList(){

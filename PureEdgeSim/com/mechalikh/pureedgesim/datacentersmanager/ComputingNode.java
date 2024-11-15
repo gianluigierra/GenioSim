@@ -79,6 +79,15 @@ public interface ComputingNode {
 	void submitContainerPlacement(Container container);
 
 	/**
+	 * Called when a task has been offloaded to this computing node. The task will
+	 * be added to the execution queue.
+	 * 
+	 * @param task the task to execute.
+	 * @return
+	 */
+	void submitContainerUnPlacement(Container container);
+
+	/**
 	 * To get the containers placed on this compuingNode
 	 * 
 	 * @return
@@ -409,6 +418,22 @@ public interface ComputingNode {
 	 * @param applicationType the type of application.
 	 */
 	void setApplicationType(int applicationType);
+
+	/**
+	 * Gets the type of user this edge device is linked to. Used only when the
+	 * type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
+	 * 
+	 * @return the type of application.
+	 */
+	int getUser();
+
+	/**
+	 * Sets the type of User this edge device is linked to. Used only when the
+	 * type of this node is {@link SimulationParameters.TYPES#EDGE_DEVICE}.
+	 * 
+	 * @param applicationType the type of application.
+	 */
+	void setUser(int user);
 
 	/**
 	 * Gets the amount storage (in Megabytes) that is available on this computing

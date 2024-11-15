@@ -3,7 +3,6 @@ package com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
@@ -14,6 +13,7 @@ import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
 
 public class VM extends LocationAwareNode {
 	protected int applicationType;
+	protected int user;
 	protected boolean isSensor = false;
 	protected double availableStorage = 0; // in Megabytes
 	protected double storage = 0; // in Megabytes
@@ -95,11 +95,17 @@ public class VM extends LocationAwareNode {
 	}
 
 	public int getApplicationType() {
-		return applicationType;
+		return -1;
 	}
 
 	public void setApplicationType(int applicationType) {
-		this.applicationType = applicationType;
+	}
+
+	public int getUser(){
+		return -1;
+	}
+
+	public void setUser(int user){
 	}
 
 	public double getAvailableStorage() {
@@ -242,6 +248,8 @@ public class VM extends LocationAwareNode {
 
 		this.Host.submitTask(task);
 
+		if(getAssociatedContainerSizeInMBytes(task) == 0.0) System.out.println("sono una capocchia----------------------------------------------------------");
+
 		// If a CPU core and enough RAM are available, execute task directly
 		if (availableCores > 0 && this.getAvailableRam() >= getAssociatedContainerSizeInMBytes(task)) {
 			startExecution(task);
@@ -287,6 +295,26 @@ public class VM extends LocationAwareNode {
 
 		//Alternativa a quanto fatto sotto. Decommentare le cose nel DefaultSimulationManager
 		//scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
+	}
+
+	@Override
+	public void submitContainerUnPlacement(Container container) {
+		System.out.println("Richiesta di unplacement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getTime());
+		// rimuovo il container dalla lista
+		removeContainer(container);
+		// Update the amount of available storage
+		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
+
+		this.Host.submitContainerUnPlacement(container);
+	}
+
+	private void removeContainer(Container container){
+		for(Container cont : containerList){
+			if(cont.getId() == container.getId()){
+				containerList.remove(cont);
+				return;
+			}
+		}
 	}
 	
 	@Override

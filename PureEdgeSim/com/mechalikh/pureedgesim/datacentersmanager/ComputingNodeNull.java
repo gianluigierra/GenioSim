@@ -364,6 +364,22 @@ public class ComputingNodeNull implements ComputingNode {
 	}
 
 	/**
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	@Override
+	public int getUser(){
+		return -1;
+	}
+
+	/**
+	 * Does nothing since this Computing Node is supposed to be null.
+	 */
+	
+	 @Override
+	public void setUser(int user){
+	}
+
+	/**
 	 * 
 	 * Does nothing since this Computing Node is supposed to be null.
 	 */
@@ -623,6 +639,10 @@ public class ComputingNodeNull implements ComputingNode {
 
 	@Override
 	public void submitContainerPlacement(Container container) {
+	}
+
+	@Override
+	public void submitContainerUnPlacement(Container container) {
 	}
 	
 	@Override

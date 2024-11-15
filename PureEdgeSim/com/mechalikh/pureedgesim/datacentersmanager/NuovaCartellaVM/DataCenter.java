@@ -20,6 +20,7 @@ import org.w3c.dom.NodeList;
 public class DataCenter extends LocationAwareNode {
 
 	protected int applicationType;
+	protected int user;
 	protected boolean isSensor = false;
 	protected double availableStorage = 0; // in Megabytes
 	protected double storage = 0; // in Megabytes
@@ -185,11 +186,17 @@ public class DataCenter extends LocationAwareNode {
 	}
 
 	public int getApplicationType() {
-		return applicationType;
+		return -1;
 	}
 
 	public void setApplicationType(int applicationType) {
-		this.applicationType = applicationType;
+	}
+
+	public int getUser(){
+		return -1;
+	}
+
+	public void setUser(int user){
 	}
 
 	public double getAvailableStorage() {
@@ -332,6 +339,23 @@ public class DataCenter extends LocationAwareNode {
 		containerList.add(container);
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
+	}
+
+	@Override
+	public void submitContainerUnPlacement(Container container) {
+		// rimuovo il container dalla lista
+		removeContainer(container);
+		// Update the amount of available storage
+		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
+	}
+
+	private void removeContainer(Container container){
+		for(Container cont : containerList){
+			if(cont.getId() == container.getId()){
+				containerList.remove(cont);
+				return;
+			}
+		}
 	}
 	
 	@Override

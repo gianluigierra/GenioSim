@@ -19,6 +19,7 @@ import com.mechalikh.pureedgesim.locationmanager.MobilityModel;
 
 public class Host extends LocationAwareNode {
 	protected int applicationType;
+	protected int user;
 	protected boolean isSensor = false;
 	protected double availableStorage = 0; // in Megabytes
 	protected double storage = 0; // in Megabytes
@@ -178,13 +179,19 @@ public class Host extends LocationAwareNode {
 	public void setNumberOfCPUCores(int numberOfCPUCores) {
 		this.numberOfCPUCores = numberOfCPUCores;
 	}
-
+	
 	public int getApplicationType() {
-		return applicationType;
+		return -1;
 	}
 
 	public void setApplicationType(int applicationType) {
-		this.applicationType = applicationType;
+	}
+
+	public int getUser(){
+		return -1;
+	}
+
+	public void setUser(int user){
 	}
 
 	public double getAvailableStorage() {
@@ -331,6 +338,25 @@ public class Host extends LocationAwareNode {
 		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
 
 		this.DataCenter.submitContainerPlacement(container);
+	}
+
+	@Override
+	public void submitContainerUnPlacement(Container container) {
+		// rimuovo il container dalla lista
+		removeContainer(container);
+		// Update the amount of available storage
+		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
+
+		this.DataCenter.submitContainerUnPlacement(container);
+	}
+
+	private void removeContainer(Container container){
+		for(Container cont : containerList){
+			if(cont.getId() == container.getId()){
+				containerList.remove(cont);
+				return;
+			}
+		}
 	}
 	
 	@Override
