@@ -20,6 +20,7 @@ public class DefaultContainerGenerator extends ContainerGenerator {
 	protected Random random;
 	protected int id = 0;
 	protected double simulationTime;
+	public static boolean debugContainer = true;
 
 	public DefaultContainerGenerator(SimulationManager simulationManager) {
 		super(simulationManager);
@@ -61,8 +62,25 @@ public class DefaultContainerGenerator extends ContainerGenerator {
 	 * @param device the device to generate containers for
 	 * @param app    the application type
 	 */
-	protected void generateContainerForDevice(ComputingNode dev, int app) {               
-		insert(0, app, dev);
+	protected void generateContainerForDevice(ComputingNode dev, int app) {
+		//seleziono uno User dalla lista degli user non Deployati per l'app scelta   
+		User primoUser = new User();
+
+		for(int i = 0; i < SimulationParameters.applicationList.get(app).getUsersList().size(); i++){
+			if(!SimulationParameters.applicationList.get(app).getUsersList().get(i).isDeployed()){
+				primoUser = SimulationParameters.applicationList.get(app).getUsersList().get(i);
+				//setto lo user come deployato
+				primoUser.setIsDeployed(true); 
+				//associo il dispositivo allo user   
+				primoUser.setComputingNode(dev); 
+				////associo lo user al dispositivo
+				dev.setUser(i); 
+				//creo i container (piazzo quelli correnti ed eventualmente quelli futuri)
+				insert(0, app, i, dev);
+				return;
+			}
+		}
+
 	}
 
 	/**
@@ -72,23 +90,41 @@ public class DefaultContainerGenerator extends ContainerGenerator {
 	 * @param app    the application type of the container
 	 * @param device the device that requests the container's placement
 	 */
-	protected void insert(int time, int app, ComputingNode dev) {
+	protected void insert(int time, int app, int i, ComputingNode dev) {
 		Application appParams = SimulationParameters.applicationList.get(app);                  
 		long containerSize = appParams.getContainerSizeInBits();
 		long containerRequestSize = appParams.getContainerRequestSize();
 		boolean sharedContainer = appParams.getSharedContainer();
 		String Name = appParams.getName();
 
-		Container container = createContainer(++id).setAssociatedAppName(Name).setContainerSizeInBits(containerSize)
+		User user = appParams.getUsersList().get(i);
+		int start = 60*user.getStart();						//user.getStart è in minuti, noi lo vogliamo in secondi 
+		double duration = 60*user.getDuration();			//user.getDuration è in minuti, noi lo vogliamo in secondi 
+		int interval = 60*user.getInterval();				//user.getInterval è in minuti, noi lo vogliamo in secondi 
+		
+		time += start;
+		while(time < SimulationParameters.simulationDuration){
+			id++;
+			Container container = createContainer(id).setAssociatedAppName(Name).setContainerSizeInBits(containerSize)
 												   .setFileSizeInBits(containerRequestSize).setSharedContainer(sharedContainer)
 												   .setApplicationID(app).addEdgeDevice(dev);
+			container.getEdgeDevice(0).setApplicationType(app);
+			container.setTime(time);
+			containerList.add(container);
+			getSimulationManager().getSimulationLogger().deepLog("BasicContainersGenerator, Container " + id + " with placement time " + time + " (s) generated.");
 
-		time += 0;
-		container.setTime(time);
-		container.getEdgeDevice(0).setApplicationType(app);									//setto qui l'app type perchè sopra non sembra funzionare nella lambda
+			if(debugContainer) System.out.println("Ho generato la richiesta di placement per il dispositivo " + dev.getName() + " al tempo: " + time + ", associata all'utente " + i + " dell'applicazione " + SimulationParameters.applicationList.get(app).name);
 
-		containerList.add(container);
-		getSimulationManager().getSimulationLogger().deepLog("BasicContainersGenerator, Container " + id + " with execution time " + time + " (s) generated.");
+			time += duration;
+
+			container.setDuration(time);
+
+			if(debugContainer) System.out.println("Ho generato la richiesta di Unplacement per il dispositivo " + dev.getName() + " al tempo: " + time + ", associata all'utente " + i + " dell'applicazione " + SimulationParameters.applicationList.get(app).name);
+
+			getSimulationManager().getSimulationLogger().deepLog("BasicContainersGenerator, Container " + id + " with unplacement time " + time + " (s) generated.");
+
+			time += interval;
+		}
 		
 	}
 
