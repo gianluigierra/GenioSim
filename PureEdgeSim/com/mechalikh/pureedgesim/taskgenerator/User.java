@@ -1,5 +1,7 @@
 package com.mechalikh.pureedgesim.taskgenerator;
 
+import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+
 public class User {
 
     /**
@@ -37,6 +39,14 @@ public class User {
 	 */
     private boolean isDeployed;
 
+    /**
+	 * the computing node associated to this user
+	 */
+    private ComputingNode Node;
+
+    public User(){
+    }
+
     public User(int type, String accessPattern, int rate, int start, double duration, int interval){
         setType(type);
         setAccessPatter(accessPattern);
@@ -55,6 +65,14 @@ public class User {
         setDuration(user.getDuration());
         setInterval(user.getInterval());
         setIsDeployed(false);
+    }
+
+    public void setComputingNode(ComputingNode computingNode){
+        this.Node = computingNode;
+    }
+
+    public ComputingNode getComputingNode(){
+        return this.Node;
     }
 
     public void setIsDeployed(boolean isDeployed){

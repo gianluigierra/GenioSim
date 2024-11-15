@@ -63,18 +63,20 @@ public class UsersFileParser  extends XmlFileParser {
 						condition + userElement.getAttribute("type") + user + file);
 
 				// The start (time in minutes)
-				int start = (int) assertDouble(userElement, "start", value -> (value > 0),
+				int start = (int) assertDouble(userElement, "start", value -> (value >= 0),
 						condition + userElement.getAttribute("type") + user + file);
 
-				// The start (time in minutes)
+				// The duration (time in minutes)
 				double duration;
 				String durationString = userElement.getElementsByTagName("duration").item(0).getTextContent();
 				if(durationString.equals("infinity"))
-					duration = SimulationParameters.simulationDuration;
+					duration = SimulationParameters.simulationDuration/60;
 				else duration = Double.valueOf(durationString);
 
-				// The start (time in minutes)
-				int interval = (int) assertDouble(userElement, "interval", value -> (value >= 0),
+				// The interval (time in minutes)
+				int interval;
+				if(durationString.equals("infinity")) interval = (int) SimulationParameters.simulationDuration/60;
+				else interval = (int) assertDouble(userElement, "interval", value -> (value >= 0),
 						condition + userElement.getAttribute("type") + user + file);
 
 				// Save user's parameters.
