@@ -30,7 +30,6 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.FutureQueue;
 import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.taskgenerator.TaskGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.ContainerGenerator;
 
@@ -221,10 +220,7 @@ public class SimulationThread {
 		SimLog.println(this.getClass().getSimpleName() + " - All modules were successfully launched...");
 		
 		// Generate tasks list
-		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task Generator...");
-		Constructor<?> tasksGeneratorConstructor = simulation.tasksGenerator.getConstructor(SimulationManager.class);
-		TaskGenerator tasksGenerator = (TaskGenerator) tasksGeneratorConstructor.newInstance(simulationManager);
-		//FutureQueue<Task> taskList = tasksGenerator.generate();							//TASK GENERATOR: decommentare questo e commentare sotto per generare i task a inizio sim
+		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task List...");
 		FutureQueue<Task> taskList = new FutureQueue<>();
 		simulationManager.setTaskList(taskList);
 

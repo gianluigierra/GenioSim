@@ -38,6 +38,8 @@ import com.mechalikh.pureedgesim.scenariomanager.EdgeDevicesParser;
 import com.mechalikh.pureedgesim.scenariomanager.ONTParser;
 import com.mechalikh.pureedgesim.scenariomanager.SDNParser;
 
+import com.mechalikh.pureedgesim.taskgenerator.Application;
+
 /**
  * The {@code Simulation} class represents the main class of PureEdgeSim. By
  * which the simulation can be run. All PureEdgeSim simulations are instances of
@@ -224,11 +226,19 @@ public class Simulation extends SimulationAbstract {
 		// Save the different simulation runs (i.e., scenarios) in the scenarios List
 		for (int algorithmID = 0; algorithmID < SimulationParameters.orchestrationAlgorithms.length; algorithmID++) {
 			for (int architectureID = 0; architectureID < SimulationParameters.orchestrationArchitectures.length; architectureID++) {
-				for (int devicesCount = SimulationParameters.minNumberOfEdgeDevices; devicesCount <= SimulationParameters.maxNumberOfEdgeDevices; devicesCount += SimulationParameters.edgeDevicesIncrementationStepSize) {
-					iterations.add(new Scenario(devicesCount, algorithmID, architectureID));
-				}
+				iterations.add(new Scenario(getEdgeDeviceNumber(), algorithmID, architectureID));
 			}
 		}
+	}
+
+	/**
+	 * Returns the number of edgeDevices (Clients) associated with the users of the applications of the simulation
+	 */
+	private int getEdgeDeviceNumber(){
+		int numberOfEdgeDevicesPerApplication = 0;
+		for(Application app : SimulationParameters.applicationList)
+			numberOfEdgeDevicesPerApplication += app.getUsersList().size();
+		return numberOfEdgeDevicesPerApplication;
 	}
 
 	/**
