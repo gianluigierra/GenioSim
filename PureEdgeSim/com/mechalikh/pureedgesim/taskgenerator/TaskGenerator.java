@@ -94,12 +94,6 @@ public abstract class TaskGenerator {
 	}
 
 	/**
-	 * Generates the tasks that will be offloaded during the simulation.
-	 * 
-	 */
-	public abstract FutureQueue<Task> generate();
-
-	/**
 	 * Allows to use a custom task class in the simulation. The class must extend
 	 * the {@link Task} provided by PureEdgeSim.
 	 * 
