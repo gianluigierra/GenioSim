@@ -55,6 +55,10 @@ public class DefaultNetworkModel extends NetworkModel {
 			// Send the placement request to the orchestrator
 			sendRequestFromDeviceToCloudOrch((Container) ev.getData());
 			break;
+		case SEND_UNPLACEMENT_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH:
+			// Send the placement request to the orchestrator
+			sendUnplacementRequestFromDeviceToCloudOrch((Container) ev.getData());
+			break;
 		case SEND_REQUEST_FROM_EDGE_ORCH_TO_DESTINATION:
 			// Forward the offloading request from orchestrator to offloading destination
 			sendRequestFromEdgeOrchToDest((Task) ev.getData());
@@ -62,6 +66,10 @@ public class DefaultNetworkModel extends NetworkModel {
 		case SEND_CONTAINER_FROM_CLOUD_ORCH_TO_DESTINATION:
 			// Forward the placement request from orchestrator to placement destination
 			sendContainerFromCloudOrchToDest((Container) ev.getData());
+			break;
+		case SEND_CONTAINER_UNPLACEMENT_FROM_CLOUD_ORCH_TO_DESTINATION:
+			// Forward the placement request from orchestrator to placement destination
+			sendContainerUnplacementFromCloudOrchToDest((Container) ev.getData());
 			break;
 		case SEND_RESULT_TO_EDGE_ORCH:
 			// Send the execution results to the orchestrator
@@ -71,9 +79,17 @@ public class DefaultNetworkModel extends NetworkModel {
 			// Send the execution results to the orchestrator
 			sendResultFromDevToCloudOrch((Container) ev.getData());
 			break;
+		case SEND_UNPLACEMENT_RESULT_TO_CLOUD_ORCH:
+			// Send the execution results to the orchestrator
+			sendUnplacementResultFromDevToCloudOrch((Container) ev.getData());
+			break;
 		case SEND_RESULT_FROM_CLOUD_TO_EDGE_ORCH:
 			// Send the placement destination to the SDN
 			sendResultFromCloudToEdgeOrch((Container) ev.getData());
+			break;
+		case SEND_UNPLACEMENT_RESULT_FROM_CLOUD_TO_EDGE_ORCH:
+			// Send the placement destination to the SDN
+			sendUnplacementResultFromCloudToEdgeOrch((Container) ev.getData());
 			break;
 		case SEND_RESULT_FROM_EDGE_ORCH_TO_DEV:
 			// Transfer the execution results from the orchestrators to the device
@@ -82,6 +98,10 @@ public class DefaultNetworkModel extends NetworkModel {
 		case SEND_RESULT_FROM_CLOUD_ORCH_TO_DEV:
 			// Transfer the execution results from the orchestrators to the device
 			sendResultFromCloudOrchToDev((Container) ev.getData());
+			break;	
+		case SEND_UNPLACEMENT_RESULT_FROM_CLOUD_ORCH_TO_DEV:
+			// Transfer the execution results from the orchestrators to the device
+			sendUnplacementResultFromCloudOrchToDev((Container) ev.getData());
 			break;	
 		case TRANSFER_FINISHED:
 			// Transfer the execution results from the orchestrators to the device
@@ -223,9 +243,19 @@ public class DefaultNetworkModel extends NetworkModel {
 			//	updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getEdgeDevice(0), transfer.getContainer().getOrchestrator());
 			offloadingRequestRecievedByCloudOrchestrator(transfer);
 		}
+		// If it is an Unplacement request that is sent to the orchestrator
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.UNPLACEMENT_REQUEST) {
+			//if (transfer.getVertexList().get(0) == transfer.getContainer().getOrchestrator()) 
+			//	updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getEdgeDevice(0), transfer.getContainer().getOrchestrator());
+			unplacementRequestRecievedByCloudOrchestrator(transfer);
+		}
 		// If the container has been downloaded, then execute the task now
 		else if (transfer.getTransferType() == ContainerTransferProgress.Type.CONTAINER) {
 			containerDownloadFinished(transfer);
+		}
+		// container unplacement request arrived
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.CONTAINER_UNPLACEMENT) {
+			containerUnplacementFinished(transfer);
 		}
 		// If the transfer of execution results to the orchestrator has finished
 		else if (transfer.getTransferType() == ContainerTransferProgress.Type.RESULTS_TO_ORCH) {
@@ -236,9 +266,27 @@ public class DefaultNetworkModel extends NetworkModel {
 			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getPlacementDestination(), transfer.getContainer().getOrchestrator());
 		}
 		// If the transfer of execution results to the orchestrator has finished
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.UNPLACEMENT_RESULTS_TO_ORCH) {
+			//invio il risultato al device che ha richiesto il placement
+			returnUnplacementResultsToDeviceFromCloud(transfer);
+			//Avviso l'SDN che ho piazzato il container
+			returnUnplacementResultsFromCloudToEdgeOrch(transfer);
+			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getPlacementDestination(), transfer.getContainer().getOrchestrator());
+		}
+		// If the transfer of execution results to the orchestrator has finished
 		else if (transfer.getTransferType() == ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE) {
 			resultsReturnedFromCloudToEdge(transfer);
 			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getPlacementDestination(), transfer.getContainer().getOrchestrator());
+		}
+		// If the transfer of execution results to the orchestrator has finished
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.UNPLACEMENT_RESULT_FROM_CLOUD_TO_EDGE) {
+			unplacementResultsReturnedFromCloudToEdge(transfer);
+			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getPlacementDestination(), transfer.getContainer().getOrchestrator());
+		}
+		// Results transferred to the device
+		else if (transfer.getTransferType() == ContainerTransferProgress.Type.UNPLACEMENT_RESULTS_TO_DEV) {
+			unplacementResultsReturnedToDeviceFromCloud(transfer);
+			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getOrchestrator(), transfer.getContainer().getEdgeDevice(0));
 		}
 		// Results transferred to the device
 		else {
@@ -266,6 +314,10 @@ public class DefaultNetworkModel extends NetworkModel {
 		else sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.CONTAINER);
 	}
 
+	public void sendContainerUnplacementFromCloudOrchToDest(Container container) {
+		sendContainer(container.getOrchestrator(), container.getPlacementDestination(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.CONTAINER_UNPLACEMENT);
+	}
+
 	public void sendResultFromEdgeOrchToDev(Task task) {
 		if (task.getOrchestrator() != task.getEdgeDevice())
 			sendTask(task.getOrchestrator(), task.getEdgeDevice(), task, task.getOutputSizeInBits(),
@@ -277,6 +329,10 @@ public class DefaultNetworkModel extends NetworkModel {
 
 	public void sendResultFromCloudOrchToDev(Container container) {
 		sendContainer(container.getOrchestrator(), container.getEdgeDevice(0), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_DEV);
+	}
+
+	public void sendUnplacementResultFromCloudOrchToDev(Container container) {
+		sendContainer(container.getOrchestrator(), container.getEdgeDevice(0), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.UNPLACEMENT_RESULTS_TO_DEV);
 	}
 
 	public void sendResultFromDevToEdgeOrch(Task task) {
@@ -292,6 +348,10 @@ public class DefaultNetworkModel extends NetworkModel {
 		sendContainer(container.getPlacementDestination(), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULTS_TO_ORCH);
 	}
 
+	public void sendUnplacementResultFromDevToCloudOrch(Container container) {
+		sendContainer(container.getPlacementDestination(), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.UNPLACEMENT_RESULTS_TO_ORCH);
+	}
+
 	public void sendRequestFromDeviceToEdgeOrch(Task task) {
 		sendTask(task.getEdgeDevice(), task.getOrchestrator(), task, task.getFileSizeInBits(),TransferProgress.Type.REQUEST);
 	}
@@ -300,9 +360,17 @@ public class DefaultNetworkModel extends NetworkModel {
 		sendContainer(container.getEdgeDevice(container.getEdgeDevices().size() - 1), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.REQUEST);
 	}
 
+	public void sendUnplacementRequestFromDeviceToCloudOrch(Container container) {
+		sendContainer(container.getEdgeDevice(container.getEdgeDevices().size() - 1), container.getOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.UNPLACEMENT_REQUEST);
+	}
+
 	public void sendResultFromCloudToEdgeOrch(Container container) {
 		sendContainer(container.getOrchestrator(), container.getEdgeDevices().get(0).getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE);
 	}
+
+	public void sendUnplacementResultFromCloudToEdgeOrch(Container container) {
+		sendContainer(container.getOrchestrator(), container.getEdgeDevices().get(0).getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.UNPLACEMENT_RESULT_FROM_CLOUD_TO_EDGE);
+	}	
 
 	protected void updateEdgeDevicesRemainingEnergy(TransferProgress transfer, ComputingNode origin,
 			ComputingNode destination) {
@@ -319,8 +387,16 @@ public class DefaultNetworkModel extends NetworkModel {
 		scheduleNow(simulationManager, DefaultSimulationManager.DOWNLOAD_CONTAINER, transfer.getContainer());
 	}
 
+	protected void containerUnplacementFinished(ContainerTransferProgress transfer) {
+		scheduleNow(simulationManager, DefaultSimulationManager.UNPLACEMENT_CONTAINER, transfer.getContainer());
+	}
+
 	protected void resultsReturnedFromCloudToEdge(ContainerTransferProgress transfer) {
 		scheduleNow(simulationManager, DefaultSimulationManager.RESULTS_FROM_CLOUD_TO_EDGE_ORCH, transfer.getContainer());
+	}
+
+	protected void unplacementResultsReturnedFromCloudToEdge(ContainerTransferProgress transfer) {
+		scheduleNow(simulationManager, DefaultSimulationManager.UNPLACEMENT_RESULTS_FROM_CLOUD_TO_EDGE_ORCH, transfer.getContainer());
 	}
 
 	protected void resultsReturnedToDeviceFromEdge(TransferProgress transfer) {
@@ -331,6 +407,10 @@ public class DefaultNetworkModel extends NetworkModel {
 		scheduleNow(simulationManager, DefaultSimulationManager.PLACEMENT_RESULT_RETURN_FINISHED, transfer.getContainer());
 	}
 
+	protected void unplacementResultsReturnedToDeviceFromCloud(ContainerTransferProgress transfer) {
+		scheduleNow(simulationManager, DefaultSimulationManager.UNPLACEMENT_RESULT_RETURN_FINISHED, transfer.getContainer());
+	}
+
 	protected void returnResultsToDeviceFromEdge(TransferProgress transfer) {
 		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_EDGE_ORCH_TO_DEV, transfer.getTask());
 	}	
@@ -339,10 +419,18 @@ public class DefaultNetworkModel extends NetworkModel {
 		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_CLOUD_ORCH_TO_DEV, transfer.getContainer());
 	}
 
+	protected void returnUnplacementResultsToDeviceFromCloud(ContainerTransferProgress transfer) {
+		scheduleNow(this, NetworkModel.SEND_UNPLACEMENT_RESULT_FROM_CLOUD_ORCH_TO_DEV, transfer.getContainer());
+	}
+
 	protected void returnResultsFromCloudToEdgeOrch(ContainerTransferProgress transfer) {
 		scheduleNow(this, NetworkModel.SEND_RESULT_FROM_CLOUD_TO_EDGE_ORCH, transfer.getContainer());
 	}
 	
+	protected void returnUnplacementResultsFromCloudToEdgeOrch(ContainerTransferProgress transfer) {
+		scheduleNow(this, NetworkModel.SEND_UNPLACEMENT_RESULT_FROM_CLOUD_TO_EDGE_ORCH, transfer.getContainer());
+	}
+
 	protected void executeTaskOrDownloadContainer(TransferProgress transfer) {
 		if (SimulationParameters.enableRegistry && "CLOUD".equals(SimulationParameters.registryMode)
 				&& !(transfer.getTask().getOffloadingDestination()).getType().equals(TYPES.CLOUD)) {
@@ -363,6 +451,11 @@ public class DefaultNetworkModel extends NetworkModel {
 	protected void offloadingRequestRecievedByCloudOrchestrator(ContainerTransferProgress transfer) {
 		// Find the placement destination and download the container
 		scheduleNow(simulationManager, DefaultSimulationManager.SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM, transfer.getContainer());
+	}
+	
+	protected void unplacementRequestRecievedByCloudOrchestrator(ContainerTransferProgress transfer) {
+		// Find the placement destination and download the container
+		scheduleNow(simulationManager, DefaultSimulationManager.SEND_UNPLACEMENT_FROM_CLOUD_ORCH_TO_VM, transfer.getContainer());
 	}
 	
 }

@@ -16,6 +16,11 @@ public class DefaultContainer extends ContainerAbstract{
     * The time required for the placement of the Container in seconds.
     */
    protected double placementTime;
+   
+   /**
+    * The the container will be placed for in seconds.
+    */
+   protected double placementDuration;
 
    /**
     * The edgeDevices where the Container will be offloaded.
@@ -91,6 +96,7 @@ public class DefaultContainer extends ContainerAbstract{
 		this.setSharedContainer(container.getSharedContainer());
 		this.setStatus(container.getStatus());
 		this.setTime(container.getTime());
+		this.setDuration(container.getDuration());
     }
 
 	/**
@@ -123,6 +129,16 @@ public class DefaultContainer extends ContainerAbstract{
 	public void setTime(double time) {
 		this.placementTime = time;
 	}
+	
+	/**
+	 * Sets the duration of placement for the Container.
+	 *
+	 * @param duration The duration time in seconds.
+	 */
+	@Override
+	public void setDuration(double duration) {
+		this.placementDuration = duration;
+	}
 
 	/**
 	 * Returns the offloading time for the Container.
@@ -132,6 +148,16 @@ public class DefaultContainer extends ContainerAbstract{
 	@Override
 	public double getTime() {
 		return placementTime;
+	}
+
+	/**
+	 * Returns the duration time for the Container.
+	 *
+	 * @return The offloading time in seconds.
+	 */
+	@Override
+	public double getDuration() {
+		return placementDuration;
 	}
 
 	/**

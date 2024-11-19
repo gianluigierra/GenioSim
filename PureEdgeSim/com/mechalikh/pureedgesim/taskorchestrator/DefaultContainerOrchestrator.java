@@ -44,6 +44,15 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 	}
 
+	public void removeContainerFromVM(Container container){
+		for(int i = 0; i <  nodeList.size(); i++){
+			if(nodeList.get(i).equals(container.getPlacementDestination())){
+				ContainerMap.get(i).remove(container);
+				historyMap.put(i, historyMap.get(i) - 1); 
+			}
+		}
+	}
+
 	protected int findComputingNode(String[] architecture, Container container) {
 
 		//se il container è del tipo "shared"

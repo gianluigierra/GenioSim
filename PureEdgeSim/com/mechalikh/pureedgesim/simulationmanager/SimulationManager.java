@@ -55,16 +55,22 @@ public abstract class SimulationManager extends SimEntity {
 	protected static final int SHOW_PROGRESS = 2;
 	public static final int EXECUTE_TASK = 3;
 	public static final int DOWNLOAD_CONTAINER = 13;
+	public static final int UNPLACEMENT_CONTAINER = 23;
 	public static final int TRANSFER_RESULTS_TO_EDGE_ORCH = 4;
 	public static final int TRANSFER_RESULTS_TO_CLOUD_ORCH = 14;
+	public static final int TRANSFER_UNPLACEMENT_RESULTS_TO_CLOUD_ORCH = 24;
 	public static final int RESULTS_FROM_CLOUD_TO_EDGE_ORCH = 16;
+	public static final int UNPLACEMENT_RESULTS_FROM_CLOUD_TO_EDGE_ORCH = 26;
 	public static final int TASK_RESULT_RETURN_FINISHED = 5;
 	public static final int PLACEMENT_RESULT_RETURN_FINISHED = 15;
+	public static final int UNPLACEMENT_RESULT_RETURN_FINISHED = 25;
 	public static final int SEND_TO_EDGE_ORCH = 6;
 	public static final int SEND_TO_CLOUD_ORCH = 10;
+	public static final int SEND_UNPLACEMENT_TO_CLOUD_ORCH = 20;
 	public static final int UPDATE_REAL_TIME_CHARTS = 7;
 	public static final int SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION = 8;
 	public static final int SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM = 11;
+	public static final int SEND_UNPLACEMENT_FROM_CLOUD_ORCH_TO_VM = 21;
 	protected static final int NEXT_BATCH = 9; 
 
 	protected Orchestrator edgeOrchestrator;

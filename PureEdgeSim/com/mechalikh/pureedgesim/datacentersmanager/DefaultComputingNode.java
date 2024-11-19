@@ -26,6 +26,7 @@ import java.util.List;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultContainer;
 
@@ -305,6 +306,8 @@ public class DefaultComputingNode extends LocationAwareNode {
 
 		//creo container provvisorio per specificare l'ultimo edge device aggiunto
 		Container container_provvisorio = new DefaultContainer(container);
+
+		if(Orchestrator.printDebug) System.out.println("Richiesta di Placement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getTime() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
 							 
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container_provvisorio);
 	}
@@ -313,8 +316,14 @@ public class DefaultComputingNode extends LocationAwareNode {
 	public void submitContainerUnPlacement(Container container) {
 		// rimuovo il container dalla lista
 		removeContainer(container);
+		// setto il container come UNPLACED
+		container.setStatus(Container.Status.NOT_PLACED);
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
+	
+		if(Orchestrator.printDebug) System.out.println("Richiesta di Unplacement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getDuration() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
+
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_UNPLACEMENT_RESULTS_TO_CLOUD_ORCH, container);
 	}
 	
 	private void removeContainer(Container container){

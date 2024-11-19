@@ -33,6 +33,7 @@ import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskgenerator.DefaultContainerGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
 import com.mechalikh.pureedgesim.simulationengine.FutureQueue;
 
@@ -117,28 +118,16 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	@Override
 	public void onSimulationStart() {
 		// Initialize logger variables.
-		//simLog.setGeneratedTasks(taskList.size());							//TASK GENERATOR: decommentare questo per generare i task a inizio sim
 		simLog.setCurrentOrchPolicy(scenario.getStringOrchArchitecture());
 
 		simLog.print("%s - Simulation: %d  , iteration: %d", getClass().getSimpleName(), getSimulationId(),
 				getIteration());
 
-		//schedule the containers placeement (all of them)
+		//schedule the containers placement (all of them)
 		for(int i = containerList.size(); i > 0; i--){
 			schedule(this, containerList.first().getTime() - simulation.clock(), SEND_TO_CLOUD_ORCH, containerList.first());
 			containerList.remove(containerList.first());
 		}
-
-		//TASK GENERATOR: decommentare sotto  per generare i task a inizio sim
-		// // Schedule the tasks offloading (first batch).
-		// for (int i = 0; i < Math.min(taskList.size(), SimulationParameters.batchSize); i++) {
-		// 	schedule(this, taskList.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskList.first());
-		// 	taskList.remove(taskList.first());
-		// }
-
-		// // Schedule the offlaoding of next batch
-		// if (taskList.size() > 0)
-		// 	schedule(this, taskList.first().getTime() - simulation.clock(), NEXT_BATCH);
 
 		// Scheduling the end of the simulation.
 		schedule(this, SimulationParameters.simulationDuration, PRINT_LOG);
@@ -191,6 +180,11 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			//System.out.println("Inviata la richiesta di placement al cloud: " + container.getId());
 			sendContainerRequestToCloudOrchestrator(container);
 			break;
+		case SEND_UNPLACEMENT_TO_CLOUD_ORCH:
+			container = (Container) ev.getData();
+			//if(DefaultContainerGenerator.debugContainer) System.out.println("Ho ricevuto la richiesta di Unplacement per il dispositivo " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " al tempo: " + simulation.clock() + ", associata all'utente " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getUser() + " dell'applicazione " + SimulationParameters.applicationList.get(container.getEdgeDevice(container.getEdgeDevices().size()-1).getApplicationType()).getName());
+			sendContainerUnplacementRequestToCloudOrchestrator(container);
+			break;
 		case SEND_TASK_FROM_EDGE_ORCH_TO_DESTINATION:
 			// The offlaoding decision was made, send the request from the orchestrator to
 			// the offloading destination.
@@ -203,6 +197,11 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			// the placement destination.
 			// TODO: implementare funzione di placement
 			sendFromCloudOrchToDestination((Container) ev.getData());
+			break;
+		case SEND_UNPLACEMENT_FROM_CLOUD_ORCH_TO_VM:
+			// the device asked to unplace the container previously placed
+			cloudOrchestrator.removeContainerFromVM((Container) ev.getData());
+			sendUnplacementFromCloudOrchToDestination((Container) ev.getData());
 			break;
 		case EXECUTE_TASK:
 			// Offlaoding request received by the destination, execute the task.
@@ -219,6 +218,11 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			cloudOrchestrator.notifyOrchestratorOfContainerExecution(container);
 			break;
 
+		case UNPLACEMENT_CONTAINER:
+			// Placemenet request received by the destination, place the container.
+			container = (Container) ev.getData();
+			container.getPlacementDestination().submitContainerUnPlacement(container);
+			break;
 		case TRANSFER_RESULTS_TO_EDGE_ORCH:
 			// Task execution finished, transfer the results to the orchestrator.
 			task = (Task) ev.getData();
@@ -231,10 +235,20 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			//TODO implementare il metodo
 			sendResultsToCloudOchestrator((Container) ev.getData());
 			break;
+		case TRANSFER_UNPLACEMENT_RESULTS_TO_CLOUD_ORCH:
+			// Task execution finished, transfer the results to the orchestrator.
+			//TODO implementare il metodo
+			sendUnplacementResultsToCloudOchestrator((Container) ev.getData());
+			break;
 		case RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
 			//Container placement has finished and i notified the orchestrator.
 			//TODO implementare il metodo
 			edgeOrchestrator.setContainerToVM((Container) ev.getData());
+			break;
+		case UNPLACEMENT_RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
+			//Container placement has finished and i notified the orchestrator.
+			//TODO implementare il metodo
+			edgeOrchestrator.removeContainerFromVM((Container) ev.getData());
 			break;
 		case TASK_RESULT_RETURN_FINISHED:
 			// Results returned to edge device.
@@ -252,6 +266,9 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			placedContainers.add(container);
 			cloudOrchestrator.resultsReturned(container);
 
+			//schedulo l'unplacement del container
+			schedule(this, container.getDuration() - simulation.clock(), SEND_UNPLACEMENT_TO_CLOUD_ORCH, container);
+
 			//inizio a generare i task per l'edge device che ha ottenuto il placement
 			DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
 
@@ -263,12 +280,19 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 			FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(container.getEdgeDevice(container.getEdgeDevices().size()-1));
 			simLog.setGeneratedTasks(simLog.getGeneratedTasks() + taskListProvvisoria.size());
+
+			//schedulo i task generati
 			while(!taskListProvvisoria.isEmpty()){
 				schedule(this, taskListProvvisoria.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskListProvvisoria.first());
 				taskListProvvisoria.remove(taskListProvvisoria.first());
 			}
 			break;
 
+		case UNPLACEMENT_RESULT_RETURN_FINISHED:
+			// Results returned to edge device.
+			container = (Container) ev.getData();
+			placedContainers.remove(container);
+			break;
 		case SHOW_PROGRESS:
 			// Calculate the simulation progress.
 			int progress;
@@ -365,6 +389,15 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	}
 
 	/**
+	 * Returns the Container placement execution to the orchestrator.
+	 *
+	 * @param container The container that has been placed.
+	 */
+	protected void sendUnplacementResultsToCloudOchestrator(Container container) {
+		scheduleNow(getNetworkModel(), NetworkModel.SEND_UNPLACEMENT_RESULT_TO_CLOUD_ORCH, container);
+	}
+
+	/**
 	 * Sends the task from the orchestrator to the offloading destination.
 	 *
 	 * @param task The task that has been offlaoded.
@@ -419,6 +452,16 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	}
 	
 	/**
+	 * Sends the Container from the orchestrator to the placement destination.
+	 *
+	 * @param task The task that has been offlaoded.
+	 */
+	protected void sendUnplacementFromCloudOrchToDestination(Container container) {
+		cloudOrchestrator.findVmAssociatedWithContainer(container);
+		scheduleNow(getNetworkModel(), NetworkModel.SEND_CONTAINER_UNPLACEMENT_FROM_CLOUD_ORCH_TO_DESTINATION, container);
+	}
+	
+	/**
 	 * Sends the task to the orchestrator in order to make the offloading decision.
 	 *
 	 * @param task The task that needs to be offloaded.
@@ -445,6 +488,15 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	protected void sendContainerRequestToCloudOrchestrator(Container container) {
 		container.setOrchestrator(container.getEdgeDevice(0).getCloudOrchestrator());
 		scheduleNow(networkModel, NetworkModel.SEND_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH, container);
+	}
+
+	/**
+	 * Sends the Container Unplacement request to the cloud orchestrator.
+	 *
+	 * @param container The container that needs to be placed.
+	 */
+	protected void sendContainerUnplacementRequestToCloudOrchestrator(Container container) {
+		scheduleNow(networkModel, NetworkModel.SEND_UNPLACEMENT_REQUEST_FROM_DEVICE_TO_CLOUD_ORCH, container);
 	}
 
 	/**
@@ -514,6 +566,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		// The task is failed due to long delay
 		if (phase == 3 && task.getTotalDelay() >= task.getMaxLatency()) {
 			task.setFailureReason(Task.FailureReason.FAILED_DUE_TO_LATENCY);
+			//System.out.println("waitingtime: " + task.getWatingTime() + " getActualNetworkTime: " + task.getActualNetworkTime() + " getActualCpuTime: " + task.getActualCpuTime());
 			simLog.incrementTasksFailedLatency(task);
 			return setFailed(task, phase);
 		}

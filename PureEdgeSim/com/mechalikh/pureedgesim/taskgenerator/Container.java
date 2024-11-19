@@ -43,6 +43,14 @@ public interface Container extends QueueElement {
       * @param time the time to set
       */
      void setTime(double time);
+
+     /**
+      * 
+      * Sets the duration of the Container.
+      * 
+      * @param time the time to set
+      */
+     void setDuration(double duration);
  
      /**
       * 
@@ -51,6 +59,14 @@ public interface Container extends QueueElement {
       * @return the time of the task
       */
      double getTime();
+
+     /**
+      * 
+      * Gets the duration of the Container.
+      * 
+      * @param time the time to set
+      */
+     double getDuration();
 
     /**
 	 * Sets the ID of the Container.

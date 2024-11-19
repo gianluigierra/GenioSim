@@ -8,6 +8,7 @@ import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultContainer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.LocationAwareNode;
 
@@ -248,7 +249,9 @@ public class VM extends LocationAwareNode {
 
 		this.Host.submitTask(task);
 
-		if(getAssociatedContainerSizeInMBytes(task) == 0.0) System.out.println("sono una capocchia----------------------------------------------------------");
+		if(getAssociatedContainerSizeInMBytes(task) == 0.0) {
+			System.out.println("sono una capocchia---------------------------------------------------------- request from device: " + task.getEdgeDevice().getName());
+		}
 
 		// If a CPU core and enough RAM are available, execute task directly
 		if (availableCores > 0 && this.getAvailableRam() >= getAssociatedContainerSizeInMBytes(task)) {
@@ -291,6 +294,8 @@ public class VM extends LocationAwareNode {
 
 		Container container_provvisorio = new DefaultContainer(container);
 							 
+		if(Orchestrator.printDebug) System.out.println("Richiesta di Placement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getTime() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
+
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container_provvisorio);
 
 		//Alternativa a quanto fatto sotto. Decommentare le cose nel DefaultSimulationManager
@@ -299,13 +304,18 @@ public class VM extends LocationAwareNode {
 
 	@Override
 	public void submitContainerUnPlacement(Container container) {
-		System.out.println("Richiesta di unplacement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getTime());
 		// rimuovo il container dalla lista
 		removeContainer(container);
+		// setto il container come UNPLACED
+		container.setStatus(Container.Status.NOT_PLACED);
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
 
 		this.Host.submitContainerUnPlacement(container);
+	
+		if(Orchestrator.printDebug) System.out.println("Richiesta di Unplacement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getDuration() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
+
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_UNPLACEMENT_RESULTS_TO_CLOUD_ORCH, container);
 	}
 
 	private void removeContainer(Container container){

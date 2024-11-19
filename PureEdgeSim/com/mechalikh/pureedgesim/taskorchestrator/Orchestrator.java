@@ -40,7 +40,7 @@ public abstract class Orchestrator extends SimEntity {
 	protected String architectureName;
 	protected String[] architectureLayers;
 
-	protected static boolean printDebug = false;
+	public static boolean printDebug = true;
 
 	protected Orchestrator(SimulationManager simulationManager) {
 		super(simulationManager.getSimulation());
@@ -282,6 +282,19 @@ public abstract class Orchestrator extends SimEntity {
 			}
 		}
 		return -1;
+	}
+
+	public void removeContainerFromVM(Container container){
+		removeContainer(container);
+	}
+
+	private void removeContainer(Container container){
+		for(Container cont : containerList){
+			if(cont.getId() == container.getId()){
+				containerList.remove(cont);
+				return;
+			}
+		}
 	}
 
 	public abstract void resultsReturned(Task task);

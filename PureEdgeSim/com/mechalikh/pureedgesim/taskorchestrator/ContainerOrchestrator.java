@@ -8,6 +8,7 @@ import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public abstract class ContainerOrchestrator extends SimEntity {
 	static protected List<ComputingNode> nodeList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
@@ -195,6 +196,20 @@ public abstract class ContainerOrchestrator extends SimEntity {
 	static public List<ComputingNode> getNodeList(){
 		return nodeList;
 	}
+
+	public void findVmAssociatedWithContainer(Container container){
+
+		//ciclo tra tutti i dispositivi di placement
+		for(ComputingNode cn : nodeList){	
+			//ciclo tra tutti i container del dispositivo i-mo
+			for(Container cont : cn.getContainerList()){
+				if(cont.getId() == container.getId())
+					container.setPlacementDestination(cn);
+			}
+		}
+	}
+
+	public abstract void removeContainerFromVM(Container container);
 
 	public abstract void notifyOrchestratorOfContainerExecution(Container container);
 	
