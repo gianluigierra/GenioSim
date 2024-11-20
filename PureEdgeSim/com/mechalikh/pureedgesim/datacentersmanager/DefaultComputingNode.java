@@ -23,6 +23,7 @@ package com.mechalikh.pureedgesim.datacentersmanager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
@@ -287,35 +288,21 @@ public class DefaultComputingNode extends LocationAwareNode {
 
 		container.setStatus(Container.Status.PLACED);
 
-		//se il container è del tipo shared ed è già stato piazzato allora aggiungo l'edge device al container già piazzato
-		if(container.getSharedContainer() && isContainerApplicationInList(container)){
-			for(Container cont : containerList)
-				if(cont.getAssociatedAppName().equals(container.getAssociatedAppName())){
-					cont.addEdgeDevice(container.getEdgeDevice(container.getEdgeDevices().size()-1));
-					//associo il container precedente a quello già piazzato
-					container = cont;
-				}
-		}
-		//altrimenti
-		else{
-			// Aggiungo il container alla lista
-			containerList.add(container);
-			// Update the amount of available storage
-			this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
-		}
+		// Aggiungo il container alla lista
+		containerList.add(container);
+		// update the amount of available storage
+		this.setAvailableStorage(this.availableStorage - container.getContainerSizeInMBytes());
 
-		//creo container provvisorio per specificare l'ultimo edge device aggiunto
-		Container container_provvisorio = new DefaultContainer(container);
-
-		if(Orchestrator.printDebug) System.out.println("Richiesta di Placement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getTime() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
+		if(Orchestrator.printDebug && !container.getSharedContainer()) System.out.println("Richiesta di Placement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " dall'utente "+SimulationParameters.applicationList.get(container.getEdgeDevice(container.getEdgeDevices().size()-1).getApplicationType()).getUsersList().get(container.getEdgeDevice(container.getEdgeDevices().size()-1).getUser()).getType()+"  generata al tempo " + container.getTime() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
+		if(Orchestrator.printDebug && container.getSharedContainer()) System.out.println("Richiesta di Placement dell'operatore " + container.getAssociatedAppName() +" generata al tempo " + container.getTime() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
 							 
-		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container_provvisorio);
+		scheduleNow(simulationManager, SimulationManager.TRANSFER_RESULTS_TO_CLOUD_ORCH, container);
 	}
 
 	@Override
 	public void submitContainerUnPlacement(Container container) {
 		// rimuovo il container dalla lista
-		removeContainer(container);
+		containerList.remove(container);
 		// setto il container come UNPLACED
 		container.setStatus(Container.Status.NOT_PLACED);
 		// Update the amount of available storage
@@ -324,15 +311,6 @@ public class DefaultComputingNode extends LocationAwareNode {
 		if(Orchestrator.printDebug) System.out.println("Richiesta di Unplacement del " + container.getEdgeDevice(container.getEdgeDevices().size()-1).getName() + " generata al tempo " + container.getDuration() + ". AvailableStorage del nodo " + this.getName() + " = " + this.availableStorage + ". ContainerID = " + container.getId() + ". ContainerList.size() = " + containerList.size());
 
 		scheduleNow(simulationManager, SimulationManager.TRANSFER_UNPLACEMENT_RESULTS_TO_CLOUD_ORCH, container);
-	}
-	
-	private void removeContainer(Container container){
-		for(Container cont : containerList){
-			if(cont.getId() == container.getId()){
-				containerList.remove(cont);
-				return;
-			}
-		}
 	}
 
 	double getAssociatedContainerSizeInMBytes(Task task){

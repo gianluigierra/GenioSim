@@ -62,11 +62,41 @@ public class DefaultTaskGenerator extends TaskGenerator {
 		// Get clock time in minutes
 		currentTime = simulationManager.getSimulation().clockInMinutes();
 
-		//System.out.println("Voglio generare nuovi task per il dispositivo " + computingNode.getName() + " al tempo " + currentTime);
-		generateTasksForDevice(computingNode, computingNode.getApplicationType());
-		//System.out.println("Ho generato " + getTaskList().size() + " tasks");
+		//se l'applicazione associata al dispositivo è shared uso questa funzione
+		if(!SimulationParameters.applicationList.get(computingNode.getApplicationType()).getSharedContainer()) generateTasksForDevice(computingNode, computingNode.getApplicationType());
+		//atrimenti li genero per la durata della simulazione
+		else generateTasksForDeviceForAllSimulation(computingNode, computingNode.getApplicationType());
 
 		return this.getTaskList();
+	}
+
+	/**
+	 * Generates tasks that will be offloaded during simulation for the given device
+	 * and application.
+	 * 
+	 * @param device the device to generate tasks for
+	 * @param app    the application type
+	 */
+	protected void generateTasksForDeviceForAllSimulation(ComputingNode dev, int app) {
+		currentTime += (int) SimulationParameters.applicationList.get(app).getUsersList().get(dev.getUser()).getStart();
+		while((int) currentTime <= SimulationParameters.simulationDuration/60){
+			int remainingTime = 0;
+			//calcolo il remaining time della simulazione, nel caso che debba iniziare ad offloadare tasks poco prima che questa finisca
+			if((int) SimulationParameters.applicationList.get(app).getUsersList().get(dev.getUser()).getDuration() + (int) currentTime <= SimulationParameters.simulationDuration/60) 
+				remainingTime = (int) SimulationParameters.applicationList.get(app).Users.get(dev.getUser()).getDuration() + (int) currentTime;
+			else 
+				remainingTime = (int) SimulationParameters.simulationDuration/60;
+			
+			if(SimulationParameters.applicationList.get(app).getUsersList().get(dev.getUser()).getAccessPatter().equals("random"))
+				IntStream.range((int) currentTime, remainingTime)
+				//First get time in seconds
+				.forEach(st -> insert((st * 60)
+						// Then pick up random second in this minute "st". Shift the time by a random
+						// value
+						+ random.nextInt(1,15), app, dev.getUser(), dev));
+			
+			currentTime += (int) SimulationParameters.applicationList.get(app).getUsersList().get(dev.getUser()).getDuration() + (int) SimulationParameters.applicationList.get(app).getUsersList().get(dev.getUser()).getInterval();
+		}
 	}
 
 	/**
@@ -79,7 +109,7 @@ public class DefaultTaskGenerator extends TaskGenerator {
 	protected void generateTasksForDevice(ComputingNode dev, int app) {
 		int remainingTime = 0;
 		//calcolo il remaining time della simulazione, nel caso che debba iniziare ad offloadare tasks poco prima che questa finisca
-		if((int) SimulationParameters.applicationList.get(app).Users.get(dev.getUser()).getDuration() + (int) currentTime <= SimulationParameters.simulationDuration/60) 
+		if((int) SimulationParameters.applicationList.get(app).getUsersList().get(dev.getUser()).getDuration() + (int) currentTime <= SimulationParameters.simulationDuration/60) 
 			remainingTime = (int) SimulationParameters.applicationList.get(app).Users.get(dev.getUser()).getDuration() + (int) currentTime;
 		else 
 			remainingTime = (int) SimulationParameters.simulationDuration/60;

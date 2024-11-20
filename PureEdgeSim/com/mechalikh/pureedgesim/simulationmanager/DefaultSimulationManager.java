@@ -30,8 +30,10 @@ import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationengine.OnSimulationStartListener;
 import com.mechalikh.pureedgesim.simulationengine.PureEdgeSim;
+import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.User;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultContainerGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
@@ -125,8 +127,22 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 		//schedule the containers placement (all of them)
 		for(int i = containerList.size(); i > 0; i--){
-			schedule(this, containerList.first().getTime() - simulation.clock(), SEND_TO_CLOUD_ORCH, containerList.first());
+			if(!containerList.first().getSharedContainer()) schedule(this, containerList.first().getTime() - simulation.clock(), SEND_TO_CLOUD_ORCH, containerList.first());
+			else {
+				for(ComputingNode cn : dataCentersManager.getComputingNodesGenerator().getOrchestratorsList())
+					if(cn.getName().equals("CloudDC")) containerList.first().setOrchestrator(cn);
+				schedule(this, containerList.first().getTime() - simulation.clock(), SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM, containerList.first());
+			}
 			containerList.remove(containerList.first());
+		}
+
+		//creates and schedules the tasks for the shared applications
+		for(int i = 0; i < SimulationParameters.applicationList.size(); i++){
+			if(SimulationParameters.applicationList.get(i).getSharedContainer()){
+				for(User user : SimulationParameters.applicationList.get(i).getUsersList()){
+					generateAndScheduleNewTasks(user.getComputingNode());
+				}
+			}
 		}
 
 		// Scheduling the end of the simulation.
@@ -266,26 +282,15 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			placedContainers.add(container);
 			cloudOrchestrator.resultsReturned(container);
 
+			//se il container è shared allora fermo qui
+			if(container.getSharedContainer()) break;
+			//altrimenti procedo con unplacement container e generazione task
+
 			//schedulo l'unplacement del container
 			schedule(this, container.getDuration() - simulation.clock(), SEND_UNPLACEMENT_TO_CLOUD_ORCH, container);
 
-			//inizio a generare i task per l'edge device che ha ottenuto il placement
-			DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
-
-			//Alternativa a quanto fatto col costruttore DefaultContainer nella VM e nel DefaultComputingNode
-			//ComputingNode edgeDevice = container.getEdgeDevice(0);
-			//container.getEdgeDevices().remove(0);			
-			//FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(edgeDevice);
-			//container.addEdgeDevice(edgeDevice);
-
-			FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(container.getEdgeDevice(container.getEdgeDevices().size()-1));
-			simLog.setGeneratedTasks(simLog.getGeneratedTasks() + taskListProvvisoria.size());
-
-			//schedulo i task generati
-			while(!taskListProvvisoria.isEmpty()){
-				schedule(this, taskListProvvisoria.first().getTime() - simulation.clock(), SEND_TO_EDGE_ORCH, taskListProvvisoria.first());
-				taskListProvvisoria.remove(taskListProvvisoria.first());
-			}
+			//inizio a generare i task per l'edge device che ha ottenuto il placement e li schedulo
+			generateAndScheduleNewTasks(container.getEdgeDevice(container.getEdgeDevices().size()-1));
 			break;
 
 		case UNPLACEMENT_RESULT_RETURN_FINISHED:
@@ -359,6 +364,19 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			break;
 		}
 
+	}
+
+	protected void generateAndScheduleNewTasks(ComputingNode cn){
+		//inizio a generare i task per l'edge device che ha ottenuto il placement
+		DefaultTaskGenerator tasksGenerator = new DefaultTaskGenerator(this);
+		FutureQueue<Task> taskListProvvisoria = tasksGenerator.generateNewTasks(cn);
+		//System.out.println("Il device " + cn.getName() + " ha generato " + taskListProvvisoria.size() + " tasks per lo user " + SimulationParameters.applicationList.get(cn.getApplicationType()).getUsersList().get(cn.getUser()).getType() + " relativi all'applicazione: " +  SimulationParameters.applicationList.get(cn.getApplicationType()).getName());
+		simLog.setGeneratedTasks(simLog.getGeneratedTasks() + taskListProvvisoria.size());
+		//schedulo i task generati
+		while(!taskListProvvisoria.isEmpty()){
+			schedule(this, taskListProvvisoria.first().getTime() - simulation.clock(), SimulationManager.SEND_TO_EDGE_ORCH, taskListProvvisoria.first());
+			taskListProvvisoria.remove(taskListProvvisoria.first());
+		}
 	}
 
 	/**

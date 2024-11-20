@@ -260,7 +260,7 @@ public class DefaultNetworkModel extends NetworkModel {
 		// If the transfer of execution results to the orchestrator has finished
 		else if (transfer.getTransferType() == ContainerTransferProgress.Type.RESULTS_TO_ORCH) {
 			//invio il risultato al device che ha richiesto il placement
-			returnResultsToDeviceFromCloud(transfer);
+			if(!transfer.getContainer().getSharedContainer()) returnResultsToDeviceFromCloud(transfer);
 			//Avviso l'SDN che ho piazzato il container
 			returnResultsFromCloudToEdgeOrch(transfer);
 			//updateEdgeDevicesRemainingEnergy(transfer, transfer.getContainer().getPlacementDestination(), transfer.getContainer().getOrchestrator());

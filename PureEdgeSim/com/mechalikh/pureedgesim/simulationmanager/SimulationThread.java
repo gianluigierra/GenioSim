@@ -206,6 +206,11 @@ public class SimulationThread {
 		long endTime = System.currentTimeMillis();
 		System.out.println("Time taken: " + (endTime - startTime) + " milliseconds");
 		
+		// Generate tasks list
+		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task List...");
+		FutureQueue<Task> taskList = new FutureQueue<>();
+		simulationManager.setTaskList(taskList);
+		
 		// Generate Container list
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Container Generator...");
 		Constructor<?> containersGeneratorConstructor = simulation.containersGenerator.getConstructor(SimulationManager.class);
@@ -218,11 +223,6 @@ public class SimulationThread {
 		Constructor<?> cloudOrchestratorConstructor = simulation.cloudOrchestrator.getConstructor(SimulationManager.class);
 		cloudOrchestratorConstructor.newInstance(simulationManager);
 		SimLog.println(this.getClass().getSimpleName() + " - All modules were successfully launched...");
-		
-		// Generate tasks list
-		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task List...");
-		FutureQueue<Task> taskList = new FutureQueue<>();
-		simulationManager.setTaskList(taskList);
 
 		// Initialize the Task orchestrator
 		SimLog.println(this.getClass().getSimpleName() + " - Initializing the Task Orchestrator...");

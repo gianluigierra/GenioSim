@@ -343,20 +343,11 @@ public class Host extends LocationAwareNode {
 	@Override
 	public void submitContainerUnPlacement(Container container) {
 		// rimuovo il container dalla lista
-		removeContainer(container);
+		containerList.remove(container);
 		// Update the amount of available storage
 		this.setAvailableStorage(this.availableStorage + container.getContainerSizeInMBytes());
 
 		this.DataCenter.submitContainerUnPlacement(container);
-	}
-
-	private void removeContainer(Container container){
-		for(Container cont : containerList){
-			if(cont.getId() == container.getId()){
-				containerList.remove(cont);
-				return;
-			}
-		}
 	}
 	
 	@Override
