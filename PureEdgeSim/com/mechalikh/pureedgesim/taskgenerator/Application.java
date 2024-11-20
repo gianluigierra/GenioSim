@@ -39,11 +39,6 @@ public class Application {
 	protected String name;
 	
 	/**
-	 * The rate at which requests are generated for this application
-	 */
-	protected int rate;
-	
-	/**
 	 * The users associated with this App
 	 */
 	protected List<User> Users = new ArrayList<>();
@@ -62,6 +57,11 @@ public class Application {
 	 * whether the container that this application runs in can be shared across multiple devices
 	 */
 	protected boolean sharedContainer;
+
+	/**
+	 * if the container is shared then we specify how many copies of it we want
+	 */
+	protected int copies;
 
 	/**
 	 * The size of the request of the container that this application runs in, in bits
@@ -85,11 +85,6 @@ public class Application {
 	protected double taskLength;
 
 	/**
-	 * The percentage of time that the application is being used by the user
-	 */
-	protected double usagePercentage;
-
-	/**
 	 * The type of application
 	 */
 	protected String type;
@@ -105,8 +100,6 @@ public class Application {
 	 * @param type            the type of the application
 	 * @param rate            the rate at which requests are generated for this
 	 *                        application
-	 * @param usagePercentage the percentage of time that the application is being
-	 *                        used by the user
 	 * @param latency         the latency of the application, in seconds
 	 * @param containerSize   the size of the container that this application runs
 	 *                        in, in bits
@@ -117,16 +110,15 @@ public class Application {
 	 * @param taskLength      the length of time it takes for the application to
 	 *                        execute, in MI (Mega-Instructions)
 	 */
-	public Application(String name, String type, int rate, double usagePercentage, double latency, long containerSize, long containerRequestSize, boolean shared,
+	public Application(String name, String type, double latency, long containerSize, long containerRequestSize, boolean shared, int copies,
 			long requestSize, long resultsSize, double taskLength) {
 		setName(name);
 		setType(type);
-		setRate(rate);
-		setUsagePercentage(usagePercentage);
 		setLatency(latency);
 		setContainerSize(containerSize);
 		setContainerRequestSize(containerRequestSize);
 		setSharedContainer(shared);
+		setContainerCopies(copies);
 		setRequestSize(requestSize);
 		setResultsSize(resultsSize);
 		setTaskLength(taskLength);
@@ -148,24 +140,6 @@ public class Application {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-	
-	/**
-	 * Gets the rate at which requests are generated for this application.
-	 *
-	 * @return the rate at which requests are generated for this application
-	 */
-	public int getRate() {
-		return rate;
-	}
-
-	/**
-	 * Sets the rate at which requests are generated for this application.
-	 *
-	 * @param rate the rate at which requests are generated for this application
-	 */
-	public void setRate(int rate) {
-		this.rate = rate;
 	}
 
 	/**
@@ -224,6 +198,26 @@ public class Application {
 	 */
 	public void setContainerRequestSize(long containerRequestSize) {
 		this.containerRequestSize = containerRequestSize;
+	}
+
+	/**
+	 * 
+	 * Returns how many copies of the container we want.
+	 * 
+	 * @return the boolean
+	 */
+	public int getContainerCopies() {
+		return copies;
+	}
+
+	/**
+	 * 
+	 * Sets how many copies of the container we want.
+	 * 
+	 * @param sharedContainer the boolean
+	 */
+	public void setContainerCopies(int copies) {
+		this.copies = copies;
 	}
 
 	/**
@@ -308,26 +302,6 @@ public class Application {
 
 	/**
 	 * 
-	 * Returns the usage percentage of the application.
-	 * 
-	 * @return the usage percentage of the application
-	 */
-	public double getUsagePercentage() {
-		return usagePercentage;
-	}
-
-	/**
-	 * 
-	 * Sets the usage percentage of the application.
-	 * 
-	 * @param usagePercentage the usage percentage of the application
-	 */
-	public void setUsagePercentage(double usagePercentage) {
-		this.usagePercentage = usagePercentage;
-	}
-
-	/**
-	 * 
 	 * Returns the latency of the application in seconds.
 	 * 
 	 * @return the latency of the application in seconds
@@ -384,9 +358,9 @@ public class Application {
 	 */
 	@Override
 	public String toString() {
-		return "Application [type=" + type + ", rate=" + rate + ", latency=" + latency + ", containerSize="
+		return "Application [type=" + type + ", latency=" + latency + ", containerSize="
 				+ containerSize + ", requestSize=" + requestSize + ", resultsSize=" + resultsSize + ", taskLength="
-				+ taskLength + ", usagePercentage=" + usagePercentage + "]";
+				+ taskLength + "]";
 	}
 
 }

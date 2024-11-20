@@ -28,7 +28,7 @@ public class ProgettoGenio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// cambio la modalità di esecuzione
-		String exampleMode = "E_Health";
+		String exampleMode = "Video_Surveillance";
 
 		switch (exampleMode) {
 			case "Smart_Lights":
@@ -51,7 +51,7 @@ public class ProgettoGenio {
 			case "Video_Surveillance":
 				sim.setSimulationParameterProperties(settingsPath, "Video_Surveillance/simulation_parameters_Video_Surveillance.properties");
 				sim.setApplicationsXML(settingsPath, "Video_Surveillance/applications_Video_Surveillance.xml");
-				sim.setUsersXML(settingsPath, "E_Health/users.xml");
+				sim.setUsersXML(settingsPath, "Video_Surveillance/users.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "Video_Surveillance/edge_datacenters_Video_Surveillance.xml");
 				sim.setCloudDatacentersXML(settingsPath, "Video_Surveillance/cloud_Video_Surveillance.xml");
 				sim.setSimulationName(exampleMode);

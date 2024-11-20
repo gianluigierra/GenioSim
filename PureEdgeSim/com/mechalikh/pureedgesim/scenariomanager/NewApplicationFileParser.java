@@ -50,8 +50,8 @@ public class NewApplicationFileParser extends XmlFileParser {
 				Element appElement = (Element) appNode;
 				isAttributePresent(appElement, "name");				//MODIFICA MIA, c'era scritto attribtue...
 
-				for (String element : List.of("type", "latency", "usage_percentage", "container_size", "container_request_size", "shared", "request_size",
-						"results_size", "task_length", "rate"))
+				for (String element : List.of("type", "latency", "container_size", "container_request_size", "shared", "request_size",
+						"results_size", "task_length"))
 					isElementPresent(appElement, element);
 
 				// Latency-sensitivity in seconds.
@@ -69,6 +69,13 @@ public class NewApplicationFileParser extends XmlFileParser {
 				// If the container can be shared.
 				boolean sharedContainer = Boolean.parseBoolean(appElement.getElementsByTagName("shared").item(0).getTextContent());
 
+				// if the container is shared then we retrieve how many copies of it must be created
+				int copies = 1;
+				if(sharedContainer){
+					copies = (int) assertDouble(appElement, "copies", value -> (value > 0),
+						condition + appElement.getAttribute("name") + application + file);
+				}
+
 				// Average request size (bits).
 				long requestSize = (long) (8000 * assertDouble(appElement, "request_size", value -> (value > 0),
 						condition + appElement.getAttribute("name") + application + file));
@@ -81,15 +88,6 @@ public class NewApplicationFileParser extends XmlFileParser {
 				double taskLength = assertDouble(appElement, "task_length", value -> (value > 0),
 						condition + appElement.getAttribute("name") + application + file);
 
-				// The generation rate (tasks per minute)
-				int rate = (int) assertDouble(appElement, "rate", value -> (value > 0),
-						condition + appElement.getAttribute("name") + application + file);
-
-				// The percentage of devices using this type of applications.
-				int usagePercentage = (int) assertDouble(appElement, "usage_percentage", value -> (value > 0),
-						condition + appElement.getAttribute("name") + application + file);
-
-
 				// The type of application.
 				String type = appElement.getElementsByTagName("type").item(0).getTextContent();
 				
@@ -97,8 +95,8 @@ public class NewApplicationFileParser extends XmlFileParser {
 				String name = appElement.getAttribute("name");
 
 				// Save applications parameters.
-				SimulationParameters.applicationList.add(new Application(name, type, rate, usagePercentage, latency,
-						containerSize, containerRequestSize, sharedContainer, requestSize, resultsSize, taskLength));
+				SimulationParameters.applicationList.add(new Application(name, type, latency,
+						containerSize, containerRequestSize, sharedContainer, copies, requestSize, resultsSize, taskLength));
 
 				//creates the users for this application
 				String usersType = appElement.getElementsByTagName("users_type").item(0).getTextContent();

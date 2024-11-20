@@ -20,7 +20,10 @@
  **/
 package com.mechalikh.pureedgesim.taskorchestrator;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.*;
@@ -34,13 +37,14 @@ import com.mechalikh.pureedgesim.taskgenerator.Container;
 public abstract class Orchestrator extends SimEntity {
 	public List<ComputingNode> nodeList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
 	protected List<Container> containerList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
+	public Map<Integer, Integer> sharedHistoryMap = new LinkedHashMap<>();
 	protected SimulationManager simulationManager;
 	protected SimLog simLog;
 	protected String algorithmName;
 	protected String architectureName;
 	protected String[] architectureLayers;
 
-	public static boolean printDebug = true;
+	public static boolean printDebug = false;
 
 	protected Orchestrator(SimulationManager simulationManager) {
 		super(simulationManager.getSimulation());
@@ -263,38 +267,68 @@ public abstract class Orchestrator extends SimEntity {
 	public void setContainerToVM(Container container){
 		//System.out.println("Sono l'SDN e ho ricevuto la richiesta di associare il container " + container.getId());
 		containerList.add(container);
+
+		//se il container è shared lo aggiungo alla historyMap
+		if(container.getSharedContainer()){
+			if(printDebug) System.out.println("Ho inserito il container shared in posizione " + (containerList.size()-1));
+			sharedHistoryMap.put(containerList.size()-1, 0);
+		}
 	}
 
 	public int findVmAssociatedWithTask(Task task){
-		//Ciclo tra tutti i container
-		for(Container container : containerList){
-			//se il nome dell'app associata al task ==  a quello associato al container
-			if(task.getAssociatedAppName().equals(container.getAssociatedAppName())){
-				//ciclo tra tutti gli edge device di quel container
-				for(ComputingNode edgeDevice : container.getEdgeDevices()){
-					//se il dispositivo che ha generato il container == dispositivo che ha generato il task
-					if(task.getEdgeDevice().equals(edgeDevice))
-						//prelevo la VM associata a quel container
-						for(int i = 0; i < nodeList.size(); i++)
-							if(nodeList.get(i).equals(container.getPlacementDestination()))
-								return i;	
+		//se l'applicazione non è shared
+		if(!SimulationParameters.applicationList.get(task.getApplicationID()).getSharedContainer()){
+			//Ciclo tra tutti i container
+			for(Container container : containerList){
+				//se il nome dell'app associata al task ==  a quello associato al container
+				if(task.getAssociatedAppName().equals(container.getAssociatedAppName())){
+					//ciclo tra tutti gli edge device di quel container
+					for(ComputingNode edgeDevice : container.getEdgeDevices()){
+						//se il dispositivo che ha generato il container == dispositivo che ha generato il task
+						if(task.getEdgeDevice().equals(edgeDevice))
+							//prelevo la VM associata a quel container
+							for(int i = 0; i < nodeList.size(); i++)
+								if(nodeList.get(i).equals(container.getPlacementDestination()))
+									return i;	
+					}
 				}
 			}
+		}
+		//se invece è shared
+		else{
+			//applico roundRobin tra i container associati
+			int containerPos = roundRobinAssociatedContainers(task.getAssociatedAppName());
+			//trovato il container nella lista devo trovare la VM ad esso associato.
+			for(int i = 0; i < nodeList.size(); i++)
+				if(nodeList.get(i).equals(containerList.get(containerPos).getPlacementDestination()))
+					return i;
 		}
 		return -1;
 	}
 
-	public void removeContainerFromVM(Container container){
-		removeContainer(container);
-	}
-
-	private void removeContainer(Container container){
-		for(Container cont : containerList){
-			if(cont.getId() == container.getId()){
-				containerList.remove(cont);
-				return;
+	public int roundRobinAssociatedContainers(String AppName){
+		int selected = -1;
+		int minTasksCount = -1; // Computing node with minimum assigned tasks.
+		for (int i = 0; i < containerList.size(); i++) {
+			if(containerList.get(i).getAssociatedAppName().equals(AppName)
+											&& 
+				(minTasksCount == -1 || minTasksCount > sharedHistoryMap.get(i))
+			  ) 
+			{
+				minTasksCount = sharedHistoryMap.get(i);
+				// if this is the first time,
+				// or new min found, so we choose it as the best computing node.
+				selected = i;
 			}
 		}
+		// Assign the tasks to the obtained computing node.
+		sharedHistoryMap.put(selected, minTasksCount + 1);
+
+		return selected;
+	}
+
+	public void removeContainerFromVM(Container container){
+		containerList.remove(container);
 	}
 
 	public abstract void resultsReturned(Task task);

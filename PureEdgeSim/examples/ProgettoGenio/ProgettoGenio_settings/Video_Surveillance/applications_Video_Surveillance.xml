@@ -2,14 +2,12 @@
 
 	<application name="Smart Lights">
 		<type>Normal</type>
-		<rate>2</rate>
-		<usage_percentage>80</usage_percentage>
 		<container>
 			<container_size>20000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>false</shared> <!-- se il container deve essere usato da più edge device diversi -->
 		</container>
-        <users_type>[10,1]</users_type> <!--in this case 10 users "1" type-->
+        <users_type>[1,6]</users_type> <!--in this case 10 users "1" type-->
 		<task>
 			<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>1</request_size> <!-- La size della request rappresentata in KB -->
@@ -20,14 +18,13 @@
 
 	<application name="E-Health">
 		<type>Normal</type>
-		<rate>60</rate>
-		<usage_percentage>20</usage_percentage>
 		<container>
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
+			<copies>4</copies> <!-- Quante copie di questo container devono essere istanziate -->
 		</container>
-		<users_type>[30,2];[30,3]</users_type> <!--in this case 60 users "2" type-->
+		<users_type>[2,6];[2,7]</users_type> <!--in this case 60 users "2" type-->
 		<task>
 			<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>10</request_size> <!-- La size della request rappresentata in KB -->
