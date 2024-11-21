@@ -104,7 +104,7 @@ public class NetworkLink extends SimEntity {
 		if (evt.getTag() == UPDATE_PROGRESS) {
 			// Update the progress of the current transfers and their allocated bandwidth
 			updateTransfersProgress();
-			if (this.transferProgressList.size() != 0)
+			if (this.transferProgressList.size() != 0 || this.containerRequestTransferProgressList.size() != 0)
 				schedule(this, SimulationParameters.networkUpdateInterval, UPDATE_PROGRESS);
 			else
 				scheduled = false;
