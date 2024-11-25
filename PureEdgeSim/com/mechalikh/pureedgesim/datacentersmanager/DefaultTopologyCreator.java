@@ -139,8 +139,8 @@ public class DefaultTopologyCreator extends TopologyCreator {
 
 		//Connetto l'SDN più vicino a ciascun EdgeDC mediante Fiber
 		for(ComputingNode edgeDC : computingNodesGenerator.getEdgeOnlyList()){
-			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, edgeDC.getEdgeOrchestrator(), simulationManager, NetworkLinkTypes.FIBER));
-			infrastructureTopology.addLink(new NetworkLinkWanDown(edgeDC.getEdgeOrchestrator(), edgeDC, simulationManager, NetworkLinkTypes.FIBER));
+			infrastructureTopology.addLink(new NetworkLinkFiber(edgeDC, edgeDC.getEdgeOrchestrator(), simulationManager, NetworkLinkTypes.FIBER));
+			infrastructureTopology.addLink(new NetworkLinkFiber(edgeDC.getEdgeOrchestrator(), edgeDC, simulationManager, NetworkLinkTypes.FIBER));
 		}
 
 		//Connetto ogni EdgeDC con il Cloud
