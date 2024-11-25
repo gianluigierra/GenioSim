@@ -61,7 +61,6 @@ public class VM extends LocationAwareNode {
 	public void processEvent(Event e) {
 		super.processEvent(e);
 		if (e.getTag() == EXECUTION_FINISHED){
-			this.Host.processEvent(e);
 			executionFinished(e);
 		}
 	}
@@ -366,8 +365,7 @@ public class VM extends LocationAwareNode {
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
 
-		// Task taskOut = (Task) e.getData();
-		// System.out.println("networking time = " + taskOut.getActualNetworkTime());
+		// System.out.println("networking time = " + ((Task) e.getData()).getActualNetworkTime());
 
 		// Save the execution end time for later use.
 		((Task) e.getData()).setExecutionFinishTime(this.getSimulation().clock());

@@ -186,21 +186,21 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		
 		//QUESTI DUE SOTTO SERVONO PER STAMPARE LA TOPOLOGIA
 		
-		DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
-		System.out.println("Nodi:");
-        for (ComputingNode node : graph.vertexSet()) {
-            System.out.println(" - " + node.getName() + ", id " + node.getId());
-        }
+		// DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
+		// System.out.println("Nodi:");
+        // for (ComputingNode node : graph.vertexSet()) {
+        //     System.out.println(" - " + node.getName() + ", id " + node.getId());
+        // }
 
-        // Stampa tutti gli archi
-        System.out.println("\nCollegamenti:");
-        for (NetworkLink edge : graph.edgeSet()) {
-            ComputingNode sourceNode = graph.getEdgeSource(edge);
-            ComputingNode targetNode = graph.getEdgeTarget(edge);
-            NetworkLinkTypes tipo = edge.getType();
+        // // Stampa tutti gli archi
+        // System.out.println("\nCollegamenti:");
+        // for (NetworkLink edge : graph.edgeSet()) {
+        //     ComputingNode sourceNode = graph.getEdgeSource(edge);
+        //     ComputingNode targetNode = graph.getEdgeTarget(edge);
+        //     NetworkLinkTypes tipo = edge.getType();
 
-            System.out.println(" - " + sourceNode.getName() + " -> " + targetNode.getName() + ", Rete: " + tipo);
-        }
+        //     System.out.println(" - " + sourceNode.getName() + " -> " + targetNode.getName() + ", Rete: " + tipo);
+        // }
 		
 		
 		// Save the shortest paths between all computing nodes

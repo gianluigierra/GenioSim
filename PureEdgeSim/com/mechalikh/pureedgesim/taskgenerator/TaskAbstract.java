@@ -351,6 +351,7 @@ public abstract class TaskAbstract implements Task, Comparable<Task> {
 	 * 
 	 * @return the serial number of the task.
 	 */
+	@Override
 	public long getSerial() {
 		return this.serial;
 	}

@@ -145,7 +145,6 @@ public class Host extends LocationAwareNode {
 	public void processEvent(Event e) {
 		super.processEvent(e);
 		if (e.getTag() == EXECUTION_FINISHED){
-			this.DataCenter.processEvent(e);
 			executionFinished(e);
 		}
 	}
