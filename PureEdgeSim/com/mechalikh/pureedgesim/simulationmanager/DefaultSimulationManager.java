@@ -22,7 +22,10 @@ package com.mechalikh.pureedgesim.simulationmanager;
 
 import java.io.IOException;
 
+import org.jgrapht.GraphPath;
+
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.network.NetworkModel;
 import com.mechalikh.pureedgesim.scenariomanager.Scenario;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
@@ -58,6 +61,8 @@ import com.mechalikh.pureedgesim.simulationengine.FutureQueue;
  * @since PureEdgeSim 4.2
  */
 public class DefaultSimulationManager extends SimulationManager implements OnSimulationStartListener {
+
+	private Boolean printDebug = true;
 
 	/**
 	 * Simulation progress parameters.
@@ -192,7 +197,6 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 		case SEND_TO_CLOUD_ORCH:
 			container = (Container) ev.getData();
-			//TODO
 			//System.out.println("Inviata la richiesta di placement al cloud: " + container.getId());
 			sendContainerRequestToCloudOrchestrator(container);
 			break;
@@ -211,7 +215,6 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		case SEND_CONTAINER_FROM_CLOUD_ORCH_TO_VM:
 			// The placement decision was made, send the request from the orchestrator to
 			// the placement destination.
-			// TODO: implementare funzione di placement
 			sendFromCloudOrchToDestination((Container) ev.getData());
 			break;
 		case SEND_UNPLACEMENT_FROM_CLOUD_ORCH_TO_VM:
@@ -248,22 +251,18 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 		case TRANSFER_RESULTS_TO_CLOUD_ORCH:
 			// Task execution finished, transfer the results to the orchestrator.
-			//TODO implementare il metodo
 			sendResultsToCloudOchestrator((Container) ev.getData());
 			break;
 		case TRANSFER_UNPLACEMENT_RESULTS_TO_CLOUD_ORCH:
 			// Task execution finished, transfer the results to the orchestrator.
-			//TODO implementare il metodo
 			sendUnplacementResultsToCloudOchestrator((Container) ev.getData());
 			break;
 		case RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
 			//Container placement has finished and i notified the orchestrator.
-			//TODO implementare il metodo
 			edgeOrchestrator.setContainerToVM((Container) ev.getData());
 			break;
 		case UNPLACEMENT_RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
 			//Container placement has finished and i notified the orchestrator.
-			//TODO implementare il metodo
 			edgeOrchestrator.removeContainerFromVM((Container) ev.getData());
 			break;
 		case TASK_RESULT_RETURN_FINISHED:
@@ -584,7 +583,21 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 		// The task is failed due to long delay
 		if (phase == 3 && task.getTotalDelay() >= task.getMaxLatency()) {
 			task.setFailureReason(Task.FailureReason.FAILED_DUE_TO_LATENCY);
-			//System.out.println("waitingtime: " + task.getWatingTime() + " getActualNetworkTime: " + task.getActualNetworkTime() + " getActualCpuTime: " + task.getActualCpuTime());
+
+			//printa il percorso e i motivi del fallimento per latency
+			if(printDebug){
+				System.out.println("task: " + task.getId() + ", waitingtime: " + task.getWatingTime() + " getActualNetworkTime: " + task.getActualNetworkTime() + " getActualCpuTime: " + task.getActualCpuTime());
+				GraphPath<ComputingNode, NetworkLink> path = getDataCentersManager().getTopology().getPath(task.getEdgeDevice(), task.getEdgeDevice().getEdgeOrchestrator());
+				System.out.println("from: " + task.getEdgeDevice().getName() + ", to: " + task.getOffloadingDestination().getName());
+				System.out.print("[");
+				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
+				path = getDataCentersManager().getTopology().getPath(task.getEdgeDevice().getEdgeOrchestrator(), task.getOffloadingDestination());
+				path.getVertexList().remove(0);
+				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
+				System.out.print("]");
+				System.out.println("");
+			}
+
 			simLog.incrementTasksFailedLatency(task);
 			return setFailed(task, phase);
 		}
