@@ -1,6 +1,6 @@
 <applications>
 
-	<application name="Smart Lights">
+	<application name="Video Suveillance 1">
 		<type>Normal</type>
 		<container>
 			<container_size>20000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
@@ -16,15 +16,15 @@
 		</task>
 	</application>
 
-	<application name="E-Health">
+	<application name="Video Suveillance 2">
 		<type>Normal</type>
 		<container>
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
-			<copies>4</copies> <!-- Quante copie di questo container devono essere istanziate -->
+			<copies>10</copies> <!-- Quante copie di questo container devono essere istanziate -->
 		</container>
-		<users_type>[2,6];[2,7]</users_type> <!--in this case 60 users "2" type-->
+		<users_type>[5,6];[5,7]</users_type> <!--in this case 60 users "2" type-->
 		<task>
 			<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>10</request_size> <!-- La size della request rappresentata in KB -->

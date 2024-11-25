@@ -366,6 +366,9 @@ public class VM extends LocationAwareNode {
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
 
+		// Task taskOut = (Task) e.getData();
+		// System.out.println("networking time = " + taskOut.getActualNetworkTime());
+
 		// Save the execution end time for later use.
 		((Task) e.getData()).setExecutionFinishTime(this.getSimulation().clock());
 

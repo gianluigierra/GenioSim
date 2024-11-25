@@ -30,7 +30,6 @@ import com.mechalikh.pureedgesim.scenariomanager.Scenario;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
 
-import com.mechalikh.pureedgesim.scenariomanager.ApplicationFileParser;
 import com.mechalikh.pureedgesim.scenariomanager.NewApplicationFileParser;
 import com.mechalikh.pureedgesim.scenariomanager.UsersFileParser;
 import com.mechalikh.pureedgesim.scenariomanager.DatacentersParser;
