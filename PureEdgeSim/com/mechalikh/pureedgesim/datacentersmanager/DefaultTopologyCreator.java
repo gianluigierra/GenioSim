@@ -127,14 +127,20 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		// Generate the topology of edge data centers from an XML file
 		generateTopologyFromXmlFile();
 
-		//Connetto l'SDN al cloud mediante WAN link
-		infrastructureTopology.addLink(new NetworkLinkWanUp(computingNodesGenerator.getSDN(), wanNode, simulationManager, NetworkLinkTypes.WAN));
-		infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, computingNodesGenerator.getSDN(), simulationManager, NetworkLinkTypes.WAN));
+		//Connetto ciascun SDN al cloud mediante WAN link
+		for (ComputingNode node : simulationManager.getDataCentersManager().getComputingNodesGenerator().getOrchestratorsList()) {
+			if(node.getType().equals( SimulationParameters.TYPES.SDN)){
+				infrastructureTopology.addLink(new NetworkLinkWanUp(node, wanNode, simulationManager, NetworkLinkTypes.WAN));
+				infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, node, simulationManager, NetworkLinkTypes.WAN));
+			}
+		}
+		// infrastructureTopology.addLink(new NetworkLinkWanUp(wanNode.getEdgeOrchestrator(), wanNode, simulationManager, NetworkLinkTypes.WAN));
+		// infrastructureTopology.addLink(new NetworkLinkWanDown(wanNode, wanNode.getEdgeOrchestrator(), simulationManager, NetworkLinkTypes.WAN));
 
-		//Connetto l'SDN a tutti gli EdgeDC mediante Fiber
+		//Connetto l'SDN più vicino a ciascun EdgeDC mediante Fiber
 		for(ComputingNode edgeDC : computingNodesGenerator.getEdgeOnlyList()){
-			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, computingNodesGenerator.getSDN(), simulationManager, NetworkLinkTypes.FIBER));
-			infrastructureTopology.addLink(new NetworkLinkWanDown(computingNodesGenerator.getSDN(), edgeDC, simulationManager, NetworkLinkTypes.FIBER));
+			infrastructureTopology.addLink(new NetworkLinkWanUp(edgeDC, edgeDC.getEdgeOrchestrator(), simulationManager, NetworkLinkTypes.FIBER));
+			infrastructureTopology.addLink(new NetworkLinkWanDown(edgeDC.getEdgeOrchestrator(), edgeDC, simulationManager, NetworkLinkTypes.FIBER));
 		}
 
 		//Connetto ogni EdgeDC con il Cloud
@@ -165,12 +171,12 @@ public class DefaultTopologyCreator extends TopologyCreator {
 
 		}
 		
-		//Connect each ONT to the SDN
+		//Connect each ONT to the associated SDN
 		for (ComputingNode ONTDevice : computingNodesGenerator.getONT_List()) {
 			NetworkLink ONTup;
 			NetworkLink ONTdown;
-			ONTup = new NetworkLinkFiber(ONTDevice, computingNodesGenerator.getSDN(), simulationManager, NetworkLinkTypes.FIBER);
-			ONTdown = new NetworkLinkFiber(computingNodesGenerator.getSDN(), ONTDevice, simulationManager, NetworkLinkTypes.FIBER);
+			ONTup = new NetworkLinkFiber(ONTDevice, ONTDevice.getEdgeOrchestrator(), simulationManager, NetworkLinkTypes.FIBER);
+			ONTdown = new NetworkLinkFiber(ONTDevice.getEdgeOrchestrator(), ONTDevice, simulationManager, NetworkLinkTypes.FIBER);
 			infrastructureTopology.addLink(ONTup);
 			infrastructureTopology.addLink(ONTdown);
 			simulationManager.getNetworkModel().getFiberUp().add(ONTup);
@@ -180,21 +186,21 @@ public class DefaultTopologyCreator extends TopologyCreator {
 		
 		//QUESTI DUE SOTTO SERVONO PER STAMPARE LA TOPOLOGIA
 		
-		// DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
-		// System.out.println("Nodi:");
-        // for (ComputingNode node : graph.vertexSet()) {
-        //     System.out.println(" - " + node.getName() + ", id " + node.getId());
-        // }
+		DirectedWeightedMultigraph<ComputingNode, NetworkLink> graph = infrastructureTopology.getGraph();
+		System.out.println("Nodi:");
+        for (ComputingNode node : graph.vertexSet()) {
+            System.out.println(" - " + node.getName() + ", id " + node.getId());
+        }
 
-        // // Stampa tutti gli archi
-        // System.out.println("\nCollegamenti:");
-        // for (NetworkLink edge : graph.edgeSet()) {
-        //     ComputingNode sourceNode = graph.getEdgeSource(edge);
-        //     ComputingNode targetNode = graph.getEdgeTarget(edge);
-        //     NetworkLinkTypes tipo = edge.getType();
+        // Stampa tutti gli archi
+        System.out.println("\nCollegamenti:");
+        for (NetworkLink edge : graph.edgeSet()) {
+            ComputingNode sourceNode = graph.getEdgeSource(edge);
+            ComputingNode targetNode = graph.getEdgeTarget(edge);
+            NetworkLinkTypes tipo = edge.getType();
 
-        //     System.out.println(" - " + sourceNode.getName() + " -> " + targetNode.getName() + ", Rete: " + tipo);
-        // }
+            System.out.println(" - " + sourceNode.getName() + " -> " + targetNode.getName() + ", Rete: " + tipo);
+        }
 		
 		
 		// Save the shortest paths between all computing nodes

@@ -91,12 +91,6 @@ public abstract class ComputingNodesGenerator {
 	protected List<ComputingNode> mistOnlyListSensorsExcluded;
 
 	/**
-	 * The SDN device used in the simulation
-	 * 
-	 */
-	protected ComputingNode SDN;
-
-	/**
 	 * A list that contains only edge data centers and servers.
 	 * 
 	 * @see com.mechalikh.pureedgesim.taskorchestrator.Orchestrator#edgeOnly(Task
@@ -143,9 +137,9 @@ public abstract class ComputingNodesGenerator {
 	protected List<ComputingNode> ONTandServer_List;
 
 	/**
-	 * A list that contains ONT and VMs
+	 * A list that contains Hosts and VMs
 	*/
-	protected List<ComputingNode> ONTandVM_List;
+	protected List<ComputingNode> HostAndVM_List;
 	
 	/**
 	 * A list that contains ONT Devices
@@ -191,7 +185,7 @@ public abstract class ComputingNodesGenerator {
 		this.mistOnlyList = new ArrayList<>(simulationManager.getScenario().getDevicesCount());
 		this.ONT_List = new ArrayList<>(simulationManager.getScenario().getDevicesCount());
 		this.ONTandServer_List = new ArrayList<>(SimulationParameters.numberOfEdgeDataCenters + SimulationParameters.numberOfCloudDataCenters);
-		this.ONTandVM_List = new ArrayList<>();
+		this.HostAndVM_List = new ArrayList<>();
 		this.mistOnlyListSensorsExcluded = new ArrayList<>(simulationManager.getScenario().getDevicesCount());
 		this.mistAndCloudListSensorsExcluded = new ArrayList<>(
 				simulationManager.getScenario().getDevicesCount() + SimulationParameters.numberOfCloudDataCenters);
@@ -263,17 +257,6 @@ public abstract void generateDatacentersAndDevices();
 	 */
 	public List<DataCenter> getEdgeOnlyList() {
 		return this.edgeOnlyList;
-	}
-
-	/**
-	 * Gets the SDN
-	 * 
-	 * @see com.mechalikh.pureedgesim.datacentersmanager.DefaultComputingNodesGenerator#generateSDNDevice(String, TYPES)
-	 * 
-	 * @return the SDN
-	 */
-	public ComputingNode getSDN() {
-		return this.SDN;
 	}
 
 	/**
@@ -366,10 +349,10 @@ public abstract void generateDatacentersAndDevices();
 	}
 	
 	/**
-	 * Gets the list containing ONT and VMs
+	 * Gets the list containing Hosts and VMs
 	 */
-	public List<ComputingNode> getONTandVM_List(){
-		return this.ONTandVM_List;
+	public List<ComputingNode> getHostAndVM_List(){
+		return this.HostAndVM_List;
 	}
 
 }

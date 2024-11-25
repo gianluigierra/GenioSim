@@ -47,6 +47,8 @@ import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 
 public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
+	protected boolean printDebug = false;
+
 	public DefaultComputingNodesGenerator(SimulationManager simulationManager,
 			Class<? extends MobilityModel> mobilityModelClass, Class<? extends ComputingNode> computingNodeClass) {
 		super(simulationManager, mobilityModelClass, computingNodeClass);
@@ -62,11 +64,11 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		// Generate Cloud data centers.
 		generateDataCenters(SimulationParameters.cloudDataCentersFile, SimulationParameters.TYPES.CLOUD); 
 
-		//Generate SDN device
-		generateSDNDevice(SimulationParameters.SdnFile, SimulationParameters.TYPES.SDN);
-
 		// Generate Edge data centers.
 		generateDataCenters(SimulationParameters.edgeDataCentersFile, SimulationParameters.TYPES.EDGE_DATACENTER); 
+
+		//Generate SDN device
+		generateSDNDevice(SimulationParameters.SdnFile, SimulationParameters.TYPES.SDN);
 
 		// Generate edge devices.
 		generateEdgeDevices();
@@ -74,13 +76,38 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 		//Generate ONT devices
 		generateONTDevices(SimulationParameters.OntFile, SimulationParameters.TYPES.ONT);
 
-		//Setto gli orchestratori per tutti i nodi (per il momento commentata finchè non capisco cosa non funziona)
+		//Setto gli orchestratori per tutti i nodi 
 		setOrchestrators();
 
 		getSimulationManager().getSimulationLogger()
 				.print("%s - Datacenters and devices were generated", getClass().getSimpleName());
 				
 	}
+
+	// /**
+	//  * Generates SDN device
+	//  */
+	// public void generateSDNDevice(String file, TYPES type) {
+		
+	// 	try(InputStream SDN_FILE = new FileInputStream(file)) {
+			
+	// 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+	// 		dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+	// 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+	// 		Document doc = dBuilder.parse(SDN_FILE);
+	// 		NodeList SDN_nodeList = doc.getElementsByTagName("SDNDevice");
+	// 		for (int i = 0; i < SDN_nodeList.getLength(); i++) {
+	// 			Element SDN_Element = (Element) SDN_nodeList.item(i);
+	// 			//ComputingNode computingNode = createComputingNode(datacenterElement, type);
+	// 			SDN sdn = createSDNNode(SDN_Element, type);
+	// 			allNodesList.add(sdn);
+	// 			ONTandServer_List.add(sdn);
+	// 		}
+	// 	} catch (Exception e) {
+	// 		e.printStackTrace();
+	// 	}	
+		
+	// }
 
 	/**
 	 * Generates SDN device
@@ -94,17 +121,12 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(SDN_FILE);
 			NodeList SDN_nodeList = doc.getElementsByTagName("SDNDevice");
-			Element SDN_Element = (Element) SDN_nodeList.item(0);
-			
-			//Generates SDN 
-												
-			ComputingNode computingNode = createSDNNode(SDN_Element, type);
-			allNodesList.add(computingNode);
-			ONTandServer_List.add(computingNode);
-
-			//setto l'SDN nel computingNodesGenerator
-			SDN = computingNode;
-			
+			for (int i = 0; i < edgeOnlyList.size(); i++) {
+				Element SDN_Element = (Element) SDN_nodeList.item(0);
+				SDN sdn = createSDNNode(SDN_Element, type, edgeOnlyList.get(i));
+				allNodesList.add(sdn);
+				ONTandServer_List.add(sdn);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	
@@ -131,7 +153,6 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 				ComputingNode computingNode = createComputingNode(ONT_Element, type);			//appunto: nel defaultopologycreator i sensori si collegano agli ONT mediante wifi. 
 				ONT_List.add(computingNode);
 				ONTandServer_List.add(computingNode);
-				ONTandVM_List.add(computingNode);
 				allNodesList.add(computingNode);
 				//allNodesListSensorsExcluded.add(computingNode);
 			}
@@ -253,6 +274,15 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 					edgeOnlyList.add(DC);
 					mistAndEdgeListSensorsExcluded.add(DC);
 				}
+
+				//aggiungo host e VM del datacenter alle relative liste
+				for(Host host : DC.getHostList()){
+					getHostAndVM_List().addAll(host.getVMList());
+					getHostAndVM_List().add(host);
+					allNodesList.addAll(host.getVMList());
+					allNodesList.add(host);
+				}
+
 				allNodesList.add(DC);
 				allNodesListSensorsExcluded.add(DC);
 				edgeAndCloudList.add(DC);
@@ -449,10 +479,6 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			dataCenter.setCloudOrchestrator(dataCenter);
 			orchestratorsList.add(dataCenter);
 		}
-		
-		for(Host host : dataCenter.getHostList()){
-			ONTandVM_List.addAll(host.getVMList());
-		}
 
 		return dataCenter;
 	}
@@ -474,26 +500,26 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	protected SDN createSDNNode(Element SDNElement, SimulationParameters.TYPES type)
-			throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		// SecureRandom is preferred to generate random values.
+	protected SDN createSDNNode(Element SDNElement, SimulationParameters.TYPES type, DataCenter edgeDC)
+	throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
+	 		IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Boolean mobile = false;
 		double speed = 0;
 		double minPauseDuration = 0;
 		double maxPauseDuration = 0;
 		double minMobilityDuration = 0;
 		double maxMobilityDuration = 0;
-		int xPosition = -1;
-		int yPosition = -1;
+		double xPosition = -1;
+		double yPosition = -1;
 		double idleConsumption = Double
 				.parseDouble(SDNElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
 		double maxConsumption = Double
 				.parseDouble(SDNElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
 
-		Element location = (Element) SDNElement.getElementsByTagName("location").item(0);
-		xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-		yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+				
+		Random random = SecureRandom.getInstanceStrong();
+		xPosition = edgeDC.getMobilityModel().getCurrentLocation().getXPos() + 2;
+		yPosition = edgeDC.getMobilityModel().getCurrentLocation().getYPos() + 2;
 		Location SDNLocation = new Location(xPosition, yPosition);
 
 		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
@@ -517,16 +543,68 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 		//Imposto il nome dell'SDN	
 		String name = SDNElement.getAttribute("name");
+		name += "-"+ edgeDC.getName();
 		sdn.setName(name);
 
 		return sdn;
 	}
+	// protected SDN createSDNNode(Element SDNElement, SimulationParameters.TYPES type)
+	// 		throws NoSuchAlgorithmException, NoSuchMethodException, SecurityException, InstantiationException,
+	// 		IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	// 	// SecureRandom is preferred to generate random values.
+	// 	Boolean mobile = false;
+	// 	double speed = 0;
+	// 	double minPauseDuration = 0;
+	// 	double maxPauseDuration = 0;
+	// 	double minMobilityDuration = 0;
+	// 	double maxMobilityDuration = 0;
+	// 	int xPosition = -1;
+	// 	int yPosition = -1;
+	// 	double idleConsumption = Double
+	// 			.parseDouble(SDNElement.getElementsByTagName("idleConsumption").item(0).getTextContent());
+	// 	double maxConsumption = Double
+	// 			.parseDouble(SDNElement.getElementsByTagName("maxConsumption").item(0).getTextContent());
+
+	// 	Element location = (Element) SDNElement.getElementsByTagName("location").item(0);
+	// 	xPosition = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+	// 	yPosition = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+	// 	Location SDNLocation = new Location(xPosition, yPosition);
+
+	// 	Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
+	// 	MobilityModel mobilityModel = ((MobilityModel) mobilityConstructor.newInstance(simulationManager,
+	// 	SDNLocation)).setMobile(mobile).setSpeed(speed).setMinPauseDuration(minPauseDuration)
+	// 			.setMaxPauseDuration(maxPauseDuration).setMinMobilityDuration(minMobilityDuration)
+	// 			.setMaxMobilityDuration(maxMobilityDuration);
+
+	// 	SDN sdn = new SDN(simulationManager, 0.0, 0, 0.0, 0.0);
+
+	// 	sdn.setMobilityModel(mobilityModel);
+		
+	// 	sdn.setType(type);
+
+	// 	sdn.setAsEdgeOrchestrator(true);
+	// 	sdn.setEdgeOrchestrator(sdn);
+
+	// 	orchestratorsList.add(sdn);
+
+	// 	sdn.setEnergyModel(new EnergyModelComputingNode(maxConsumption, idleConsumption));
+
+	// 	//Imposto il nome dell'SDN	
+	// 	String name = SDNElement.getAttribute("name");
+	// 	sdn.setName(name);
+
+	// 	return sdn;
+	// }
 
 	//Setto gli orchestratori per tutti i nodi della simulazione
 	protected void setOrchestrators(){
+		//ciclo tra tutti i computing node del sistema (esclusi VM e Host)
 		for(ComputingNode computingNode : simulationManager.getDataCentersManager().getComputingNodesGenerator().getAllNodesList()){
+			//ciclo tra tutti gli orchestratori del sistema
 			for (ComputingNode node : simulationManager.getDataCentersManager().getComputingNodesGenerator().getOrchestratorsList()) {
-				if(node.getType().equals( SimulationParameters.TYPES.SDN)){
+				//se il nodo è SDN e la distanza tra questo SDN e il computing node è inferiore rispetto a quella con il suo precedente orchestratore
+				if(node.getType().equals( SimulationParameters.TYPES.SDN) && computingNode.getEdgeOrchestrator().getMobilityModel().distanceTo(computingNode) > computingNode.getMobilityModel().distanceTo(node)){
+					if(printDebug) System.out.println("Sto impostando come orchestratore per il " + computingNode.getName() + " il nodo " + node.getName() + " poiche' la distanza precedente era " + computingNode.getEdgeOrchestrator().getMobilityModel().distanceTo(computingNode) + " e quella attuale e' " + computingNode.getMobilityModel().distanceTo(node));
 					computingNode.setEdgeOrchestrator(node);
 				}
 				else if(node.getType().equals( SimulationParameters.TYPES.CLOUD)){

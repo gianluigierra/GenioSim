@@ -265,13 +265,18 @@ public abstract class Orchestrator extends SimEntity {
 	}
 
 	public void setContainerToVM(Container container){
-		//System.out.println("Sono l'SDN e ho ricevuto la richiesta di associare il container " + container.getId());
-		containerList.add(container);
+		//se la lista non contiene il container allora lo aggiungo 
+		//(per prevenire l'aggiunta di container shared uguali, dal momento che il Cloud avvisa tanti SDN quanti sono gli EdgeDC
+		//e quindi questa funzione viene chiamata tante volte quanti sono gli SDN per ogni copia di un container shared)
+		if(!containerList.contains(container)) {
+			containerList.add(container);
 
-		//se il container è shared lo aggiungo alla historyMap
-		if(container.getSharedContainer()){
-			if(printDebug) System.out.println("Ho inserito il container shared in posizione " + (containerList.size()-1));
-			sharedHistoryMap.put(containerList.size()-1, 0);
+			//se il container è shared lo aggiungo alla historyMap
+			if(container.getSharedContainer()){
+				if(printDebug) System.out.println("Ho inserito il container " + container.getId() + " shared in posizione " + (containerList.size()-1));
+				sharedHistoryMap.put(containerList.size()-1, 0);
+			}
+			return;
 		}
 	}
 
@@ -306,6 +311,7 @@ public abstract class Orchestrator extends SimEntity {
 		return -1;
 	}
 
+	//round robin per i container shared
 	public int roundRobinAssociatedContainers(String AppName){
 		int selected = -1;
 		int minTasksCount = -1; // Computing node with minimum assigned tasks.
@@ -329,6 +335,8 @@ public abstract class Orchestrator extends SimEntity {
 
 	public void removeContainerFromVM(Container container){
 		containerList.remove(container);
+		//Non devo rimuovere niente dalla sharedHistoryMap poichè i container shared durano per tutta la durata della simulazione. 
+		//Gli unici che vengono rimossi sono quelli non shared
 	}
 
 	public abstract void resultsReturned(Task task);

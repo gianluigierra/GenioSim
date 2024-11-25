@@ -133,9 +133,9 @@ public class DefaultNetworkModel extends NetworkModel {
 				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
 			}
 			if(printDebug){
-				System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				System.out.println("from: " + from.getName() + ", to: " + to.getName());
 				System.out.print("[");
-				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
 				System.out.print("]");
 				System.out.println("");
 			}
@@ -143,9 +143,9 @@ public class DefaultNetworkModel extends NetworkModel {
 			path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 			simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
 			if(printDebug){
-				System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				System.out.println("from: " + from.getName() + ", to: " + to.getName());
 				System.out.print("[");
-				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
 				System.out.print("]");
 				System.out.println("");
 			}
@@ -173,9 +173,9 @@ public class DefaultNetworkModel extends NetworkModel {
 				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
 			}
 			if(printDebug){
-				System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				System.out.println("from: " + from.getName() + ", to: " + to.getName());
 				System.out.print("[");
-				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
 				System.out.print("]");
 				System.out.println("");
 			}
@@ -184,9 +184,9 @@ public class DefaultNetworkModel extends NetworkModel {
 			path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
 			simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
 			if(printDebug){
-				System.out.println("from: " + from.getType() + from.getId() + ", to: " + to.getType() + to.getId());
+				System.out.println("from: " + from.getName() + ", to: " + to.getName());
 				System.out.print("[");
-				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getType() + " " + cn.getId() + ", ");
+				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
 				System.out.print("]");
 				System.out.println("");
 			}
@@ -365,7 +365,20 @@ public class DefaultNetworkModel extends NetworkModel {
 	}
 
 	public void sendResultFromCloudToEdgeOrch(Container container) {
-		sendContainer(container.getOrchestrator(), container.getEdgeDevices().get(0).getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE);
+		//se il container non è shared invio all'edgeOrch associato al container
+		if(!container.getSharedContainer())
+			sendContainer(container.getOrchestrator(), container.getEdgeDevices().get(0).getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE);
+		//se invece il container è shared allora invio all'orchestratore associato a ciascun nodo relativo al container
+		else {
+			if(printDebug) System.out.println("Sto generando il flusso per il container " + container.getId() + " associato all'app " + container.getAssociatedAppName());
+			List<ComputingNode> orchList = new ArrayList<ComputingNode>();
+			for(ComputingNode cn : container.getEdgeDevices()){
+				if(!orchList.contains(cn.getEdgeOrchestrator())){
+					orchList.add(cn.getEdgeOrchestrator());
+					sendContainer(container.getOrchestrator(), cn.getEdgeOrchestrator(), container, container.getFileSizeInBits(), ContainerTransferProgress.Type.RESULT_FROM_CLOUD_TO_EDGE);
+				}
+			}
+		}
 	}
 
 	public void sendUnplacementResultFromCloudToEdgeOrch(Container container) {

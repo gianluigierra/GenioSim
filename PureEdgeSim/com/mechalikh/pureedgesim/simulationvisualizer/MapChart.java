@@ -238,11 +238,17 @@ public class MapChart extends Chart {
 			List<Double> x_SDN = new ArrayList<>();
 			List<Double> y_SDN = new ArrayList<>();
 
-			double Xpos = computingNodesGenerator.getSDN().getMobilityModel().getCurrentLocation().getXPos();
-			double Ypos = computingNodesGenerator.getSDN().getMobilityModel().getCurrentLocation().getYPos();
-			
-			x_SDN.add(Xpos);
-			y_SDN.add(Ypos);
+			for (ComputingNode node : computingNodesGenerator.getOrchestratorsList()) {
+				if(node.getType().equals(SimulationParameters.TYPES.SDN)){
+					ComputingNode SDN = node;
+					double Xpos = SDN.getMobilityModel().getCurrentLocation().getXPos();
+					double Ypos = SDN.getMobilityModel().getCurrentLocation().getYPos();
+
+					x_SDN.add(Xpos);
+					y_SDN.add(Ypos);
+				}
+				
+			}
 
 			updateSeries(getChart(), "Active SDN", toArray(x_SDN),
 					toArray(y_SDN), SeriesMarkers.TRIANGLE_UP, Color.RED);
