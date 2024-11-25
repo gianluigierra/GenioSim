@@ -26,7 +26,6 @@ import java.util.List;
 import org.jgrapht.GraphPath;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
-import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode.LinkOrientation;
 import com.mechalikh.pureedgesim.energy.EnergyModelComputingNode;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters.TYPES;
