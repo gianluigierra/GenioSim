@@ -386,7 +386,8 @@ public class VM extends LocationAwareNode {
 			// Execute the task.
 			startExecution(task);
 		}
-
+		
+		Host.executionFinished(e);
 	}
 
 }

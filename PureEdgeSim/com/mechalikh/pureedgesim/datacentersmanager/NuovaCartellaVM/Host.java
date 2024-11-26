@@ -407,6 +407,7 @@ public class Host extends LocationAwareNode {
 		// Update CPU utilization.
 		removeCpuUtilization((Task) e.getData());
 
+		DataCenter.executionFinished(e);
 	}
 
 }
