@@ -218,7 +218,8 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			sendFromCloudOrchToDestination((Container) ev.getData());
 			break;
 		case SEND_UNPLACEMENT_FROM_CLOUD_ORCH_TO_VM:
-			// the device asked to unplace the container previously placed
+			//The CloudOrchestrator ordered the unplacement of a Container based on an EdgeDevice request.
+			//So I remove the container from the list of the orchestrator
 			cloudOrchestrator.removeContainerFromVM((Container) ev.getData());
 			sendUnplacementFromCloudOrchToDestination((Container) ev.getData());
 			break;
@@ -262,7 +263,8 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 			edgeOrchestrator.setContainerToVM((Container) ev.getData());
 			break;
 		case UNPLACEMENT_RESULTS_FROM_CLOUD_TO_EDGE_ORCH:
-			//Container placement has finished and i notified the orchestrator.
+			//Container unplacement has finished and i notified the EdgeOrchestrator.
+			//So I remove the container from the list of the orchestrator
 			edgeOrchestrator.removeContainerFromVM((Container) ev.getData());
 			break;
 		case TASK_RESULT_RETURN_FINISHED:

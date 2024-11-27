@@ -114,7 +114,7 @@ public class SimulationVisualizer {
                 + " seconds  -  number of edge devices = " + simulationManager.getScenario().getDevicesCount()
                 + " -  Architecture = " + simulationManager.getScenario().getStringOrchArchitecture()
                 + " -  Container Algorithm = " + simulationManager.getScenario().getStringOrchAlgorithm()
-                + " -  Task Algorithm = " + SimulationParameters.taskOrchestrationAlgorithm);
+                + "    Task Algorithm = " + SimulationParameters.taskOrchestrationAlgorithm);
     }
 
     /**
