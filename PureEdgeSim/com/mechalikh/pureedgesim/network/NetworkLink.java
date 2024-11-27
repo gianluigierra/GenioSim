@@ -28,8 +28,8 @@ import com.mechalikh.pureedgesim.energy.EnergyModelNetworkLink;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
 import com.mechalikh.pureedgesim.simulationengine.SimEntity;
+import com.mechalikh.pureedgesim.simulationmanager.DefaultSimulationManager;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-
 
 /**
  * Link between two compute nodes in the infrastructure graph
@@ -117,125 +117,129 @@ public class NetworkLink extends SimEntity {
 		for (Bandwidth bandwidth : UsedBandwidthList) {
 			bandwidth.usedBandwidth = 0;
 		}
-		
-		double allocatedBandwidth = 0; 
-		
+
+		double allocatedBandwidth = 0;
+
 		for (int i = 0; i < transferProgressList.size(); i++) {
-			
+
 			if (!SimulationParameters.BandwidthAllocationOnApplicationType) {
 				allocatedBandwidth = getBandwidth(transferProgressList.size());
 			} else {
 				allocatedBandwidth = getBandwidthOnType(transferProgressList.get(i));
 			}
-			
+
 			// Allocate bandwidth
 			usedBandwidth += transferProgressList.get(i).getRemainingFileSize();
-			
-			if (this.getType()==NetworkLinkTypes.FIBER) 
+
+			if (this.getType() == NetworkLinkTypes.FIBER)
 				UpdateBandwidth(transferProgressList.get(i));
-				
+
 			transferProgressList.get(i).setCurrentBandwidth(allocatedBandwidth);
 			updateTransfer(transferProgressList.get(i));
 		}
 
 		for (int i = 0; i < containerRequestTransferProgressList.size(); i++) {
-			
+
 			if (!SimulationParameters.BandwidthAllocationOnApplicationType) {
 				allocatedBandwidth = getBandwidth(containerRequestTransferProgressList.size());
 			} else {
 				allocatedBandwidth = getBandwidthOnContainerRequestType(containerRequestTransferProgressList.get(i));
 			}
-			
+
 			// Allocate bandwidth
 			usedBandwidth += containerRequestTransferProgressList.get(i).getRemainingFileSize();
-			
-			if (this.getType()==NetworkLinkTypes.FIBER) 
+
+			if (this.getType() == NetworkLinkTypes.FIBER)
 				UpdateContainerRequestBandwidth(containerRequestTransferProgressList.get(i));
-				
+
 			containerRequestTransferProgressList.get(i).setCurrentBandwidth(allocatedBandwidth);
 			updateContainerRequestTransfer(containerRequestTransferProgressList.get(i));
 		}
 
 	}
-	
+
 	protected void UpdateBandwidth(TransferProgress T) {
 		boolean found = false;
-        for (Bandwidth bandwidth : UsedBandwidthList) {
-            if (bandwidth.ApplicationName.equals(T.getTask().getAssociatedAppName())) {
-                bandwidth.usedBandwidth += T.getRemainingFileSize();
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            UsedBandwidthList.add(new Bandwidth(T.getTask().getAssociatedAppName(), bandwidth, T.getRemainingFileSize()));
-            //System.out.println("Nuovo oggetto bandwidth relativo all'app" + T.getTask().getAssociatedAppName() + "aggiunto al link: " + this.getId());
-        }		
+		for (Bandwidth bandwidth : UsedBandwidthList) {
+			if (bandwidth.ApplicationName.equals(T.getTask().getAssociatedAppName())) {
+				bandwidth.usedBandwidth += T.getRemainingFileSize();
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			UsedBandwidthList
+					.add(new Bandwidth(T.getTask().getAssociatedAppName(), bandwidth, T.getRemainingFileSize()));
+			// System.out.println("Nuovo oggetto bandwidth relativo all'app" +
+			// T.getTask().getAssociatedAppName() + "aggiunto al link: " + this.getId());
+		}
 	}
 
 	protected void UpdateContainerRequestBandwidth(ContainerTransferProgress T) {
 		boolean found = false;
-        for (Bandwidth bandwidth : UsedBandwidthList) {
-            if (bandwidth.ApplicationName.equals(T.getContainer().getAssociatedAppName())) {
-                bandwidth.usedBandwidth += T.getRemainingFileSize();
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            UsedBandwidthList.add(new Bandwidth(T.getContainer().getAssociatedAppName(), bandwidth, T.getRemainingFileSize()));
-            //System.out.println("Nuovo oggetto bandwidth relativo all'app" + T.getTask().getAssociatedAppName() + "aggiunto al link: " + this.getId());
-        }		
+		for (Bandwidth bandwidth : UsedBandwidthList) {
+			if (bandwidth.ApplicationName.equals(T.getContainer().getAssociatedAppName())) {
+				bandwidth.usedBandwidth += T.getRemainingFileSize();
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			UsedBandwidthList
+					.add(new Bandwidth(T.getContainer().getAssociatedAppName(), bandwidth, T.getRemainingFileSize()));
+			// System.out.println("Nuovo oggetto bandwidth relativo all'app" +
+			// T.getTask().getAssociatedAppName() + "aggiunto al link: " + this.getId());
+		}
 	}
 
 	protected double getBandwidth(double remainingTasksCount) {
 		return (bandwidth / (remainingTasksCount > 0 ? remainingTasksCount : 1));
 	}
-	
-	protected double getBandwidthOnType(TransferProgress task) { 
+
+	protected double getBandwidthOnType(TransferProgress task) {
 		double BandwidthValue = 0;
-		
+
 		if (SimulationParameters.AllocationValue.equals("LATENCY")) {
-			
+
 			double latency = task.getTask().getMaxLatency();
-			
+
 			if (latency <= 0.05) {
-				BandwidthValue = bandwidth*50/100;
+				BandwidthValue = bandwidth * 50 / 100;
 			} else if (latency > 0.05 && latency <= 0.2) {
-				BandwidthValue = bandwidth*25/100;
+				BandwidthValue = bandwidth * 25 / 100;
 			} else if (latency > 0.2) {
-				BandwidthValue = bandwidth*10/100;
+				BandwidthValue = bandwidth * 10 / 100;
 			}
-			
+
 		} else {
 			double task_length = task.getTask().getLength();
-			
+
 			if (task_length > 1000) {
-				BandwidthValue = bandwidth*50/100;
+				BandwidthValue = bandwidth * 50 / 100;
 			} else if (task_length > 100 && task_length <= 1000) {
-				BandwidthValue = bandwidth*25/100;
+				BandwidthValue = bandwidth * 25 / 100;
 			} else if (task_length <= 100) {
-				BandwidthValue = bandwidth*10/100;
+				BandwidthValue = bandwidth * 10 / 100;
 			}
-			
+
 		}
-	
+
 		return BandwidthValue;
 	}
 
-	protected double getBandwidthOnContainerRequestType(ContainerTransferProgress task) { 
+	protected double getBandwidthOnContainerRequestType(ContainerTransferProgress task) {
 		double BandwidthValue = 0;
-		
+
 		double container_size = task.getContainer().getFileSizeInBits();
-			
+
 		if (container_size > 1000) {
-			BandwidthValue = bandwidth*50/100;
+			BandwidthValue = bandwidth * 50 / 100;
 		} else if (container_size > 100 && container_size <= 1000) {
-			BandwidthValue = bandwidth*25/100;
+			BandwidthValue = bandwidth * 25 / 100;
 		} else if (container_size <= 100) {
-			BandwidthValue = bandwidth*10/100;
+			BandwidthValue = bandwidth * 10 / 100;
 		}
-	
+
 		return BandwidthValue;
 	}
 
@@ -251,6 +255,27 @@ public class NetworkLink extends SimEntity {
 			transfer.setRemainingFileSize(0);
 
 		double transferDelay = (oldRemainingSize - transfer.getRemainingFileSize()) / transfer.getCurrentBandwidth();
+
+		//calcolo la latency associata alla distanza:
+		double x1 = transfer.getVertexList().get(0).getMobilityModel().getCurrentLocation().getXPos();
+		double y1 = transfer.getVertexList().get(0).getMobilityModel().getCurrentLocation().getYPos();									//questi sono i due datacenter interessati, io devo tenere conto dei due vertici comunicanti
+		double x2 = transfer.getVertexList().get(1).getMobilityModel().getCurrentLocation().getXPos();
+		double y2 = transfer.getVertexList().get(1).getMobilityModel().getCurrentLocation().getYPos();
+		double distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+		// Velocità di propagazione della luce in fibra ottica (200,000 km/s)
+		double propagationSpeed = 200000; // in km/s
+		double distanceInKm = distance / 1000; // Conversione distanza in km
+		// Latenza basata sulla distanza
+		double distanceLatency = distanceInKm / propagationSpeed; // in secondi
+		// System.out.print("Latenza su distanza" + distanceLatency + "\n");
+		double latency_const = latency;
+		transferDelay += (distanceLatency + latency_const);
+
+		// System.out.println("Task " + transfer.getTask().getId() + " associato a " + transfer.getTask().getEdgeDevice().getType() + " " + transfer.getTask().getEdgeDevice().getId() 
+		// 					+ " ho aggiunto: \n		-il delay " + transferDelay + " derivante dalla \n		-latency " + latency + " \n		-la distanza in metri " + distance + "dalla quale si ottiene la latency_dist " + distanceLatency
+		// 					+ "\n		--precedente delay = " + (transferDelay - distanceLatency - latency_const)
+		// 					+ "\n		per spostarmi: \n		da " + transfer.getVertexList().get(0).getType() + " " + transfer.getVertexList().get(0).getId()
+		// 					+ "\n		verso " + transfer.getVertexList().get(1).getType() + " " + transfer.getVertexList().get(1).getId());
 
 		// Set the task network delay to decide whether it has failed due to latency or
 		// not.
@@ -294,7 +319,7 @@ public class NetworkLink extends SimEntity {
 		// Update network usage delay
 		if (type == NetworkLinkTypes.LAN)
 			transfer.setLanNetworkUsage(transfer.getLanNetworkUsage() + transferDelay);
-		
+
 		// Update FIBER network usage delay
 		else if (type == NetworkLinkTypes.FIBER)
 			transfer.setFiberNetworkUsage(transfer.getFiberNetworkUsage() + transferDelay);
@@ -318,7 +343,7 @@ public class NetworkLink extends SimEntity {
 		this.transferProgressList.remove(transfer);
 
 		// Add the network link latency to the task network delay
-		transfer.getTask().addActualNetworkTime(latency);		//era settato latency, ho messo 0 come Vitale altrimenti i task fallivano
+		transfer.getTask().addActualNetworkTime(0); //originariamente settato su latency, ora settato su 0 poichè la latency la sommo nella funzione updateTransfer
 
 		// Remove the previous hop (data has been transferred one hop)
 		transfer.getVertexList().remove(0);
@@ -406,8 +431,8 @@ public class NetworkLink extends SimEntity {
 	public double getTotalTransferredData() {
 		return totalTrasferredData;
 	}
-	
-	public List<Bandwidth> getUsedBandwidthList(){
+
+	public List<Bandwidth> getUsedBandwidthList() {
 		return this.UsedBandwidthList;
 	}
 
