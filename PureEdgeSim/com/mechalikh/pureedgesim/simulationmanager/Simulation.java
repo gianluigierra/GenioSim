@@ -223,7 +223,7 @@ public class Simulation extends SimulationAbstract {
 	 */
 	protected void loadScenarios() {
 		// Save the different simulation runs (i.e., scenarios) in the scenarios List
-		for (int algorithmID = 0; algorithmID < SimulationParameters.orchestrationAlgorithms.length; algorithmID++) {
+		for (int algorithmID = 0; algorithmID < SimulationParameters.containerOrchestrationAlgorithms.length; algorithmID++) {
 			for (int architectureID = 0; architectureID < SimulationParameters.orchestrationArchitectures.length; architectureID++) {
 				iterations.add(new Scenario(getEdgeDeviceNumber(), algorithmID, architectureID));
 			}

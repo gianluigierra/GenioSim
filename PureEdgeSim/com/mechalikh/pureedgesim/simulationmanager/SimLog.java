@@ -599,7 +599,7 @@ public class SimLog {
 
 	public void initialize(SimulationManager simulationManager, int dev, int alg, int arch) {
 		this.currentEdgeDevicesCount = dev;
-		this.currentOrchAlgorithm = SimulationParameters.orchestrationAlgorithms[alg];
+		this.currentOrchAlgorithm = SimulationParameters.containerOrchestrationAlgorithms[alg];
 		this.currentOrchArchitecture = SimulationParameters.orchestrationArchitectures[arch];
 		this.simulationManager = simulationManager;
 	}

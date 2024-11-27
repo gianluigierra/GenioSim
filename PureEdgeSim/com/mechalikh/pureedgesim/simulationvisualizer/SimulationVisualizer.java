@@ -113,7 +113,8 @@ public class SimulationVisualizer {
         simulationResultsFrame.setTitle("Simulation time = " + ((int) time / 60) + " min : " + ((int) time % 60)
                 + " seconds  -  number of edge devices = " + simulationManager.getScenario().getDevicesCount()
                 + " -  Architecture = " + simulationManager.getScenario().getStringOrchArchitecture()
-                + " -  Algorithm = " + simulationManager.getScenario().getStringOrchAlgorithm());
+                + " -  Container Algorithm = " + simulationManager.getScenario().getStringOrchAlgorithm()
+                + " -  Task Algorithm = " + SimulationParameters.taskOrchestrationAlgorithm);
     }
 
     /**

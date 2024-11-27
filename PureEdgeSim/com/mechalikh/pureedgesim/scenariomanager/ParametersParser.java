@@ -157,7 +157,9 @@ public class ParametersParser extends FileParserAbstract {
 
 			SimulationParameters.orchestrationArchitectures = prop.getProperty("orchestration_architectures")
 					.split(",");
-			SimulationParameters.orchestrationAlgorithms = prop.getProperty("orchestration_algorithms").split(",");
+			SimulationParameters.taskOrchestrationAlgorithm = prop.getProperty("task_orchestration_algorithm").trim();
+
+			SimulationParameters.containerOrchestrationAlgorithms = prop.getProperty("container_orchestration_algorithms").split(",");
 
 			SimulationParameters.neuralNetworkLearningSpeed = (int) assertDouble(prop, "neural_network_learning_speed", value -> (value > 0), "> 0");
 

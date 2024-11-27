@@ -100,17 +100,17 @@ public class ChartsGenerator {
 
 	public void generateChart(String x_series, String y_series, String y_series_label, boolean byAlgorithms) {
 		XYChart chart;
-		for (int i = 0; i < (byAlgorithms ? SimulationParameters.orchestrationAlgorithms.length
+		for (int i = 0; i < (byAlgorithms ? SimulationParameters.containerOrchestrationAlgorithms.length
 				: SimulationParameters.orchestrationArchitectures.length); i++) {
 			chart = initChart(x_series, y_series, y_series_label, getArray(byAlgorithms)[i]);
 			for (int j = 0; j < (byAlgorithms ? SimulationParameters.orchestrationArchitectures.length
-					: SimulationParameters.orchestrationAlgorithms.length); j++) {
+					: SimulationParameters.containerOrchestrationAlgorithms.length); j++) {
 				double[] xData = toArray(
 						getColumn(x_series, SimulationParameters.orchestrationArchitectures[(byAlgorithms ? j : i)],
-								SimulationParameters.orchestrationAlgorithms[(byAlgorithms ? i : j)]));
+								SimulationParameters.containerOrchestrationAlgorithms[(byAlgorithms ? i : j)]));
 				double[] yData = toArray(
 						getColumn(y_series, SimulationParameters.orchestrationArchitectures[(byAlgorithms ? j : i)],
-								SimulationParameters.orchestrationAlgorithms[(byAlgorithms ? i : j)]));
+								SimulationParameters.containerOrchestrationAlgorithms[(byAlgorithms ? i : j)]));
 
 				XYSeries series = chart.addSeries(getArray(!byAlgorithms)[j], xData, yData);
 				series.setMarker(SeriesMarkers.CIRCLE); // Marker type: circle,rectangle, diamond..
@@ -123,7 +123,7 @@ public class ChartsGenerator {
 	}
 
 	protected String[] getArray(boolean byAlgorithms) {
-		return (byAlgorithms ? SimulationParameters.orchestrationAlgorithms
+		return (byAlgorithms ? SimulationParameters.containerOrchestrationAlgorithms
 				: SimulationParameters.orchestrationArchitectures);
 	}
 

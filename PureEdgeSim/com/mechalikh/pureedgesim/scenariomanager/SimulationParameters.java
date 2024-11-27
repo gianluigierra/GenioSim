@@ -26,6 +26,7 @@ import com.mechalikh.pureedgesim.network.TransferProgress;
 import com.mechalikh.pureedgesim.simulationmanager.SimLog;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationAbstract.Files;
 import com.mechalikh.pureedgesim.taskgenerator.Application;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.User;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
@@ -581,10 +582,17 @@ public class SimulationParameters {
 	/**
 	 * The algorithm that will be used in the simulation to orchestrate the tasks.
 	 * 
-	 * @see com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator#findComputingNode(String[]
+	 * @see com.mechalikh.pureedgesim.taskorchestrator.Orchestrator#findVmAssociatedWithTask(Task)
+	 */
+	public static String taskOrchestrationAlgorithm;
+
+	/**
+	 * The algorithm that will be used in the simulation to orchestrate the Containers.
+	 * 
+	 * @see com.mechalikh.pureedgesim.taskorchestrator.DefaultContainerOrchestrator#findComputingNode(String[] architecture, Container container)
 	 *      architecture, Task task)
 	 */
-	public static String[] orchestrationAlgorithms;
+	public static String[] containerOrchestrationAlgorithms;
 
 	/**
 	 * The architecture/paradigms to use in the simulation
