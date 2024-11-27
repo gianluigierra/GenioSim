@@ -351,8 +351,7 @@ public class Host extends LocationAwareNode {
 	
 	@Override
 	public List<Container> getContainerList(){
-		List<Container> lista = new ArrayList<Container>();
-		return lista;
+		return this.containerList;
 	}
 
 	double getAssociatedContainerSizeInMBytes(Task task){
