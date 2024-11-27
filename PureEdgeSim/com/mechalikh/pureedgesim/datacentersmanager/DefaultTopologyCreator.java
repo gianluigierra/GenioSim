@@ -238,6 +238,8 @@ public class DefaultTopologyCreator extends TopologyCreator {
 			infrastructureTopology.addLink(wanUp);
 			infrastructureTopology.addLink(wanDown);
 
+			metroRouter.setMobilityModel(cloud.getMobilityModel());
+
 			// To enable the real time WAN chart, and use the WAN bandwidth in orchestration
 			// algorithms like in Example 8:
 			simulationManager.getNetworkModel().setWanLinks(wanUp, wanDown);
