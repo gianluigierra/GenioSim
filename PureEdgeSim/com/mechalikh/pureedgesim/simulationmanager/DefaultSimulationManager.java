@@ -62,7 +62,7 @@ import com.mechalikh.pureedgesim.simulationengine.FutureQueue;
  */
 public class DefaultSimulationManager extends SimulationManager implements OnSimulationStartListener {
 
-	private Boolean printDebug = true;
+	public static Boolean printDebug = false;
 
 	/**
 	 * Simulation progress parameters.
@@ -586,7 +586,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 
 			//printa il percorso e i motivi del fallimento per latency
 			if(printDebug){
-				System.out.println("task: " + task.getId() + ", waitingtime: " + task.getWatingTime() + " getActualNetworkTime: " + task.getActualNetworkTime() + " getActualCpuTime: " + task.getActualCpuTime());
+				System.out.println("---------------------task: " + task.getId() + " associatedAppName: " + task.getAssociatedAppName() + ", waitingtime: " + task.getWatingTime() + " getActualNetworkTime: " + task.getActualNetworkTime() + " getActualCpuTime: " + task.getActualCpuTime());
 				GraphPath<ComputingNode, NetworkLink> path = getDataCentersManager().getTopology().getPath(task.getEdgeDevice(), task.getEdgeDevice().getEdgeOrchestrator());
 				System.out.println("from: " + task.getEdgeDevice().getName() + ", to: " + task.getOffloadingDestination().getName());
 				System.out.print("[");
