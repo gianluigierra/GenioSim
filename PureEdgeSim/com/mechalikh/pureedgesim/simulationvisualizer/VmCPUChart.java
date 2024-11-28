@@ -70,7 +70,10 @@ public class VmCPUChart extends Chart {
 
     protected void VmEdgeCpuUsage(Map<String, Double> VmEdgeCpuUsage) {
 
-        if ((simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR") ) || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+        if (simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_EDGE")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 		    List<VM> VMedgeOnlyList = new ArrayList<>();
 
             for(DataCenter DC : computingNodesGenerator.getEdgeOnlyList())
@@ -108,7 +111,7 @@ public class VmCPUChart extends Chart {
 
                 // Genera un colore basato sull'ultimo carattere (numero identificatore)
                 Color color = getColorBasedOnIdentifier(identifier, Color.BLUE);
-                if(simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY"))
+                if(!simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD"))
                     updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, Color.BLACK);
                 else updateSeries(getChart(), entry.getKey(), time, toArray(getCPUDataFor(entry.getKey(), VmEdgeCpuUsageData)), SeriesMarkers.NONE, color);
             }
@@ -117,7 +120,10 @@ public class VmCPUChart extends Chart {
 
     protected void VmCloudCpuUsage(Map<String, Double> VmCloudCpuUsage) {
 
-        if (simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD") || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+        if (simulationManager.getScenario().getStringOrchArchitecture().equals("CLOUD_ONLY") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_CLOUD")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
             
             List<VM> VMcloudOnlyList = new ArrayList<>();
             for(DataCenter DC : computingNodesGenerator.getCloudOnlyList())

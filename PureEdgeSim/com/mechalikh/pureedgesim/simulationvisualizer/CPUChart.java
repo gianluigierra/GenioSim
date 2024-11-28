@@ -78,8 +78,10 @@ public class CPUChart extends Chart {
 	 */
 	protected void ontDevicesCpuUsage() {
 		// Only if Mist computing is used
-		if (simulationManager.getScenario().getStringOrchArchitecture().contains("FAR")
-				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+		if (simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE") || 
+			simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_EDGE") || 
+			simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_CLOUD") || 
+			simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 			List<ComputingNode> farEdgeOnlyList = computingNodesGenerator.getONT_List();
 			double farEdgeValue = farEdgeOnlyList.stream().mapToDouble(ComputingNode::getAvgCpuUtilization).average()
 					.orElse(0.0);
@@ -93,8 +95,8 @@ public class CPUChart extends Chart {
 	 */
 	protected void edgeDataCentersCpuUsage() {
 		// Only if Edge computing is used
-		if ((simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR"))
-				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+		if (simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY") || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_EDGE")
+				|| simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 			List<DataCenter> edgeOnlyList = computingNodesGenerator.getEdgeOnlyList();
 			double edgeUsageValue = edgeOnlyList.stream().mapToDouble(ComputingNode::getAvgCpuUtilization).average()
 					.orElse(0.0);
@@ -108,8 +110,8 @@ public class CPUChart extends Chart {
 	 * chart.
 	 */
 	protected void cloudCpuUsage() {
-		if (simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD")
-				|| simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+		if (simulationManager.getScenario().getStringOrchArchitecture().equals("CLOUD_ONLY") || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_CLOUD")
+				|| simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 			List<DataCenter> cloudOnlyList = computingNodesGenerator.getCloudOnlyList();
 			double cloudUsageValue = cloudOnlyList.parallelStream().mapToDouble(ComputingNode::getAvgCpuUtilization).sum();
 			cloudUsage.add(cloudUsageValue);

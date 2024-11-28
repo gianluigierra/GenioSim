@@ -71,7 +71,10 @@ public class VmTasksChart extends Chart {
 
     protected void VmEdgeTasksUsage(Map<String, Double> VmEdgeTasksUsage) {
 
-        if ((simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR") ) ||  simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+        if (simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_EDGE")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
 		    List<VM> VMedgeOnlyList = new ArrayList<>();
 
             for(DataCenter DC : computingNodesGenerator.getEdgeOnlyList())
@@ -119,7 +122,10 @@ public class VmTasksChart extends Chart {
 
     protected void VmCloudTasksUsage(Map<String, Double> VmCloudTasksUsage) {
 
-        if (simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD") || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
+        if (simulationManager.getScenario().getStringOrchArchitecture().equals("CLOUD_ONLY") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_CLOUD")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
             
             List<VM> VMcloudOnlyList = new ArrayList<>();
             for(DataCenter DC : computingNodesGenerator.getCloudOnlyList())

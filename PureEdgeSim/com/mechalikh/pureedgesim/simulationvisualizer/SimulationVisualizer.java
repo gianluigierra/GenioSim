@@ -77,8 +77,12 @@ public class SimulationVisualizer {
         charts.addAll(List.of(mapChart, tasksSuccessChart, networkUtilizationChart, cpuUtilizationChart));
 
         //se ci stanno di mezzo le VM
-        if( (simulationManager.getScenario().getStringOrchArchitecture().contains("EDGE") && !simulationManager.getScenario().getStringOrchArchitecture().contains("FAR")) 
-            || (simulationManager.getScenario().getStringOrchArchitecture().contains("CLOUD")) || simulationManager.getScenario().getStringOrchArchitecture().contains("ALL")){
+        if (simulationManager.getScenario().getStringOrchArchitecture().equals("CLOUD_ONLY") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_ONLY")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_CLOUD")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("FAR_EDGE_AND_EDGE")
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("EDGE_AND_CLOUD") 
+        || simulationManager.getScenario().getStringOrchArchitecture().equals("ALL")) {
             charts.removeAll(charts);
             charts.addAll(List.of(mapChart, tasksSuccessChart, VmTasksChart, networkUtilizationChart, cpuUtilizationChart, VmCPUChart));
         }
