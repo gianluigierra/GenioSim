@@ -375,9 +375,9 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 			String name = deviceElement.getAttribute("name");
 			computingNode.setName(name + " " + ONTcount);
 			
-			//set ONT location near the edge device 
-			double xPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getXPos() + random.nextInt(2)+1;
-			double yPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getYPos() + random.nextInt(2)+1;
+			//set ONT location at the edge device 
+			double xPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getXPos();
+			double yPos = mistOnlyList.get(ONTcount).getMobilityModel().getCurrentLocation().getYPos();
 			deviceLocation = new Location(xPos, yPos); 
 			
 			//SimLog.println(computingNode.getName() + " Location: (" + xPos + "," + yPos + ")");
@@ -518,8 +518,8 @@ public class DefaultComputingNodesGenerator extends ComputingNodesGenerator {
 
 				
 		Random random = SecureRandom.getInstanceStrong();
-		xPosition = edgeDC.getMobilityModel().getCurrentLocation().getXPos() + 2;
-		yPosition = edgeDC.getMobilityModel().getCurrentLocation().getYPos() + 2;
+		xPosition = edgeDC.getMobilityModel().getCurrentLocation().getXPos();
+		yPosition = edgeDC.getMobilityModel().getCurrentLocation().getYPos();
 		Location SDNLocation = new Location(xPosition, yPosition);
 
 		Constructor<?> mobilityConstructor = mobilityModelClass.getConstructor(SimulationManager.class, Location.class);
