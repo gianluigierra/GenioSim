@@ -51,7 +51,7 @@ public abstract class Orchestrator extends SimEntity {
 		this.simulationManager = simulationManager;
 		simulationManager.setEdgeOrchestrator(this);
 		simLog = simulationManager.getSimulationLogger();
-		algorithmName = simulationManager.getScenario().getStringOrchAlgorithm();
+		algorithmName = SimulationParameters.taskOrchestrationAlgorithm;
 		architectureName = simulationManager.getScenario().getStringOrchArchitecture();
 		initialize();
 	}
@@ -60,6 +60,7 @@ public abstract class Orchestrator extends SimEntity {
 	public void orchestrate(Task task) {
 		assignTaskToComputingNode(task, architectureLayers);
 	}
+	
 	public void initialize() {
 		if ("CLOUD_ONLY".equals(architectureName)) {
 			cloudOnly();
@@ -160,13 +161,9 @@ public abstract class Orchestrator extends SimEntity {
 		}
 	}
 
-	protected abstract int findComputingNode(String[] architectureLayers, Task task);
-
 	protected void assignTaskToComputingNode(Task task, String[] architectureLayers) {
 
-		int nodeIndex = 
-			//findComputingNode(architectureLayers, task);
-			findVmAssociatedWithTask(task);
+		int nodeIndex =  findVmAssociatedWithTask(task);
 
 		if (nodeIndex != -1) {
 			ComputingNode node = nodeList.get(nodeIndex);
@@ -280,58 +277,7 @@ public abstract class Orchestrator extends SimEntity {
 		}
 	}
 
-	public int findVmAssociatedWithTask(Task task){
-		//se l'applicazione non è shared
-		if(!SimulationParameters.applicationList.get(task.getApplicationID()).getSharedContainer()){
-			//Ciclo tra tutti i container
-			for(Container container : containerList){
-				//se il nome dell'app associata al task ==  a quello associato al container
-				if(task.getAssociatedAppName().equals(container.getAssociatedAppName())){
-					//ciclo tra tutti gli edge device di quel container
-					for(ComputingNode edgeDevice : container.getEdgeDevices()){
-						//se il dispositivo che ha generato il container == dispositivo che ha generato il task
-						if(task.getEdgeDevice().equals(edgeDevice))
-							//prelevo la VM associata a quel container
-							for(int i = 0; i < nodeList.size(); i++)
-								if(nodeList.get(i).equals(container.getPlacementDestination()))
-									return i;	
-					}
-				}
-			}
-		}
-		//se invece è shared
-		else{
-			//applico roundRobin tra i container associati
-			int containerPos = roundRobinAssociatedContainers(task.getAssociatedAppName());
-			//trovato il container nella lista devo trovare la VM ad esso associato.
-			for(int i = 0; i < nodeList.size(); i++)
-				if(nodeList.get(i).equals(containerList.get(containerPos).getPlacementDestination()))
-					return i;
-		}
-		return -1;
-	}
-
-	//round robin per i container shared
-	public int roundRobinAssociatedContainers(String AppName){
-		int selected = -1;
-		int minTasksCount = -1; // Computing node with minimum assigned tasks.
-		for (int i = 0; i < containerList.size(); i++) {
-			if(containerList.get(i).getAssociatedAppName().equals(AppName)
-											&& 
-				(minTasksCount == -1 || minTasksCount > sharedHistoryMap.get(i))
-			  ) 
-			{
-				minTasksCount = sharedHistoryMap.get(i);
-				// if this is the first time,
-				// or new min found, so we choose it as the best computing node.
-				selected = i;
-			}
-		}
-		// Assign the tasks to the obtained computing node.
-		sharedHistoryMap.put(selected, minTasksCount + 1);
-
-		return selected;
-	}
+	public abstract int findVmAssociatedWithTask(Task task);
 
 	public void removeContainerFromVM(Container container){
 		containerList.remove(container);

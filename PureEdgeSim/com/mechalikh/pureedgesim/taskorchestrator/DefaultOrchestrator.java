@@ -23,13 +23,18 @@ package com.mechalikh.pureedgesim.taskorchestrator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jgrapht.GraphPath;
+
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
+import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
-public class DefaultOrchestrator extends Orchestrator {
+public class DefaultOrchestrator extends Orchestrator implements OnSimulationEndListener{
 	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();
 
 	public DefaultOrchestrator(SimulationManager simulationManager) {
@@ -39,97 +44,158 @@ public class DefaultOrchestrator extends Orchestrator {
 			historyMap.put(i, 0);
 	}
 
-	protected int findComputingNode(String[] architecture, Task task) {
-		if ("ROUND_ROBIN".equals(algorithmName)) {
-			return roundRobin(architecture, task);
-		} else if ("TRADE_OFF".equals(algorithmName)) {
-			return tradeOff(architecture, task);
-		} else if ("GREEDY".equals(algorithmName)) {
-			return greedyChoice(architecture, task);
-		} else {
-			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
-					+ algorithmName + "', please check the simulation parameters file...");
-		}
-	}
-
-	protected int tradeOff(String[] architecture, Task task) {
-		int selected = -1;
-		double min = -1;
-		double newMin;// the computing node with minimum weight;
-		ComputingNode node; // get best computing node for this task
-		for (int i = 0; i < nodeList.size(); i++) {
-			node = nodeList.get(i);
-			if (offloadingIsPossible(task, node, architecture)) {
-				// the weight below represent the priority, the less it is, the more it is //
-				// suitable for offlaoding, you can change it as you want
-				double weight = 0.0;
-				if(node.getType() == SimulationParameters.TYPES.VM_EDGE){
-					weight = 1.2;
-					// // this is an
-					// edge server 'cloudlet', the latency is slightly high then edge // devices
-				}else if (node.getType() == SimulationParameters.TYPES.VM_CLOUD) {
-					weight = 1.8; // this
-					// is the cloud, it consumes more energy and results in high latency, so //
-					// better to avoid it
-				} else if (node.getType() == SimulationParameters.TYPES.EDGE_DEVICE) {
-					weight = 1.3;// this is an edge
-					// device, it results in an extremely low latency, but may // consume more
-					// energy.
-				}
-				newMin = (historyMap.get(i) + 1) * weight * task.getLength() / node.getMipsPerCore();
-				if (min == -1 || min > newMin) { // if it is the first
-					// iteration, or if this computing node has more // cpu mips and // less waiting
-					// tasks
-					min = newMin; // set the first computing node as the best one
-					selected = i;
+	//Questa funzione associa il task alla VM che contiene il container associato al task. (che al mercato mio padre comprò)
+	public int findVmAssociatedWithTask(Task task){
+		//se l'applicazione non è shared
+		if(!SimulationParameters.applicationList.get(task.getApplicationID()).getSharedContainer()){
+			//Ciclo tra tutti i container
+			for(Container container : containerList){
+				//se il nome dell'app associata al task ==  a quello associato al container
+				if(task.getAssociatedAppName().equals(container.getAssociatedAppName())){
+					//ciclo tra tutti gli edge device di quel container
+					for(ComputingNode edgeDevice : container.getEdgeDevices()){
+						//se il dispositivo che ha generato il container == dispositivo che ha generato il task
+						if(task.getEdgeDevice().equals(edgeDevice))
+							//prelevo la VM associata a quel container
+							for(int i = 0; i < nodeList.size(); i++)
+								if(nodeList.get(i).equals(container.getPlacementDestination()))
+									return i;	
+					}
 				}
 			}
 		}
-		if (selected != -1)
-			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
-		// node
-		return selected;
+		//se invece è shared
+		else{
+			//applico l'algoritmo specificato nel SimulationParameters.xml
+			if(algorithmName.equals("ROUND_ROBIN")) 
+				return roundRobin(task);
+			else if(algorithmName.equals("DISTANCE_ROUND_ROBIN")) 
+				return distanceRoundRobin(task);
+			else if(algorithmName.equals("LATENCY_ROUND_ROBIN")) 
+				return latencyRoundRobin(task);	
+		}
+		return -1;
 	}
 
-	protected int roundRobin(String[] architecture, Task task) {
+	//round robin per i container shared
+	public int roundRobin(Task task){
 		int selected = -1;
 		int minTasksCount = -1; // Computing node with minimum assigned tasks.
-		for (int i = 0; i < nodeList.size(); i++) {
-			if (offloadingIsPossible(task, nodeList.get(i), architecture)
-					&& (minTasksCount == -1 || minTasksCount > historyMap.get(i))) {
-				minTasksCount = historyMap.get(i);
+		for (int i = 0; i < containerList.size(); i++) {
+			if(containerList.get(i).getAssociatedAppName().equals(task.getAssociatedAppName())
+											&& 
+				(minTasksCount == -1 || minTasksCount > sharedHistoryMap.get(i))
+			  ) 
+			{
+				minTasksCount = sharedHistoryMap.get(i);
 				// if this is the first time,
 				// or new min found, so we choose it as the best computing node.
 				selected = i;
 			}
 		}
 		// Assign the tasks to the obtained computing node.
-		historyMap.put(selected, minTasksCount + 1);
+		sharedHistoryMap.put(selected, minTasksCount + 1);
 
-		return selected;
+		//trovato il container nella lista devo trovare la VM ad esso associato.
+		for(int i = 0; i < nodeList.size(); i++)
+			if(nodeList.get(i).equals(containerList.get(selected).getPlacementDestination()))
+				return i;
+
+		//caso nel quale non trovo la VM (non può verificarsi)
+		return -1;
 	}
 
-	protected int greedyChoice(String[] architecture, Task task){
-        int selected = 0;
-        double bestfit = Double.MAX_VALUE;
-        double bestnumberofcores = 0;
-        for(int i = 0; i < nodeList.size(); i++){
-            //viene scelto il nodo con il miglio rapporto TaskOffloaded/coresTotali
-            if( (historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() < bestfit) && offloadingIsPossible(task, nodeList.get(i), architecture)){
-                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
-                selected = i;
-            }
-            //laddove si abbia un rapporto TaskOffloaded/coresTotali uguale prevale il nodo con il numero di cores maggiore
-            else if((historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores() == bestfit) && (bestnumberofcores < nodeList.get(i).getNumberOfCPUCores()) && offloadingIsPossible(task, nodeList.get(i), architecture)){
-                bestnumberofcores = nodeList.get(i).getNumberOfCPUCores();
-                bestfit = historyMap.get(i)/nodeList.get(i).getNumberOfCPUCores();
-                selected = i;
-            }
-        }
-        if("GREEDY".equals(algorithmName)) historyMap.put(selected, historyMap.get(selected) + 1);
-        return selected;
-    }
+	//seleziono il device più vicino sul quale è piazzato il container shared. Se ve ne sono vari scelgo quello col numero di task inferiore (roundRobin)
+	public int distanceRoundRobin(Task task){
+		int selected = -1;
+		int minTasksCount = -1; // Computing node with minimum assigned tasks.
+		double minLen = Double.MAX_VALUE;
+		for (int i = 0; i < containerList.size(); i++) {
+			//caso nel quale la distanza è inferiore, quindi prendo a prescindere il nodo più vicino. 
+			if(containerList.get(i).getAssociatedAppName().equals(task.getAssociatedAppName())
+			&& (minLen > containerList.get(i).getPlacementDestination().getMobilityModel().distanceTo(task.getEdgeDevice()))
+			//controllo che tanto l'edgeDevice quanto il nodo destinazione afferiscano allo stesso DataCenter														decommentare se si vuole usarla in modalità "latency"
+			//&& (task.getEdgeDevice().getEdgeOrchestrator().equals(containerList.get(i).getPlacementDestination().getEdgeOrchestrator()))
+			) {
+				minTasksCount = sharedHistoryMap.get(i);
+				// if this is the first time,
+				// or new min found, so we choose it as the best computing node.
+				selected = i;
+				minLen = containerList.get(i).getPlacementDestination().getMobilityModel().distanceTo(task.getEdgeDevice());
+			}
+			//caso nel quale la distanza è uguale e quindi vedo se questo nodo ha meno container assegnati. Nel caso scelgo questo
+			else if(containerList.get(i).getAssociatedAppName().equals(task.getAssociatedAppName())
+			&& (minLen == containerList.get(i).getPlacementDestination().getMobilityModel().distanceTo(task.getEdgeDevice()))
+			//controllo che tanto l'edgeDevice quanto il nodo destinazione afferiscano allo stesso DataCenter														decommentare se si vuole usarla in modalità "latency"
+			//&& (task.getEdgeDevice().getEdgeOrchestrator().equals(containerList.get(i).getPlacementDestination().getEdgeOrchestrator()))
+			&& (minTasksCount == -1 || minTasksCount > sharedHistoryMap.get(i))){
+				minTasksCount = sharedHistoryMap.get(i);
+				// if this is the first time,
+				// or new min found, so we choose it as the best computing node.
+				selected = i;
+				minLen = containerList.get(i).getPlacementDestination().getMobilityModel().distanceTo(task.getEdgeDevice());
+			  }
+		}
+		// Assign the tasks to the obtained computing node.
+		sharedHistoryMap.put(selected, minTasksCount + 1);
+
+		//trovato il container nella lista devo trovare la VM ad esso associato.
+		for(int i = 0; i < nodeList.size(); i++)
+			if(nodeList.get(i).equals(containerList.get(selected).getPlacementDestination()))
+				return i;
+
+		//caso nel quale non trovo la VM (non può verificarsi)
+		return -1;
+	}
+
+	//seleziono il device con migliore latency sul quale è piazzato il container shared. Se ve ne sono vari scelgo quello col numero di task inferiore (roundRobin)
+	public int latencyRoundRobin(Task task){
+		int selected = -1;
+		int minTasksCount = -1; // Computing node with minimum assigned tasks.
+		double minLatency = Double.MAX_VALUE;
+		for (int i = 0; i < containerList.size(); i++) {
+			ComputingNode from = task.getEdgeDevice();
+			ComputingNode to = containerList.get(i).getPlacementDestination();
+			long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(), to.getId());
+			GraphPath<ComputingNode, NetworkLink> path;
+			if(simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id))
+				path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id); 
+			else{ 
+				path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+				simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+			}
+			double thisLatency = path.getWeight();
+			//caso nel quale la latency è inferiore, quindi prendo a prescindere il nodo più migliore. 
+			if(containerList.get(i).getAssociatedAppName().equals(task.getAssociatedAppName())
+			&& (minLatency > thisLatency)) {
+				minTasksCount = sharedHistoryMap.get(i);
+				// if this is the first time,
+				// or new min found, so we choose it as the best computing node.
+				selected = i;
+				minLatency = thisLatency;
+			}
+			//caso nel quale la latency è uguale e quindi vedo se questo nodo ha meno container assegnati. Nel caso scelgo questo
+			else if(containerList.get(i).getAssociatedAppName().equals(task.getAssociatedAppName())
+			&& (minLatency == thisLatency)
+			&& (minTasksCount == -1 || minTasksCount > sharedHistoryMap.get(i))){
+				minTasksCount = sharedHistoryMap.get(i);
+				// if this is the first time,
+				// or new min found, so we choose it as the best computing node.
+				selected = i;
+				minLatency = thisLatency;
+			  }
+		}
+		// Assign the tasks to the obtained computing node.
+		sharedHistoryMap.put(selected, minTasksCount + 1);
+
+		//trovato il container nella lista devo trovare la VM ad esso associato.
+		for(int i = 0; i < nodeList.size(); i++)
+			if(nodeList.get(i).equals(containerList.get(selected).getPlacementDestination()))
+				return i;
+
+		//caso nel quale non trovo la VM (non può verificarsi)
+		return -1;
+	}
 
 	@Override
 	public void resultsReturned(Task task) {
@@ -146,6 +212,36 @@ public class DefaultOrchestrator extends Orchestrator {
 	@Override
 	public void notifyOrchestratorOfTaskExecution(Task task) {
 		
+	}
+
+	@Override
+	public void onSimulationEnd() {
+
+		// Map<ComputingNode, Integer> mappainutile = new LinkedHashMap<>();
+		// for(ComputingNode cn :  simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList())
+		// 	mappainutile.put(cn, 0);
+
+		// //ciclo tra tutte le VM
+		// for(ComputingNode cn : nodeList){
+		// 	System.out.println("task eseguiti dal device " + cn.getName() + ": " + cn.getSentTasks());
+		// }
+
+		// //ciclo tra tutti gli edgeDevice
+		// for(ComputingNode cn2 : simulationManager.getDataCentersManager().getComputingNodesGenerator().getMistOnlyList()){
+		// 	ComputingNode bestNode = null;
+		// 	double minDistance = Double.MAX_VALUE;
+		// 	//ciclo tra tutti i DataCenter
+		// 	for(ComputingNode cn :  simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList()){
+		// 		if(cn2.getMobilityModel().distanceTo(cn) < minDistance){
+		// 			bestNode = cn;
+		// 			minDistance = cn2.getMobilityModel().distanceTo(cn);
+		// 		}
+		// 	}
+		// 	mappainutile.put(bestNode, mappainutile.get(bestNode) + 1);
+		// }
+
+		// for(ComputingNode cn :  simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList())
+		// 	System.out.println("DC " + cn.getName() + ", device associati " + mappainutile.get(cn));
 	}
 
 }
