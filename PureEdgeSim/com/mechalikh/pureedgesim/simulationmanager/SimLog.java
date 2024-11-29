@@ -73,9 +73,11 @@ public class SimLog {
 	protected int executedTasksCount = 0;
 	protected int tasksExecutedOnCloud = 0;
 	protected int tasksExecutedOnEdge = 0;
+	protected int tasksExecutedOnFarEdge = 0;
 	protected int tasksExecutedOnMist = 0;
 	protected int tasksFailedCloud = 0;
 	protected int tasksFailedEdge = 0;
+	protected int tasksFailedFarEdge = 0;
 	protected int tasksFailedMist = 0;
 
 	// Network utilization
@@ -140,26 +142,31 @@ public class SimLog {
 		double averageCpuUtilization = 0;
 		double averageCloudCpuUtilization = getCpuUtilizationForNodeType(SimulationParameters.TYPES.CLOUD);
 		double averageEdgeCpuUtilization = getCpuUtilizationForNodeType(SimulationParameters.TYPES.EDGE_DATACENTER);
+		double averageFarEdgeCpuUtilization = getCpuUtilizationForNodeType(SimulationParameters.TYPES.ONT);
 		double averageMistCpuUtilization = getCpuUtilizationForNodeType(SimulationParameters.TYPES.EDGE_DEVICE);
 
 		int totalNodes = simulationManager.getDataCentersManager()
 				.getComputingNodesGenerator().getMistOnlyListSensorsExcluded().size() + SimulationParameters.numberOfEdgeDataCenters
 				+ SimulationParameters.numberOfCloudDataCenters;
 		if (totalNodes > 0) {
-			averageCpuUtilization = (averageCloudCpuUtilization + averageMistCpuUtilization + averageEdgeCpuUtilization)
+			averageCpuUtilization = (averageCloudCpuUtilization + averageMistCpuUtilization + averageEdgeCpuUtilization + averageFarEdgeCpuUtilization)
 					/ totalNodes;
 		}
 
 		averageCloudCpuUtilization /= SimulationParameters.numberOfCloudDataCenters;
 		averageEdgeCpuUtilization /= SimulationParameters.numberOfEdgeDataCenters;
+		averageFarEdgeCpuUtilization /= simulationManager.getDataCentersManager().getComputingNodesGenerator().getMistOnlyListSensorsExcluded().size();
+
 		averageMistCpuUtilization /= simulationManager.getDataCentersManager().getComputingNodesGenerator().getMistOnlyListSensorsExcluded().size();
 
 		print("Average CPU utilization                                                 :"
 				+ padLeftSpaces(decimalFormat.format(averageCpuUtilization), 20) + " %%");
-		print("Average CPU utilization per level                                       :Cloud= "
+		print("Average CPU utilization per level                                       : Cloud= "
 				+ padLeftSpaces(decimalFormat.format(averageCloudCpuUtilization), 13) + " %%");
 		print("                                                                          Edge= "
 				+ padLeftSpaces(decimalFormat.format(averageEdgeCpuUtilization), 13) + " %%");
+		print("                                                                          FarEdge= "
+				+ padLeftSpaces(decimalFormat.format(averageFarEdgeCpuUtilization), 13) + " %%");
 		print("                                                                          Mist= "
 				+ padLeftSpaces(decimalFormat.format(averageMistCpuUtilization), 13) + " %%");
 
@@ -167,6 +174,7 @@ public class SimLog {
 				resultsList.get(resultsList.size() - 1) + decimalFormat.format(averageCpuUtilization) + ","
 						+ decimalFormat.format(averageCloudCpuUtilization) + ","
 						+ decimalFormat.format(averageEdgeCpuUtilization) + ","
+						+ decimalFormat.format(averageFarEdgeCpuUtilization) + ","
 						+ decimalFormat.format(averageMistCpuUtilization) + ",");
 	}
 
@@ -246,12 +254,15 @@ public class SimLog {
 				+ padLeftSpaces(decimalFormat.format((double) tasksFailedMobility * 100 / tasksSent), 20) + " %% ("
 				+ tasksFailedMobility + " tasks)");
 
-		print("Tasks executed on each level                                            :" + "Cloud= "
+		print("Tasks executed on each level                                            :" + " Cloud= "
 				+ padLeftSpaces("" + tasksExecutedOnCloud, 13) + " tasks (where "
 				+ (tasksExecutedOnCloud - tasksFailedCloud) + " were successfully executed )");
 		print("                                                                         " + " Edge="
 				+ padLeftSpaces("" + tasksExecutedOnEdge, 14) + " tasks (where "
 				+ (tasksExecutedOnEdge - tasksFailedEdge) + " were successfully executed )");
+		print("                                                                         " + " FarEdge="
+				+ padLeftSpaces("" + tasksExecutedOnFarEdge, 14) + " tasks (where "
+				+ (tasksExecutedOnFarEdge - tasksFailedEdge) + " were successfully executed )");		
 		print("                                                                         " + " Mist="
 				+ padLeftSpaces("" + tasksExecutedOnMist, 14) + " tasks (where "
 				+ (tasksExecutedOnMist - tasksFailedMist) + " were successfully executed )");
@@ -310,6 +321,7 @@ public class SimLog {
 		double cloudEnConsumption = 0;
 		double mistEnConsumption = 0;
 		double edgeEnConsumption = 0;
+		double farEdgeEnConsumption = 0;
 		double averageRemainingPowerWh = 0;
 		double averageRemainingPower = 0;
 		List<Double> remainingPower = new ArrayList<>();
@@ -355,6 +367,10 @@ public class SimLog {
 			edgeEnConsumption += node.getEnergyModel().getTotalEnergyConsumption();
 
 		for (ComputingNode node : simulationManager.getDataCentersManager().getComputingNodesGenerator()
+				.getONT_List())
+			farEdgeEnConsumption += node.getEnergyModel().getTotalEnergyConsumption();
+	
+		for (ComputingNode node : simulationManager.getDataCentersManager().getComputingNodesGenerator()
 				.getMistOnlyList()) {
 			ComputingNode edgeDevice = node;
 			mistEnConsumption += edgeDevice.getEnergyModel().getTotalEnergyConsumption();
@@ -381,23 +397,23 @@ public class SimLog {
 		// escape from devision by 0
 		if (aliveBatteryPoweredDevicesCount == 0)
 			aliveBatteryPoweredDevicesCount = 1;
-		energyConsumption = cloudEnConsumption + edgeEnConsumption + mistEnConsumption;
+		energyConsumption = cloudEnConsumption + edgeEnConsumption + farEdgeEnConsumption + mistEnConsumption;
 		averageRemainingPower = averageRemainingPower / (double) aliveBatteryPoweredDevicesCount;
 		averageRemainingPowerWh = averageRemainingPowerWh / (double) aliveBatteryPoweredDevicesCount;
 		double averageCloudEnConsumption = cloudEnConsumption / SimulationParameters.numberOfCloudDataCenters;
 		double averageEdgeEnConsumption = edgeEnConsumption / SimulationParameters.numberOfEdgeDataCenters;
+		double averageFarEdgeEnConsumption = farEdgeEnConsumption / currentEdgeDevicesCount;
 		double averageMistEnConsumption = mistEnConsumption / simulationManager.getScenario().getDevicesCount();
 
 		print("Energy consumption                                                      :"
 				+ padLeftSpaces(decimalFormat.format(energyConsumption), 20) + " Wh (Average: "
 				+ decimalFormat.format(energyConsumption
-						/ (SimulationParameters.numberOfEdgeDataCenters + SimulationParameters.numberOfCloudDataCenters
-								+ simulationManager.getScenario().getDevicesCount()))
-				+ " Wh/data center(or device))");
+						/ (SimulationParameters.numberOfEdgeDataCenters + SimulationParameters.numberOfCloudDataCenters + currentEdgeDevicesCount))
+				+ " Wh/data center(or ONT))");
 		print("                                                                        :" + padLeftSpaces("", 19)
 				+ "     (Average: " + decimalFormat.format(energyConsumption / (double) finishedTasks.size())
 				+ " Wh/task)");
-		print("Energy Consumption per level                                            :Cloud= "
+		print("Energy Consumption per level                                            : Cloud= "
 				+ padLeftSpaces(decimalFormat.format(cloudEnConsumption), 13) + " Wh (Average: "
 				+ decimalFormat.format(cloudEnConsumption / SimulationParameters.numberOfCloudDataCenters)
 				+ " Wh/data center)");
@@ -405,6 +421,10 @@ public class SimLog {
 				+ padLeftSpaces(decimalFormat.format(edgeEnConsumption), 14) + " Wh (Average: "
 				+ decimalFormat.format(edgeEnConsumption / SimulationParameters.numberOfEdgeDataCenters)
 				+ " Wh/data center)");
+		print("                                                                          FarEdge="
+				+ padLeftSpaces(decimalFormat.format(farEdgeEnConsumption), 14) + " Wh (Average: "
+				+ decimalFormat.format(farEdgeEnConsumption / currentEdgeDevicesCount)
+				+ " Wh/ONT)");
 		print("                                                                          Mist="
 				+ padLeftSpaces(decimalFormat.format(mistEnConsumption), 14) + " Wh (Average: "
 				+ decimalFormat.format(mistEnConsumption / currentEdgeDevicesCount) + " Wh/edge device)");
@@ -445,6 +465,7 @@ public class SimLog {
 								+ simulationManager.getScenario().getDevicesCount()))
 				+ "," + decimalFormat.format(cloudEnConsumption) + "," + decimalFormat.format(averageCloudEnConsumption)
 				+ "," + decimalFormat.format(edgeEnConsumption) + "," + decimalFormat.format(averageEdgeEnConsumption)
+				+ "," + decimalFormat.format(farEdgeEnConsumption) + "," + decimalFormat.format(averageFarEdgeEnConsumption)
 				+ "," + decimalFormat.format(mistEnConsumption) + "," + decimalFormat.format(averageMistEnConsumption)
 				+ "," + decimalFormat.format(wan) + "," + decimalFormat.format(man) + "," + decimalFormat.format(lan)
 				+ "," + decimalFormat.format(wifi) + "," + decimalFormat.format(fourG) + "," + decimalFormat.format(eth)
@@ -626,6 +647,8 @@ public class SimLog {
 			this.tasksFailedCloud++;
 		} else if (type == SimulationParameters.TYPES.EDGE_DATACENTER) {
 			this.tasksFailedEdge++;
+		} else if (type == SimulationParameters.TYPES.ONT) {
+			this.tasksFailedFarEdge++;
 		} else if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
 			this.tasksFailedMist++;
 		}
@@ -667,7 +690,9 @@ public class SimLog {
 			this.tasksExecutedOnCloud++;
 		} else if (type == SimulationParameters.TYPES.VM_EDGE) {
 			this.tasksExecutedOnEdge++;
-		} else if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
+		} else if (type == SimulationParameters.TYPES.ONT) {
+			this.tasksExecutedOnFarEdge++;
+		}else if (type == SimulationParameters.TYPES.EDGE_DEVICE) {
 			this.tasksExecutedOnMist++;
 		}
 	}
