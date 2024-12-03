@@ -35,6 +35,7 @@ import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
  * Link between two compute nodes in the infrastructure graph
  */
 public class NetworkLink extends SimEntity {
+	private boolean oncePerSim = true;
 	public static final int UPDATE_PROGRESS = 1;
 	protected double latency = 0;
 	protected double bandwidth = 0;
@@ -271,6 +272,32 @@ public class NetworkLink extends SimEntity {
 		double latency_const = latency;
 		transferDelay += (distanceLatency + latency_const);
 
+		boolean bool = false;
+		for(ComputingNode cn : transfer.getVertexList())
+			if(cn.getType().equals(SimulationParameters.TYPES.ROUTER))	
+				bool = true;
+		if(bool && oncePerSim){
+			ComputingNode from = transfer.getVertexList().get(0);
+			ComputingNode to = transfer.getVertexList().get(transfer.getVertexList().size()-1);
+			ComputingNode edgeDevice = transfer.getTask().getEdgeDevice();
+			System.out.println("Task " + transfer.getTask().getId() + ", EdgeDevice: " 
+			+ edgeDevice.getName() 
+			+ ", from: " + from.getName() + ", to: " + to.getName());
+			for(ComputingNode cn : transfer.getVertexList()){
+				System.out.print("[" + cn.getName() + "],");
+			}
+			if(from.getType().equals(SimulationParameters.TYPES.SDN) && to.getType().equals(SimulationParameters.TYPES.ONT)){
+				System.out.println("\nOrchestratore associato a " + to.getName() + " = " + to.getEdgeOrchestrator().getName());
+				System.out.println("Posizione edgeDevice " + edgeDevice.getName() + ": " + edgeDevice.getMobilityModel().getCurrentLocation().getXPos() + " " +  edgeDevice.getMobilityModel().getCurrentLocation().getYPos());
+				System.out.println("Posizione ONT " + to.getName() + ": " + to.getMobilityModel().getCurrentLocation().getXPos() + " " +  to.getMobilityModel().getCurrentLocation().getYPos());
+				System.out.println("Posizione SDN " + from.getName() + ": " + from.getMobilityModel().getCurrentLocation().getXPos() + " " +  from.getMobilityModel().getCurrentLocation().getYPos());
+				System.out.println("Posizione SDN " + to.getEdgeOrchestrator().getName() + ": " + to.getEdgeOrchestrator().getMobilityModel().getCurrentLocation().getXPos() + " " +  to.getEdgeOrchestrator().getMobilityModel().getCurrentLocation().getYPos());
+			}
+		
+			System.out.print("\n\n");
+			oncePerSim = false;
+		}
+		
 		// System.out.println("Task " + transfer.getTask().getId() + " associato a " + transfer.getTask().getEdgeDevice().getType() + " " + transfer.getTask().getEdgeDevice().getId() 
 		// 					+ " ho aggiunto: \n		-il delay " + transferDelay + " derivante dalla \n		-latency " + latency + " \n		-la distanza in metri " + distance + "dalla quale si ottiene la latency_dist " + distanceLatency
 		// 					+ "\n		--precedente delay = " + (transferDelay - distanceLatency - latency_const)

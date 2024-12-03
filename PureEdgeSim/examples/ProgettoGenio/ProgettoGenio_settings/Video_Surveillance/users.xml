@@ -42,7 +42,7 @@
     
     <user type="6">
 		<access_pattern>random</access_pattern>
-        <rate>1</rate> <!-- requests per minute -->
+        <rate>100</rate> <!-- requests per minute -->
         <start>20</start> <!--Time in minutes-->
         <duration>3</duration> <!--Time in minutes-->
         <interval>20</interval> <!--Time in minutes-->
@@ -50,9 +50,9 @@
     
     <user type="7">
 		<access_pattern>random</access_pattern>
-        <rate>1</rate> <!-- requests per minute -->
+        <rate>100</rate> <!-- requests per minute -->
         <start>1</start> <!--Time in minutes-->
-        <duration>1</duration> <!--Time in minutes-->
+        <duration>30</duration> <!--Time in minutes-->
         <interval>10</interval> <!--Time in minutes-->
 	</user>
     

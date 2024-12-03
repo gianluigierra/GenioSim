@@ -7,7 +7,7 @@
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>false</shared> <!-- se il container deve essere usato da più edge device diversi -->
 		</container>
-        <users_type>[1,6]</users_type> <!--in this case 10 users "1" type-->
+        <users_type>[100,6]</users_type> <!--in this case 10 users "1" type-->
 		<task>
 			<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>1</request_size> <!-- La size della request rappresentata in KB -->
@@ -22,7 +22,7 @@
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
-			<copies>10</copies> <!-- Quante copie di questo container devono essere istanziate -->
+			<copies>5</copies> <!-- Quante copie di questo container devono essere istanziate -->
 		</container>
 		<users_type>[5,6];[5,7]</users_type> <!--in this case 60 users "2" type-->
 		<task>
