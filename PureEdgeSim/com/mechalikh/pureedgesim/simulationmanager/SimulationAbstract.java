@@ -295,6 +295,15 @@ public abstract class SimulationAbstract {
 	}
 
 	/**
+	 * Allows to specifically set the ont.xml file.
+	 * 
+	 * @param settingsFolder the new settings folder to use.
+	 */
+	public void setONTsXML(String settingsFolder, String ONTsXML){
+		setCustomFilePath(settingsFolder + ONTsXML, Files.ONT_FILE);
+	}
+
+	/**
 	 * Allows to set a custom path of each configuration file individually.
 	 * 
 	 * @param path the path from which the file will be loaded
