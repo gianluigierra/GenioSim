@@ -179,7 +179,7 @@ public class Simulation extends SimulationAbstract {
 	protected boolean checkFiles() {
 		return (new EdgeDevicesParser(SimulationParameters.edgeDevicesFile).parse()
 				&& new ONTParser(SimulationParameters.OntFile, TYPES.ONT).parse()								//MODIFICA MIA, prima non era presente
-				&& new SDNParser(SimulationParameters.OntFile, TYPES.SDN).parse()								//MODIFICA MIA, prima non era presente
+				&& new SDNParser(SimulationParameters.SdnFile, TYPES.SDN).parse()								//MODIFICA MIA, prima non era presente
 				&& new DatacentersParser(SimulationParameters.edgeDataCentersFile, TYPES.EDGE_DATACENTER).parse()
 				&& new DatacentersParser(SimulationParameters.cloudDataCentersFile, TYPES.CLOUD).parse()
 				&& new ParametersParser(SimulationParameters.simulationParametersFile).parse()
