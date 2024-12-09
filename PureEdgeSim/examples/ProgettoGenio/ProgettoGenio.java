@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mechalikh.pureedgesim.simulationmanager.*;
-import com.mechalikh.pureedgesim.simulationmanager.Simulation;
 import com.mechalikh.pureedgesim.taskorchestrator.*;
 import com.mechalikh.pureedgesim.taskorchestrator.DQN.CustomOrchestrator;
 
@@ -28,7 +27,7 @@ public class ProgettoGenio {
 		sim.setCustomSettingsFolder(settingsPath);
 
 		// cambio la modalità di esecuzione
-		String exampleMode = "Video_Surveillance";
+		String exampleMode = "Scenario_1";
 
 		switch (exampleMode) {
 			case "Smart_Lights":
@@ -56,6 +55,16 @@ public class ProgettoGenio {
 				sim.setCloudDatacentersXML(settingsPath, "Video_Surveillance/cloud_Video_Surveillance.xml");
 				sim.setSimulationName(exampleMode);
 				break;
+
+			case "Scenario_1":
+				sim.setSimulationParameterProperties(settingsPath, "Scenario_1/simulation_parameters_Scenario_1.properties");
+				sim.setApplicationsXML(settingsPath, "Scenario_1/applications_Scenario_1.xml");
+				sim.setUsersXML(settingsPath, "Scenario_1/users_Scenario_1.xml");
+				sim.setEdgeDatacentersXML(settingsPath, "Scenario_1/edge_datacenters_Scenario_1.xml");
+				sim.setCloudDatacentersXML(settingsPath, "Scenario_1/cloud_Scenario_1.xml");
+				sim.setONTsXML(settingsPath, "Scenario_1/ONT_Scenario_1.xml");
+				sim.setSimulationName(exampleMode);
+				break;	
 		}
 
         //cambio l'orchestratore con quello creatto da me
@@ -68,30 +77,9 @@ public class ProgettoGenio {
 
 	public static void main(String[] args) {
 
-        List<Integer> rewardsList = new ArrayList<>();
-        List<Double> failureRateList = new ArrayList<>();
-        double avgFailureRate = 0;
-		int numberOfIterations = 1;
-		String algName = "";
-
-		//10 iterazioni dell'algoritmo
-		for(int i = 0; i < numberOfIterations; i++){
-			System.out.println("\n\nIterazione numero: " + (i+1));
-			new ProgettoGenio();
-			rewardsList.add(CustomOrchestrator.totalreward);
-			failureRateList.add(CustomOrchestrator.failureRate);
-			avgFailureRate += CustomOrchestrator.failureRate;
-			algName = CustomOrchestrator.algName;
-		}
-		if(algName.contains("DQN")){
-			System.out.println("Rewards list: ");
-			for(int i = 0; i < rewardsList.size(); i++){
-				System.out.println("    -Iterazione " + (i+1) +", reward: " + rewardsList.get(i) + ", success rate: " + failureRateList.get(i));
-			}
-		}
-		System.out.println("Avg success rate: " + avgFailureRate/numberOfIterations);
-
-		
+        new ProgettoGenio();
+		//System.out.println((double) (SimLog.tasksSent - SimLog.tasksFailed) * 100 / SimLog.tasksSent);
+			
 	}
 
 }

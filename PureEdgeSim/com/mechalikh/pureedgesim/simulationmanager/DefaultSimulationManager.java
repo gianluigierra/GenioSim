@@ -37,6 +37,8 @@ import com.mechalikh.pureedgesim.simulationengine.SimEntity;
 import com.mechalikh.pureedgesim.simulationvisualizer.SimulationVisualizer;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.User;
+import com.mechalikh.pureedgesim.taskorchestrator.DefaultOrchestrator;
+import com.mechalikh.pureedgesim.taskorchestrator.Orchestrator;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultContainerGenerator;
 import com.mechalikh.pureedgesim.taskgenerator.DefaultTaskGenerator;
@@ -598,6 +600,7 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 				for(ComputingNode cn : path.getVertexList()) System.out.print(cn.getName() + ", ");
 				System.out.print("]");
 				System.out.println("");
+				System.out.println("Path latency approssimata = " + ((DefaultOrchestrator) edgeOrchestrator).getPathLatencyFromDeviceToOffloadingDestination(task, task.getEdgeDevice(), task.getOffloadingDestination()));
 			}
 
 			simLog.incrementTasksFailedLatency(task);

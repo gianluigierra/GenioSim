@@ -7,7 +7,7 @@
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>false</shared> <!-- se il container deve essere usato da più edge device diversi -->
 		</container>
-		<users_type>[10,1]</users_type> <!--in this case 10 users "1" type-->
+		<users_type>[10,4]</users_type> <!--in this case 10 users "1" type-->
 		<task>
 			<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>10</request_size> <!-- La size della request rappresentata in KB -->

@@ -12,37 +12,37 @@
 		<hosts>
 			<host>
 				<cores>10</cores>
-				<mips>70000</mips>
+				<mips>130000</mips>
 				<ram>64000</ram>
 				<storage>1000000</storage>
 				<VMs>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
@@ -62,37 +62,37 @@
 		<hosts>
 			<host>
 				<cores>10</cores>
-				<mips>70000</mips>
+				<mips>130000</mips>
 				<ram>64000</ram>
 				<storage>1000000</storage>
 				<VMs>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
@@ -112,37 +112,37 @@
 		<hosts>
 			<host>
 				<cores>10</cores>
-				<mips>70000</mips>
+				<mips>130000</mips>
 				<ram>64000</ram>
 				<storage>1000000</storage>
 				<VMs>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>70000</mips>
+						<mips>130000</mips>
 						<ram>12800</ram>
 						<storage>200000</storage>
 					</VM>
