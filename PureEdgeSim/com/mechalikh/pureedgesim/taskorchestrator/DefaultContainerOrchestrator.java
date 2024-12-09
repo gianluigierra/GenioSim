@@ -197,7 +197,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		int selected = -1;
 
 		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 1.5, latencyValue = 1.8;
-		double maxValue = 0;
+		double maxValue = Double.MAX_VALUE * (-1);
 		for(int i = 0; i < nodeList.size(); i++){
 
 			double latency = 0;
@@ -502,7 +502,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		int selected = -1;
 
 		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 1.5, latencyValue = 1.5;
-		double maxValue = 0;
+		double maxValue = Double.MAX_VALUE * (-1);
 		for(int i = 0; i < nodeList.size(); i++){
 
 			double latency = 0;
@@ -530,7 +530,6 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		if (selected != -1) {
 			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
 		}
-		//System.out.println("EdgeDC: " + bestNode.getName() + ", nodo scelto: " + nodeList.get(selected).getName() + ", valore = " + maxValue);
 		return selected;
 	}
 
