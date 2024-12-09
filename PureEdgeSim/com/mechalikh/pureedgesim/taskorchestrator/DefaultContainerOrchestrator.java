@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.bytedeco.mkl.global.mkl_rt.iBRngPtr;
 import org.jgrapht.GraphPath;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
@@ -38,8 +39,8 @@ import com.mechalikh.pureedgesim.taskgenerator.Container;
 public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 	//questa lista contiene solo i nodi "grossi", ossia i DataCenter (Edge o Cloud) e gli ONT
 	protected List<ComputingNode> bigNodeList = new ArrayList<>();
-	public Map<Integer, List<Container>> bigNodeSharedHistoryMap = new LinkedHashMap<>();			//usata per valutare quanti container shared sono istanziati su un DC
-	public Map<Integer, List<Container>> bigNodeHistoryMap = new LinkedHashMap<>();  				//usata per valutare quanti container non shared sono istanziati su un DC
+	public Map<Integer, List<Container>> bigNodeSharedHistoryMap = new LinkedHashMap<>();			//usata per valutare quanti container shared sono istanziati su un DataCenter
+	public Map<Integer, List<Container>> bigNodeHistoryMap = new LinkedHashMap<>();  				//usata per valutare quanti container non shared sono istanziati su un DataCenter
 	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();								//usata per valutare quanti container sono istanziati su un nodo di nodeList
 
 	public DefaultContainerOrchestrator(SimulationManager simulationManager) {
@@ -80,6 +81,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		//+ " piazzato sul nodo " + container.getPlacementDestination().getName());
 	}
 
+	//funzione che viene chiamata per trovare la destinazione di placement
 	protected int findComputingNode(String[] architecture, Container container) {
 
 		// altrimenti piazzo il container
@@ -89,10 +91,12 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			return tradeOff(architecture, container);
 		} else if ("GREEDY".equals(algorithmName)) {
 			return greedyChoice(architecture, container);
-		}else if (algorithmName.contains("DISTANCE")) {
-			return selectBestDistanceDataCenter(architecture, container);
+		} else if ("MULTI_OBIETTIVO".equals(algorithmName)) {
+			return MultiObiettivo(architecture, container);
 		} else if (algorithmName.contains("LATENCY")) {
 			return selectBestLatencyDataCenter(architecture, container);
+		}else if (algorithmName.contains("RATE")) {
+			return selectBestRateDataCenter(architecture, container);
 		}
 		else {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " - Unknown orchestration algorithm '"
@@ -189,85 +193,42 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		return selected;
 	}
 
-	protected int selectBestDistanceDataCenter(String[] architecture, Container container) {
+	protected int MultiObiettivo(String[] architecture, Container container){
 		int selected = -1;
 
-		//devo determinare i primi "copies" dispositivi di placement più vicini in media a tutti i device. (Laddove il container non sia shared, copies = 1)
-		int copies = SimulationParameters.applicationList.get(container.getApplicationID()).getContainerCopies();
-		List<ComputingNode> copiesList = new ArrayList<ComputingNode>(copies);
-		//ciclo tra tutti i dispositivi di placement per determinare una lista
-		for (int j = 0; j < copies; j++) {
-			double minAverageTotalDistance = Double.MAX_VALUE;
-			int closestNode = -1;				
-			//ciclo tra tutti i dispositivi di placement per determinare ogni volta il più vicino (se non presente in lista)
-			for (int i = 0; i < bigNodeList.size(); i++) {
-				double averageTotalDistance = 0;
-				//valuto la distanza con tutti gli edgeDevice associati al container (Laddove il container non sia shared, c'è solo un edgeDevice)
-				for(ComputingNode cn : container.getEdgeDevices()){
-					averageTotalDistance += cn.getMobilityModel().distanceTo(bigNodeList.get(i));
-				}
-				averageTotalDistance = averageTotalDistance / container.getEdgeDevices().size();
+		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 1.5, latencyValue = 1.8;
+		double maxValue = 0;
+		for(int i = 0; i < nodeList.size(); i++){
 
-				if(averageTotalDistance < minAverageTotalDistance && !copiesList.contains(bigNodeList.get(i))){
-					closestNode = i;
-					minAverageTotalDistance = averageTotalDistance;
-				}
-			}
-			if(closestNode != -1)
-				copiesList.add(bigNodeList.get(closestNode));
-		}
+			double latency = 0;
+			if(nodeList.get(i).getType().equals(SimulationParameters.TYPES.ONT)) latency = 1;
+			else if(nodeList.get(i).getType().equals(SimulationParameters.TYPES.VM_EDGE)) latency = 1;
+			else if(nodeList.get(i).getType().equals(SimulationParameters.TYPES.VM_CLOUD)) latency = 2;
 
-		//adesso devo scegliere in quale Nodo vado ad allocare questo Container sulla base delle copie già presenti sulla base di un RoundRobin
-		ComputingNode bestNode = null;
-		int bigNodeSelected = -1;
-		int minPlacement = Integer.MAX_VALUE;
-		for(ComputingNode cn : copiesList){
-			int num = 0;
-			for(int i = 0; i < bigNodeList.size(); i++){
-				if(cn.equals(bigNodeList.get(i))){
+			double currentValue = 0
+				+ ramValue*(nodeList.get(i).getAvailableRam()/averageNodeListRam())
+				+ storageValue*(nodeList.get(i).getAvailableStorage()/averageNodeListStorage())
+				+ cpuValue*(nodeList.get(i).getNumberOfCPUCores()/averageNodeListCpuCores()) 
+				+ mipsValue*(nodeList.get(i).getMipsPerCore()/averageNodeListMipsPerCore()) 
+				- containerValue*historyMap.get(i)
+				- latencyValue*latency;
 
-					//se container è shared allora devo prendere il numero di container shared
-					if(container.getSharedContainer())
-						num = numOfSharedContainerInList(container, bigNodeSharedHistoryMap.get(i)); 
-					//altrimenti quelli non shared
-					else
-						num = bigNodeHistoryMap.get(i).size();
+				//System.out.println("Nodo : " + nodeList.get(i).getName() + ", valore = " + currentValue);
 
-					//System.out.println("Nodo " + cn.getName() + ", numero di copie del container shared in lista = " + num);
-					if(num < minPlacement){
-						bigNodeSelected = i;
-						minPlacement = num;
-						bestNode = cn;
-					}
-				}
+			if( currentValue > maxValue && placementIsPossible(container, nodeList.get(i), architecture)){
+				maxValue = currentValue;
+				selected = i;
 			}
 		}
-				
-		if(algorithmName.contains("ROUND_ROBIN"))
-			selected = DCRoundRobin(architecture, container, bestNode);				
-		else if(algorithmName.contains("TRADE_OFF"))
-		 	selected = DCTradeOff(architecture, container, bestNode);	
-		else if(algorithmName.contains("GREEDY"))
-		 	selected = DCGreedyChoice(architecture, container, bestNode);		
-	
 		if (selected != -1) {
-			//System.out.println("Ho scelto il dispositivo " + nodeList.get(selected).getName() + " come placement per il container " 
-			//+ container.getId() + " relativo all'app " + container.getAssociatedAppName());
 			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
-
-			//adesso devo comportarmi diversamente a seconda che il Container sia Shared oppure no:
-			//caso shared
-			if(!container.getSharedContainer())
-				//aggiungo il container alla HistoryMap di quel DC
-				bigNodeHistoryMap.get(bigNodeSelected).add(container);
-			else								
-				//aggiungo il container alla sharedHistoryMap di quel DC
-				bigNodeSharedHistoryMap.get(bigNodeSelected).add(container);
 		}
-
+		//System.out.println("Nodo scelto: " + nodeList.get(selected).getName() + ", valore = " + maxValue);
 		return selected;
 	}
 
+	//algoritmo basato sulla latency. Vengono scelti i primi "copies" migliori OLT in base alla distanza tra gli edgeDevice associati al container e l'OLT. 
+	//Viene selezionato il migliore su base RoundRobin e poi si applica un algoritmo per scegliere la migliore destinazione di placement tra i nodi associati all'OLT
 	protected int selectBestLatencyDataCenter(String[] architecture, Container container) {
 		int selected = -1;
 
@@ -283,9 +244,28 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 				double averageLatency = 0;
 				//valuto la distanza con tutti gli edgeDevice associati al container (Laddove il container non sia shared, c'è solo un edgeDevice)
 				for(ComputingNode cn : container.getEdgeDevices()){
+					//latenza dal nodo al SDN più vicino
 					ComputingNode from = cn;
-					ComputingNode to = bigNodeList.get(i);
-					GraphPath<ComputingNode, NetworkLink> path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+					ComputingNode to = cn.getEdgeOrchestrator();
+					GraphPath<ComputingNode, NetworkLink> path;
+					long id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(), to.getId());
+					if(simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id))
+						path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id); 
+					else{ 
+						path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+						simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+					}
+					averageLatency += path.getWeight();
+					//latenza dall'SDN più vicino al nodo al Datacenter i-mo
+					from = cn.getEdgeOrchestrator();
+					to = bigNodeList.get(i);
+					id = simulationManager.getDataCentersManager().getTopology().getUniqueId(from.getId(), to.getId());
+					if(simulationManager.getDataCentersManager().getTopology().getPathsMap().containsKey(id))
+						path = simulationManager.getDataCentersManager().getTopology().getPathsMap().get(id); 
+					else{ 
+						path = simulationManager.getDataCentersManager().getTopology().getPath(from, to);
+						simulationManager.getDataCentersManager().getTopology().getPathsMap().put(id, path);
+					}
 					averageLatency += path.getWeight();
 				}
 				averageLatency = averageLatency / container.getEdgeDevices().size();
@@ -326,15 +306,17 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 				
 		if(algorithmName.contains("ROUND_ROBIN"))
-			selected = DCRoundRobin(architecture, container, bestNode);				
+			selected = DataCenterRoundRobin(architecture, container, bestNode);				
 		else if(algorithmName.contains("TRADE_OFF"))
-		 	selected = DCTradeOff(architecture, container, bestNode);	
+		 	selected = DataCenterTradeOff(architecture, container, bestNode);	
 		else if(algorithmName.contains("GREEDY"))
-		 	selected = DCGreedyChoice(architecture, container, bestNode);		
+		 	selected = DataCenterGreedyChoice(architecture, container, bestNode);
+		else if(algorithmName.contains("MULTI_OBIETTIVO"))
+		 	selected = DataCenterMultiObiettivo(architecture, container, bestNode);				
 	
 		if (selected != -1) {
-			//System.out.println("Ho scelto il dispositivo " + nodeList.get(selected).getName() + " come placement per il container " 
-			//+ container.getId() + " relativo all'app " + container.getAssociatedAppName());
+			//System.out.println("Ho scelto il dispositivo " + nodeList.get(selected).getName() + ", associato all'OLT: " + bestNode.getName()
+			//+ " come placement per il container " + container.getId() + " relativo all'app " + container.getAssociatedAppName());
 			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
 
 			//adesso devo comportarmi diversamente a seconda che il Container sia Shared oppure no:
@@ -350,16 +332,81 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		return selected;
 	}
 
-	protected int numOfSharedContainerInList(Container container, List<Container> ContainerList){
-		int num = 0;
-		for(Container cont : ContainerList){
-			if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
-				num++;
+	//algoritmo basato sulla latency e sul rate. Le copie del container vengono istanziate su base "Rate" ossia viene scelto
+	//l'OLT più vicino suddividendo geograficamente le copie nello spazio in base a quanti device vi sono collocati.
+	//Una volta scelto l'OLT si applica un algoritmo per scegliere la migliore destinazione di placement tra i nodi ad esso associati
+	protected int selectBestRateDataCenter(String[] architecture, Container container) {
+		//inizializzo le variabili di utility
+		int selected = -1, bigNodeSelected = -1;
+		ComputingNode bestNode = null;
+		//posizione [i][0] metto il numero di device associati al container ed al bigNode, posizione [i][1] metto il numero di copie piazzate del container
+		double[][] bigNodeMatrix = new double[bigNodeList.size()][2];
+		//ciclo tra tutti i dispositivi associati al container
+		for(ComputingNode edgeDevice : container.getEdgeDevices()){
+			//prendo il miglior OLT
+			ComputingNode bestBigNode = getBestBigNode(edgeDevice);
+			//ne ricavo l'indice nella lista
+			int bestBigNodeIndex = getBigNodeIndex(bestBigNode);
+			//incremento il numero di edgeDevice associati a quel BigNode
+			bigNodeMatrix[bestBigNodeIndex][0]++;
 		}
-		return num;
+		//se il container non è shared prendo l'unico OLT ad avere valore != 0 per i dispositivi ad esso associati
+		if(!container.getSharedContainer()){
+			for(int i = 0; i < bigNodeList.size(); i++){
+				if(bigNodeMatrix[i][0] != 0){
+					bestNode = bigNodeList.get(i);
+					bigNodeSelected = i;
+				}
+			}
+		}
+		//altrimenti determino quale OLT prendere sulla base di quante copie sono allocate in relazione al numero di edgeDevice associati
+		else{
+			//come prima cosa conservo nella matrice il numero di container shared (dello stesso tipo di quello da piazzare) piazzati su quel bigNode
+			for(int i = 0; i < bigNodeList.size(); i++){
+				bigNodeMatrix[i][1] = numOfSharedContainerInList(container, bigNodeSharedHistoryMap.get(i));
+			}
+			double bestRate = Double.MAX_VALUE;
+			//determino quale bigNode abbia il miglior rapporto (numero più basso) copie piazzate/Devices associati
+			for(int i = 0; i < bigNodeList.size(); i++){
+				//System.out.println("OLT " + bigNodeList.get(i).getName() + ". Container assegnati = " + bigNodeMatrix[i][1] + ", dispositivi associati: " + bigNodeMatrix[i][0] + ", rate: " + bigNodeMatrix[i][1]/bigNodeMatrix[i][0]);
+				if(bigNodeMatrix[i][0] !=0 && bigNodeMatrix[i][1]/bigNodeMatrix[i][0] < bestRate){
+					bestRate = bigNodeMatrix[i][1]/bigNodeMatrix[i][0];
+					bigNodeSelected = i;
+				}
+			}
+			bestNode = bigNodeList.get(bigNodeSelected);
+		}
+				
+		if(algorithmName.contains("ROUND_ROBIN"))
+			selected = DataCenterRoundRobin(architecture, container, bestNode);				
+		else if(algorithmName.contains("TRADE_OFF"))
+		 	selected = DataCenterTradeOff(architecture, container, bestNode);	
+		else if(algorithmName.contains("GREEDY"))
+		 	selected = DataCenterGreedyChoice(architecture, container, bestNode);
+		else if(algorithmName.contains("MULTI_OBIETTIVO"))
+		 	selected = DataCenterMultiObiettivo(architecture, container, bestNode);				
+	
+		if (selected != -1) {
+			//System.out.println("Ho scelto il dispositivo " + nodeList.get(selected).getName() + ", associato all'OLT: " + bestNode.getName()
+			//+ " come placement per il container " + container.getId() + " relativo all'app " + container.getAssociatedAppName());
+			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
+
+			//adesso devo comportarmi diversamente a seconda che il Container sia Shared oppure no:
+			//caso shared
+			if(!container.getSharedContainer())
+				//aggiungo il container alla HistoryMap di quel DC
+				bigNodeHistoryMap.get(bigNodeSelected).add(container);
+			else								
+				//aggiungo il container alla sharedHistoryMap di quel DC
+				bigNodeSharedHistoryMap.get(bigNodeSelected).add(container);
+		}
+
+		//System.out.println("Ho scelto il datacenter: " + bigNodeList.get(bigNodeSelected).getName() + " per il container " + container.getId() + " associato all'app " + container.getAssociatedAppName());
+		
+		return selected;
 	}
 
-	protected int DCRoundRobin(String[] architecture, Container container, ComputingNode bestNode){
+	protected int DataCenterRoundRobin(String[] architecture, Container container, ComputingNode bestNode){
 		int selected = -1;
 		int minTasksCount = -1; // Computing node with minimum assigned tasks.
 		//ciclo tra tutti i device capaci di fare placement
@@ -378,7 +425,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		return selected;
 	}
 
-	protected int DCTradeOff(String[] architecture, Container container, ComputingNode bestNode){
+	protected int DataCenterTradeOff(String[] architecture, Container container, ComputingNode bestNode){
 		int selected = -1;
 		double min = -1;
 		double newMin;// the computing node with minimum weight;
@@ -391,7 +438,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 				// suitable for offlaoding, you can change it as you want
 				double weight = 0.0;
 				if (node.getType() == SimulationParameters.TYPES.VM_EDGE && nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())) {
-					weight = 1.5;
+					weight = 1;
 					// // this is an
 					// edge server 'cloudlet', the latency is slightly high then edge // devices
 				} else if (node.getType() == SimulationParameters.TYPES.VM_CLOUD && nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())) {
@@ -400,8 +447,6 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					// better to avoid it
 				} else if (nodeList.get(i).getType().equals(SimulationParameters.TYPES.ONT) && nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())) {
 					weight = 1;
-					if(container.getSharedContainer())
-						weight = 8;
 					// this is an edge
 					// device, it results in an extremely low latency, but may // consume more
 					// energy.
@@ -421,7 +466,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		return selected;
 	}
 
-	protected int DCGreedyChoice(String[] architecture, Container container, ComputingNode bestNode) {
+	protected int DataCenterGreedyChoice(String[] architecture, Container container, ComputingNode bestNode) {
 		int selected = -1;
 		double bestfit = Double.MAX_VALUE;
 		double bestnumberofcores = 0;
@@ -451,6 +496,90 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 
 		return selected;
+	}
+
+	protected int DataCenterMultiObiettivo(String[] architecture, Container container, ComputingNode bestNode){
+		int selected = -1;
+
+		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 1.5, latencyValue = 1.5;
+		double maxValue = 0;
+		for(int i = 0; i < nodeList.size(); i++){
+
+			double latency = 0;
+			if(nodeList.get(i).getType().equals(SimulationParameters.TYPES.ONT)) latency = 1;
+			else if(nodeList.get(i).getType().equals(SimulationParameters.TYPES.VM_EDGE)) latency = 1.4;
+			else if(nodeList.get(i).getType().equals(SimulationParameters.TYPES.VM_CLOUD)) latency = 2.4;
+
+			double currentValue = 0
+				+ ramValue*(nodeList.get(i).getAvailableRam()/averageNodeListRam())
+				+ storageValue*(nodeList.get(i).getAvailableStorage()/averageNodeListStorage())
+				+ cpuValue*(nodeList.get(i).getNumberOfCPUCores()/averageNodeListCpuCores()) 
+				+ mipsValue*(nodeList.get(i).getMipsPerCore()/averageNodeListMipsPerCore()) 
+				- containerValue*historyMap.get(i)
+				- latencyValue*latency;
+
+				//System.out.println("EdgeDC: " + bestNode.getName() + ", nodo : " + nodeList.get(i).getName() + ", valore = " + currentValue);
+
+			if(currentValue > maxValue
+					&& nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())
+					&& placementIsPossible(container, nodeList.get(i), architecture)){
+				maxValue = currentValue;
+				selected = i;
+			}
+		}
+		if (selected != -1) {
+			historyMap.put(selected, historyMap.get(selected) + 1); // assign the tasks to the selected computing
+		}
+		//System.out.println("EdgeDC: " + bestNode.getName() + ", nodo scelto: " + nodeList.get(selected).getName() + ", valore = " + maxValue);
+		return selected;
+	}
+
+	//returns the average ram of the nodeList
+	private double averageNodeListRam(){ 
+		return nodeList.stream().mapToDouble(ComputingNode::getAvailableRam).average().orElse(0.0);
+	}
+
+	//returns the average Storage of the nodeList
+	private double averageNodeListStorage(){ 
+		return nodeList.stream().mapToDouble(ComputingNode::getAvailableStorage).average().orElse(0.0);
+	}
+	
+	//returns the average Cpu Cores of the nodeList
+	private double averageNodeListCpuCores(){ 
+		return nodeList.stream().mapToDouble(ComputingNode::getNumberOfCPUCores).average().orElse(0.0);
+	}
+
+	//returns the average Mips per Core of the nodeList
+	private double averageNodeListMipsPerCore(){ 
+		return nodeList.stream().mapToDouble(ComputingNode::getMipsPerCore).average().orElse(0.0);
+	}
+
+	//returns the number of copies of the shared container in the given container list
+	protected int numOfSharedContainerInList(Container container, List<Container> ContainerList){
+		int num = 0;
+		for(Container cont : ContainerList){
+			if(cont.getAssociatedAppName().equals(container.getAssociatedAppName()))
+				num++;
+		}
+		return num;
+	}
+
+	//returns the closest Big Node (OLT) 
+	private ComputingNode getBestBigNode(ComputingNode cn){
+		for(ComputingNode DC : bigNodeList){
+			if(cn.getEdgeOrchestrator().equals(DC.getEdgeOrchestrator()))
+				return DC;
+		}
+		return null;
+	}
+
+	//returns the index of the BigNode in the BigNodesList
+	private int getBigNodeIndex(ComputingNode cn){
+		for(ComputingNode DC : bigNodeList){
+			if(DC.equals(cn))
+				return bigNodeList.indexOf(DC);
+		}
+		return -1;
 	}
 
 	@Override
