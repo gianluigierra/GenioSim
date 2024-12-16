@@ -38,7 +38,7 @@ public class DefaultTaskGenerator extends TaskGenerator {
 	 * @see #generateTasksForDevice(ComputingNode, int)
 	 */
 	protected Random random;
-	protected int id = 0;
+	static protected int id = 0;
 	protected double simulationTime;
 	protected double currentTime;
 
@@ -132,7 +132,7 @@ public class DefaultTaskGenerator extends TaskGenerator {
 	 */
 	protected void insert(double time, int app, int u, ComputingNode dev) {
 		Application appParams = SimulationParameters.applicationList.get(app);
-		long requestSize = appParams.getRequestSize();
+		//long requestSize = appParams.getRequestSize();
 		long outputSize = appParams.getResultsSize();
 		double maxLatency = appParams.getLatency();
 		long length = (long) appParams.getTaskLength();
@@ -144,6 +144,8 @@ public class DefaultTaskGenerator extends TaskGenerator {
 		double taskDuration = 60.0 / rate;
 
 		for (int i = 0; i < rate; i++) {
+			long requestSize = random.nextLong(appParams.getMinRequestSize(), appParams.getMaxRequestSize()+1);
+			//System.out.println("task " + id + " dell'app " + Name + ", requestSize = " + requestSize/8000);
 			Task task = createTask(++id).setType(appParams.getType()).setFileSizeInBits(requestSize).setAssociatedAppName(Name)
 					.setOutputSizeInBits(outputSize).setApplicationID(app)
 					.setMaxLatency(maxLatency).setLength(length).setEdgeDevice(dev);

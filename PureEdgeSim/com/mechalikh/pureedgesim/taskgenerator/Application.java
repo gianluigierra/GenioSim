@@ -69,9 +69,14 @@ public class Application {
 	protected long containerRequestSize;
 
 	/**
-	 * The size of the request that is sent to the application, in bits
+	 * The min size of the request that is sent to the application, in bits
 	 */
-	protected long requestSize;
+	protected long requestSizeMinValue;
+
+	/**
+	 * The max size of the request that is sent to the application, in bits
+	 */
+	protected long requestSizeMaxValue;
 
 	/**
 	 * The size of the results that the application returns, in bits
@@ -111,7 +116,7 @@ public class Application {
 	 *                        execute, in MI (Mega-Instructions)
 	 */
 	public Application(String name, String type, double latency, long containerSize, long containerRequestSize, boolean shared, int copies,
-			long requestSize, long resultsSize, double taskLength) {
+			long minRequestSize, long maxRequestSize, long resultsSize, double taskLength) {
 		setName(name);
 		setType(type);
 		setLatency(latency);
@@ -119,7 +124,8 @@ public class Application {
 		setContainerRequestSize(containerRequestSize);
 		setSharedContainer(shared);
 		setContainerCopies(copies);
-		setRequestSize(requestSize);
+		setMinRequestSize(minRequestSize);
+		setMaxRequestSize(maxRequestSize);
 		setResultsSize(resultsSize);
 		setTaskLength(taskLength);
 	}
@@ -242,22 +248,42 @@ public class Application {
 
 	/**
 	 * 
-	 * Returns the size of the request in bits.
+	 * Returns the max size of the request in bits.
 	 * 
 	 * @return the size of the request in bits
 	 */
-	public long getRequestSize() {
-		return requestSize;
+	public long getMinRequestSize() {
+		return requestSizeMinValue;
 	}
 
 	/**
 	 * 
-	 * Sets the size of the request in bits.
+	 * Sets the min size of the request in bits.
 	 * 
 	 * @param requestSize the size of the request in bits
 	 */
-	public void setRequestSize(long requestSize) {
-		this.requestSize = requestSize;
+	public void setMinRequestSize(long minRequestSize) {
+		this.requestSizeMinValue = minRequestSize;
+	}
+
+		/**
+	 * 
+	 * Returns the max size of the request in bits.
+	 * 
+	 * @return the size of the request in bits
+	 */
+	public long getMaxRequestSize() {
+		return requestSizeMaxValue;
+	}
+
+	/**
+	 * 
+	 * Sets the max size of the request in bits.
+	 * 
+	 * @param requestSize the size of the request in bits
+	 */
+	public void setMaxRequestSize(long maxRequestSize) {
+		this.requestSizeMaxValue = maxRequestSize;
 	}
 
 	/**
@@ -359,7 +385,7 @@ public class Application {
 	@Override
 	public String toString() {
 		return "Application [type=" + type + ", latency=" + latency + ", containerSize="
-				+ containerSize + ", requestSize=" + requestSize + ", resultsSize=" + resultsSize + ", taskLength="
+				+ containerSize + ", minRequestSize=" + requestSizeMinValue + ", maxRequestSize=" + requestSizeMaxValue + ", resultsSize=" + resultsSize + ", taskLength="
 				+ taskLength + "]";
 	}
 

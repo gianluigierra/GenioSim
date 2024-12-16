@@ -77,8 +77,22 @@ public class NewApplicationFileParser extends XmlFileParser {
 				}
 
 				// Average request size (bits).
-				long requestSize = (long) (8000 * assertDouble(appElement, "request_size", value -> (value > 0),
-						condition + appElement.getAttribute("name") + application + file));
+				// long requestSize = (long) (8000 * assertDouble(appElement, "request_size", value -> (value > 0),
+				// 		condition + appElement.getAttribute("name") + application + file));
+
+				//min and max request size (bits).
+				long minRequestSize, maxRequestSize;
+				String requestSizes = appElement.getElementsByTagName("request_size").item(0).getTextContent();
+				if(requestSizes.contains(",")){
+					String[] coppie = requestSizes.split(",");
+					minRequestSize = 8000 * Long.parseLong(coppie[0]);
+					maxRequestSize = 8000 * Long.parseLong(coppie[1]);
+				}
+				else{
+					minRequestSize = 8000 * Long.parseLong(requestSizes);
+					maxRequestSize = 8000 * Long.parseLong(requestSizes);
+				}
+				System.out.println("MinRequestSize = " + minRequestSize + ", MaxRequestSize = " + maxRequestSize);
 
 				// Average downloaded results size (bits).
 				long resultsSize = (long) (8000 * assertDouble(appElement, "results_size", value -> (value > 0),
@@ -96,7 +110,7 @@ public class NewApplicationFileParser extends XmlFileParser {
 
 				// Save applications parameters.
 				SimulationParameters.applicationList.add(new Application(name, type, latency,
-						containerSize, containerRequestSize, sharedContainer, copies, requestSize, resultsSize, taskLength));
+						containerSize, containerRequestSize, sharedContainer, copies, minRequestSize, maxRequestSize, resultsSize, taskLength));
 
 				//creates the users for this application
 				String usersType = appElement.getElementsByTagName("users_type").item(0).getTextContent();
