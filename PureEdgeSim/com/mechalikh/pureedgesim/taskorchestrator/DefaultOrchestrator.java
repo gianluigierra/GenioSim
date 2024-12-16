@@ -20,9 +20,6 @@
  **/
 package com.mechalikh.pureedgesim.taskorchestrator;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
 
 import org.jgrapht.GraphPath;
@@ -37,14 +34,11 @@ import com.mechalikh.pureedgesim.taskgenerator.Container;
 import com.mechalikh.pureedgesim.taskgenerator.Task;
 
 public class DefaultOrchestrator extends Orchestrator implements OnSimulationEndListener{
-	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();
-	public Map<Integer, List<Task>> tasksHistoryMap = new LinkedHashMap<>();
 
 	public DefaultOrchestrator(SimulationManager simulationManager) {
 		super(simulationManager);
-		// Initialize the history map
+		// Initialize the tasks history map
 		for (int i = 0; i < nodeList.size(); i++){
-			historyMap.put(i, 0);
 			tasksHistoryMap.put(i, new ArrayList<Task>());
 		}
 	}

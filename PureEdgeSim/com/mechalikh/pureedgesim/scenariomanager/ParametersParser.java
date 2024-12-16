@@ -158,6 +158,7 @@ public class ParametersParser extends FileParserAbstract {
 			SimulationParameters.orchestrationArchitectures = prop.getProperty("orchestration_architectures")
 					.split(",");
 			SimulationParameters.taskOrchestrationAlgorithm = prop.getProperty("task_orchestration_algorithm").trim();
+			SimulationParameters.taskOrchestrationMode = prop.getProperty("task_orchestration_mode").trim();
 
 			SimulationParameters.containerOrchestrationAlgorithms = prop.getProperty("container_orchestration_algorithms").split(",");
 

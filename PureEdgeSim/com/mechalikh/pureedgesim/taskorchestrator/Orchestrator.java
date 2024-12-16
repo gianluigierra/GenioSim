@@ -35,9 +35,17 @@ import com.mechalikh.pureedgesim.taskgenerator.Task;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 public abstract class Orchestrator extends SimEntity {
-	public List<ComputingNode> nodeList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
-	protected List<Container> containerList = new ArrayList<>();					//modificato per visibilità degli agenti DQN, era protected
-	public Map<Integer, Integer> sharedHistoryMap = new LinkedHashMap<>();
+	//lista dei nodi destinazione di offloading nel sistema
+	protected List<ComputingNode> nodeList = new ArrayList<>();	
+	//lista dei container che sono attualmente allocati nel sistema				
+	protected List<Container> containerList = new ArrayList<>();					
+	//mappa che associa i task offloadati agli specifici container shared (gli indici sono quelli della containerList)
+	protected Map<Integer, Integer> sharedHistoryMap = new LinkedHashMap<>();
+	//mappa che permette di tenere traccia per ciascun nodo di NodeList i task associati (gli indici sono quelli della nodeList)
+	protected Map<Integer, List<Task>> tasksHistoryMap = new LinkedHashMap<>();
+	//mappa che nella modalità statica associa nodi di destinazione a nodi generanti (gli "indici" sono i nodi che generano il task, il "get" sono i nodi destinazione di offloading)
+	protected Map<ComputingNode, ComputingNode> pairingNodesHistoryMap = new LinkedHashMap<>();
+	
 	protected SimulationManager simulationManager;
 	protected SimLog simLog;
 	protected String algorithmName;
@@ -53,6 +61,12 @@ public abstract class Orchestrator extends SimEntity {
 		simLog = simulationManager.getSimulationLogger();
 		algorithmName = SimulationParameters.taskOrchestrationAlgorithm;
 		architectureName = simulationManager.getScenario().getStringOrchArchitecture();
+		// Initialize the pairing historyMap
+		for(ComputingNode cn :  simulationManager.getDataCentersManager().getComputingNodesGenerator().getMistOnlyList()){
+			pairingNodesHistoryMap.put(cn, null);
+		}
+		// the shared historyMap is initialized in the setContainerToVM function
+		// the tasks historyMap is initialized in the defaultOrchestrator constructor
 		initialize();
 	}
 
@@ -163,10 +177,28 @@ public abstract class Orchestrator extends SimEntity {
 
 	protected void assignTaskToComputingNode(Task task, String[] architectureLayers) {
 
-		int nodeIndex =  findVmAssociatedWithTask(task);
+		int nodeIndex = -1;
+		
+		//se l'algoritmo scelto è statico ed è già stato associata una destinazione di offloading al nodo
+		if(SimulationParameters.taskOrchestrationMode.equals("static") && pairingNodesHistoryMap.get(task.getEdgeDevice()) != null)
+			nodeIndex = nodeList.indexOf(pairingNodesHistoryMap.get(task.getEdgeDevice()));
+		//altrimenti recupero la destinazione di offloading con il metodo dinamico
+		else
+			nodeIndex = findVmAssociatedWithTask(task);
 
 		if (nodeIndex != -1) {
 			ComputingNode node = nodeList.get(nodeIndex);
+
+			//se la modalità è statica associo il dispositivo di offloading nella pairingList
+			if(SimulationParameters.taskOrchestrationMode.equals("static")){
+				if(pairingNodesHistoryMap.get(task.getEdgeDevice()) != null) 
+					tasksHistoryMap.get(nodeIndex).add(task);
+				else{
+					if(printDebug) System.out.println("Nodo " + task.getEdgeDevice().getName() + " associato a " + node.getName());
+					pairingNodesHistoryMap.put(task.getEdgeDevice(), nodeList.get(nodeIndex));
+				}
+			}
+
 			try {
 				checkComputingNode(node);
 			} catch (Exception e) {
@@ -280,7 +312,11 @@ public abstract class Orchestrator extends SimEntity {
 	public abstract int findVmAssociatedWithTask(Task task);
 
 	public void removeContainerFromVM(Container container){
+		//rimuovo il container unplacato dalla lista (il container è necessariamente non shared)
 		containerList.remove(container);
+		//rimuovo il riferimento al container anche dalla paringList, impostando il valore null. 
+		//Posso prendere l'indice 0 poichè faccio sicuramente riferimento ad un container non shared
+		pairingNodesHistoryMap.put(container.getEdgeDevice(0), null);
 		//Non devo rimuovere niente dalla sharedHistoryMap poichè i container shared durano per tutta la durata della simulazione. 
 		//Gli unici che vengono rimossi sono quelli non shared
 	}

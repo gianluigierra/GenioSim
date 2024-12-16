@@ -587,6 +587,13 @@ public class SimulationParameters {
 	public static String taskOrchestrationAlgorithm;
 
 	/**
+	 * The mode that will be used in the simulation to orchestrate the tasks.
+	 * 
+	 * @see com.mechalikh.pureedgesim.taskorchestrator.Orchestrator#findVmAssociatedWithTask(Task)
+	 */
+	public static String taskOrchestrationMode;
+
+	/**
 	 * The algorithm that will be used in the simulation to orchestrate the Containers.
 	 * 
 	 * @see com.mechalikh.pureedgesim.taskorchestrator.DefaultContainerOrchestrator#findComputingNode(String[] architecture, Container container)
