@@ -26,10 +26,10 @@
 
     <user type="4">
 		<access_pattern>random</access_pattern>
-        <rate>1</rate> <!-- requests per minute -->
+        <rate>5</rate> <!-- requests per minute -->
         <start>1</start> <!--Time in minutes-->
         <duration>1</duration> <!--Time in minutes-->
-        <interval>200</interval> <!--Time in minutes-->
+        <interval>35</interval> <!--Time in minutes-->
 	</user>
     
 </users>
