@@ -11,46 +11,52 @@
 		</location>
 		<hosts>
 			<host>
-				<cores>10</cores>
-				<mips>50000</mips>
-				<ram>64000</ram>
-				<storage>1000000</storage> <!-- in MB -->
+				<cores>16</cores>
+				<mips>7000</mips>
+				<ram>128000</ram>
+				<storage>2000000</storage> <!-- in MB -->
 				<VMs>
 					<VM>
-						<cores>3</cores>
-						<mips>50000</mips>
-						<ram>19200</ram> <!-- in MB -->
-						<storage>300000</storage> <!-- in MB -->
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>50000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>50000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
-						<cores>1</cores>
-						<mips>50000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
-						<cores>1</cores>
-						<mips>50000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
-						<cores>1</cores>
-						<mips>50000</mips>
-						<ram>6400</ram>
-						<storage>100000</storage>
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 				</VMs>
 			</host>

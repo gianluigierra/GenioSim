@@ -1,50 +1,62 @@
 <?xml version="1.0"?>
 <edge_datacenters>
-	<datacenter name="EdgeDatacenter 1">
+	<datacenter name="dc1">
 		<periphery>true</periphery>
 		<idleConsumption>100</idleConsumption>
 		<maxConsumption>250</maxConsumption>
 		<isOrchestrator>false</isOrchestrator>
 		<location>
-			<x_pos>50</x_pos>
-			<y_pos>140</y_pos>
+			<x_pos>100</x_pos>
+			<y_pos>100</y_pos>
 		</location>
 		<hosts>
 			<host>
-				<cores>10</cores>
-				<mips>60000</mips>
-				<ram>64000</ram>
-				<storage>1000000</storage>
+				<cores>16</cores>
+				<mips>7000</mips>
+				<ram>128000</ram>
+				<storage>2000000</storage> <!-- in MB -->
 				<VMs>
 					<VM>
 						<cores>2</cores>
-						<mips>60000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>60000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>60000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>60000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 					<VM>
 						<cores>2</cores>
-						<mips>60000</mips>
-						<ram>12800</ram>
-						<storage>200000</storage>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>7000</mips>
+						<ram>16000</ram> <!-- in MB -->
+						<storage>250000</storage> <!-- in MB -->
 					</VM>
 				</VMs>
 			</host>
