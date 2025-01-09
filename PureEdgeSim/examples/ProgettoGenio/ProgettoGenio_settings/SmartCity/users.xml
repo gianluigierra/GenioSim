@@ -2,7 +2,7 @@
 
 	<user type="1">
 		<access_pattern>random</access_pattern>
-        <rate>60</rate> <!-- requests per minute -->
+        <rate>2</rate> <!-- requests per minute -->
         <start>1</start> <!--Time in minutes-->
         <duration>infinity</duration> <!--Time in minutes-->
         <interval>0</interval> <!--Time in minutes-->

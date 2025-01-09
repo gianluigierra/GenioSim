@@ -1,0 +1,21 @@
+<applications>
+
+	<application name="Smart Building">
+		<type>Normal</type>
+		<container>
+			<container_size>100</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
+			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
+			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
+			<copies>6</copies>
+		</container>
+        <users_type>[20,1]</users_type> <!--in this case 10 users "1" type-->
+		<task>
+			<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
+			<request_size>750</request_size> <!-- La size della request rappresentata in KB -->
+			<results_size>500</results_size> <!-- La size del risultato rappresentato in KB -->
+			<task_length>5000</task_length> <!-- la lunghezza del taks rappresentata in Million Istructions (MI) -->
+		</task>
+	</application>
+
+</applications>
+

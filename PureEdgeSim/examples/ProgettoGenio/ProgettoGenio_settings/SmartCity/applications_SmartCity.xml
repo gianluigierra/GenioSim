@@ -1,19 +1,19 @@
 <applications>
-	<application name="E-Health">
+	<application name="Smart City">
 		<type>Normal</type>
 		<rate>10</rate>
 		<container>
 			<container_size>100</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>10</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
-			<copies>3</copies>
+			<copies>20</copies>
 		</container>
-		<users_type>[10,1]</users_type> <!--in this case 10 users "4" type-->
+		<users_type>[128,1]</users_type> <!--in this case 10 users "4" type-->
 		<task>
-			<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
+			<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>10</request_size> <!-- La size della request rappresentata in KB -->
-			<results_size>10</results_size> <!-- La size del risultato rappresentato in KB -->
-			<task_length>1000</task_length> <!-- la lunghezza del taks rappresentata in Million Istructions (MI) -->
+			<results_size>100</results_size> <!-- La size del risultato rappresentato in KB -->
+			<task_length>500</task_length> <!-- la lunghezza del taks rappresentata in Million Istructions (MI) -->
 		</task>
 	</application>
 </applications>

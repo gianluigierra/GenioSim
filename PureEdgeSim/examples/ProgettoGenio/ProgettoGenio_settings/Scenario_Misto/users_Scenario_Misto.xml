@@ -1,0 +1,27 @@
+<users>
+
+	<user type="1">
+		<access_pattern>random</access_pattern>
+        <rate>60</rate> <!-- requests per minute -->
+        <start>1</start> <!--Time in minutes-->
+        <duration>infinity</duration> <!--Time in minutes-->
+        <interval>0</interval> <!--Time in minutes-->
+	</user>
+
+    <user type="2">
+		<access_pattern>random</access_pattern>
+        <rate>2</rate> <!-- requests per minute -->
+        <start>1</start> <!--Time in minutes-->
+        <duration>infinity</duration> <!--Time in minutes-->
+        <interval>0</interval> <!--Time in minutes-->
+	</user>
+
+    <user type="3">
+		<access_pattern>random</access_pattern>
+        <rate>10</rate> <!-- requests per minute -->
+        <start>5</start> <!--Time in minutes-->
+        <duration>45</duration> <!--Time in minutes-->
+        <interval>15</interval> <!--Time in minutes-->
+	</user>
+
+</users>
