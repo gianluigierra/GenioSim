@@ -388,6 +388,11 @@ public class DefaultSimulationManager extends SimulationManager implements OnSim
 	 * @param task The task that has been executed.
 	 */
 	protected void sendResultsToEdgeOchestrator(Task task) {
+
+		//inserisco la latency finale del Task nel vettore di logging
+		getSimulationLogger().applicationLatencyMap.get(task.getAssociatedAppName()).set(0,  getSimulationLogger().applicationLatencyMap.get(task.getAssociatedAppName()).get(0) + task.getTotalDelay());
+		getSimulationLogger().applicationLatencyMap.get(task.getAssociatedAppName()).set(1,  getSimulationLogger().applicationLatencyMap.get(task.getAssociatedAppName()).get(1) + 1);
+
 		if (taskFailed(task, 2))
 			return;
 		// If the task was offloaded

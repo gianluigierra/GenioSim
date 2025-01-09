@@ -33,8 +33,11 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
@@ -44,11 +47,14 @@ import com.mechalikh.pureedgesim.network.TransferProgress;
 import com.mechalikh.pureedgesim.network.ContainerTransferProgress;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters; 
 import com.mechalikh.pureedgesim.taskgenerator.Task;
+import com.mechalikh.pureedgesim.taskgenerator.Application;
 
 public class SimLog {
 	public static final int NO_TIME = 0;
 	public static final int SAME_LINE = 1;
 	public static final int DEFAULT = 2;
+	//aggiunta mia per tenere conto della latency effettiva per applicazione. Scrivo il nome dell'app nella stringa; nel vettore sommo in prima posizione le latency e nel secondo conto quanti task, per fare media
+	protected Map<String, Vector<Double>> applicationLatencyMap = new LinkedHashMap<>(); 			
 	protected ArrayList<String> resultsList = new ArrayList<String>();
 	protected DecimalFormat decimalFormat;
 	protected List<String> log = new ArrayList<String>();
@@ -105,22 +111,31 @@ public class SimLog {
 
 		if (isFirstIteration) {
 			// Add the CSV file header
-			resultsList.add("Orchestration architecture,Orchestration algorithm,Edge devices count,"
-					+ "Total tasks execution delay (s),Average execution delay (s),Total tasks waiting time (s),"
-					+ "Average waiting time (s),Number of generated tasks,Tasks successfully executed,"
-					+ "Task not executed (No resources available or long waiting time),Tasks failed (delay),Tasks failed (device dead),"
-					+ "Tasks failed (mobility),Tasks not generated due to the death of devices,Total tasks executed (Cloud),"
-					+ "Tasks successfully executed (Cloud),Total tasks executed (Edge),Tasks successfully executed (Edge),"
-					+ "Total tasks executed (Mist),Tasks successfully executed (Mist),"
-					+ "Network usage (s),Wan usage (s),Lan usage (s), Total network traffic (MBytes), Containers wan usage (s), Containers lan usage (s),Average bandwidth per task (Mbps),Average CPU usage (%),"
-					+ "Average CPU usage (Cloud) (%),Average CPU usage (Edge) (%),Average CPU usage (Mist) (%),"
-					+ "Energy consumption of computing nodes (Wh),Average energy consumption (Wh/Computing node),Cloud energy consumption (Wh),"
-					+ "Average Cloud energy consumption (Wh/Data center),Edge energy consumption (Wh),Average Edge energy consumption (Wh/Data center),"
-					+ "Mist energy consumption (Wh),Average Mist energy consumption (Wh/Device),"
-					+ "WAN energy consumption (Wh), MAN energy consumption (Wh), LAN energy consumption (Wh),"
-					+ "WiFi energy consumption (Wh), LTE energy consumption (Wh), Ethernet energy consumption (Wh),"
-					+ "Dead devices count,Average remaining power (Wh),Average remaining power (%), First edge device death time (s),"
-					+ "List of remaining power (%) (only battery powered devices / 0 = dead),List of the time when each device died (s)");
+			resultsList.add("Orchestration architecture;Container Orchestration algorithm;Tasks Orchestration Algorithm;Edge devices count;"
+					+ "Total tasks execution delay (s);Average execution delay (s);Total tasks waiting time (s);"
+					+ "Average waiting time (s);Number of generated tasks;Tasks successfully executed;Tasks Success Rate;"
+					+ "Task not executed (No resources available or long waiting time);Tasks failed (delay);Tasks failed (device dead);"
+					+ "Tasks failed (mobility);Tasks not generated due to the death of devices;Total tasks executed (Cloud);"
+					+ "Tasks successfully executed (Cloud);Total tasks executed (Edge);Tasks successfully executed (Edge);"
+					+ "Total tasks executed (Far Edge);Tasks successfully executed (Far Edge);Total tasks executed (Mist);Tasks successfully executed (Mist);"
+					+ "Network usage (s);Wan usage (s);Lan usage (s);Fiber usage (s);Total network traffic (MBytes); Containers wan usage (s); Containers lan usage (s); Containers Fiber usage (s);Average bandwidth per task (Mbps);Average CPU usage (%);"
+					+ "Average CPU usage (Cloud) (%);Average CPU usage (Edge) (%);Average CPU usage (Far Edge) (%);Average CPU usage (Mist) (%);"
+					+ "Energy consumption of computing nodes (Wh);Average energy consumption (Wh/Computing node);Cloud energy consumption (Wh);"
+					+ "Average Cloud energy consumption (Wh/Data center);Edge energy consumption (Wh);Average Edge energy consumption (Wh/Data center);"
+					+ "Far Edge energy consumption (Wh);Average Far Edge energy consumption (Wh/Device);"
+					+ "Mist energy consumption (Wh);Average Mist energy consumption (Wh/Device);"
+					+ "WAN energy consumption (Wh); MAN energy consumption (Wh); LAN energy consumption (Wh); Fiber energy consumption (Wh);"
+					+ "WiFi energy consumption (Wh); LTE energy consumption (Wh); Ethernet energy consumption (Wh);"
+					+ "Dead devices count;Average remaining power (Wh);Average remaining power (%);First edge device death time (s);"
+					+ "List of remaining power (%) (only battery powered devices / 0 = dead);List of the time when each device died (s)");
+			
+			//inizializzo la mappa delle latency
+			for(Application app : SimulationParameters.applicationList){
+				applicationLatencyMap.put(app.getName(), new Vector<>());
+				applicationLatencyMap.get(app.getName()).add(0.0);
+				applicationLatencyMap.get(app.getName()).add(0.0);
+			}
+			
 		}
 	}
 
@@ -171,11 +186,11 @@ public class SimLog {
 				+ padLeftSpaces(decimalFormat.format(averageMistCpuUtilization), 13) + " %%");
 
 		resultsList.set(resultsList.size() - 1,
-				resultsList.get(resultsList.size() - 1) + decimalFormat.format(averageCpuUtilization) + ","
-						+ decimalFormat.format(averageCloudCpuUtilization) + ","
-						+ decimalFormat.format(averageEdgeCpuUtilization) + ","
-						+ decimalFormat.format(averageFarEdgeCpuUtilization) + ","
-						+ decimalFormat.format(averageMistCpuUtilization) + ",");
+				resultsList.get(resultsList.size() - 1) + decimalFormat.format(averageCpuUtilization) + ";"
+						+ decimalFormat.format(averageCloudCpuUtilization) + ";"
+						+ decimalFormat.format(averageEdgeCpuUtilization) + ";"
+						+ decimalFormat.format(averageFarEdgeCpuUtilization) + ";"
+						+ decimalFormat.format(averageMistCpuUtilization) + ";");
 	}
 
 
@@ -262,21 +277,24 @@ public class SimLog {
 				+ (tasksExecutedOnEdge - tasksFailedEdge) + " were successfully executed )");
 		print("                                                                         " + " FarEdge="
 				+ padLeftSpaces("" + tasksExecutedOnFarEdge, 14) + " tasks (where "
-				+ (tasksExecutedOnFarEdge - tasksFailedEdge) + " were successfully executed )");		
+				+ (tasksExecutedOnFarEdge - tasksFailedFarEdge) + " were successfully executed )");		
 		print("                                                                         " + " Mist="
 				+ padLeftSpaces("" + tasksExecutedOnMist, 14) + " tasks (where "
 				+ (tasksExecutedOnMist - tasksFailedMist) + " were successfully executed )");
 
-		resultsList.add(currentOrchArchitecture + "," + currentOrchAlgorithm + "," + currentEdgeDevicesCount + ","
-				+ decimalFormat.format(totalExecutionTime) + ","
-				+ decimalFormat.format(totalExecutionTime / executedTasksCount) + ","
-				+ decimalFormat.format(totalWaitingTime) + ","
-				+ decimalFormat.format(totalWaitingTime / executedTasksCount) + "," + generatedTasksCount + ","
-				+ (tasksSent - tasksFailed) + "," + tasksFailedRessourcesUnavailable + "," + tasksFailedLatency + ","
-				+ tasksFailedBeacauseDeviceDead + "," + tasksFailedMobility + "," + notGeneratedBecDeviceDead + ","
-				+ tasksExecutedOnCloud + "," + (tasksExecutedOnCloud - tasksFailedCloud) + "," + tasksExecutedOnEdge
-				+ "," + (tasksExecutedOnEdge - tasksFailedEdge) + "," + tasksExecutedOnMist + ","
-				+ (tasksExecutedOnMist - tasksFailedMist) + ",");
+		resultsList.add(currentOrchArchitecture + ";" 
+				+ SimulationParameters.containerOrchestrationAlgorithms[0] + ";" + SimulationParameters.taskOrchestrationAlgorithm + ";" 
+				+ currentEdgeDevicesCount + ";" + decimalFormat.format(totalExecutionTime) + ";"
+				+ decimalFormat.format(totalExecutionTime / executedTasksCount) + ";"
+				+ decimalFormat.format(totalWaitingTime) + ";"
+				+ decimalFormat.format(totalWaitingTime / executedTasksCount) + ";" + generatedTasksCount + ";" 
+				+ (tasksSent - tasksFailed) + ";"  + decimalFormat.format((tasksSent - tasksFailed) * 100 / tasksSent) + ";"
+				+ tasksFailedRessourcesUnavailable + ";" + tasksFailedLatency + ";"
+				+ tasksFailedBeacauseDeviceDead + ";" + tasksFailedMobility + ";" + notGeneratedBecDeviceDead + ";"
+				+ tasksExecutedOnCloud + ";" + (tasksExecutedOnCloud - tasksFailedCloud) + ";" 
+				+ tasksExecutedOnEdge + ";" + (tasksExecutedOnEdge - tasksFailedEdge) + ";"
+				+ tasksExecutedOnFarEdge + ";" + (tasksExecutedOnFarEdge - tasksFailedFarEdge) + ";" 
+				+ tasksExecutedOnMist + ";" + (tasksExecutedOnMist - tasksFailedMist) + ";");
 	}
 
 	public void printNetworkRelatedResults() {
@@ -310,9 +328,9 @@ public class SimLog {
 				+ padLeftSpaces(decimalFormat.format(totalBandwidth / transfersCount), 20) + " Mbps  ");
 		// Add these values to the las item of the results list
 		resultsList.set(resultsList.size() - 1,
-				resultsList.get(resultsList.size() - 1) + totalLanUsage + "," + totalWanUsage + "," + totalLanUsage
-						+ "," + totalTraffic + "," + containersWanUsage + "," + containersLanUsage + ","
-						+ (totalBandwidth / transfersCount) + ",");
+				resultsList.get(resultsList.size() - 1) + totalLanUsage + ";" + totalWanUsage + ";" + totalLanUsage + ";" + totalFiberUsage
+						+ ";" + totalTraffic + ";" + containersWanUsage + ";" + containersLanUsage + ";" + containersFiberUsage + ";"
+						+ (totalBandwidth / transfersCount) + ";");
 	}
 
 	public void printPowerConsumptionResults(List<Task> finishedTasks) {
@@ -433,7 +451,7 @@ public class SimLog {
 				+ padLeftSpaces(decimalFormat.format(wan), 14) + " Wh");
 		print("                                                                           FIBER="
 				+ padLeftSpaces(decimalFormat.format(fiber), 12) + " Wh ");
-		print("                                                                           WAN="
+		print("                                                                           MAN="
 				+ padLeftSpaces(decimalFormat.format(man), 14) + " Wh ");
 		print("                                                                           LAN="
 				+ padLeftSpaces(decimalFormat.format(lan), 14) + " Wh ");
@@ -459,19 +477,19 @@ public class SimLog {
 
 		// Add these values to the las item of the results list
 		resultsList.set(resultsList.size() - 1, resultsList.get(resultsList.size() - 1)
-				+ decimalFormat.format(energyConsumption) + ","
+				+ decimalFormat.format(energyConsumption) + ";"
 				+ decimalFormat.format(energyConsumption
 						/ (SimulationParameters.numberOfEdgeDataCenters + SimulationParameters.numberOfCloudDataCenters
 								+ simulationManager.getScenario().getDevicesCount()))
-				+ "," + decimalFormat.format(cloudEnConsumption) + "," + decimalFormat.format(averageCloudEnConsumption)
-				+ "," + decimalFormat.format(edgeEnConsumption) + "," + decimalFormat.format(averageEdgeEnConsumption)
-				+ "," + decimalFormat.format(farEdgeEnConsumption) + "," + decimalFormat.format(averageFarEdgeEnConsumption)
-				+ "," + decimalFormat.format(mistEnConsumption) + "," + decimalFormat.format(averageMistEnConsumption)
-				+ "," + decimalFormat.format(wan) + "," + decimalFormat.format(man) + "," + decimalFormat.format(lan)
-				+ "," + decimalFormat.format(wifi) + "," + decimalFormat.format(fourG) + "," + decimalFormat.format(eth)
-				+ "," + decimalFormat.format(deadEdgeDevicesCount) + "," + decimalFormat.format(averageRemainingPowerWh)
-				+ "," + decimalFormat.format(averageRemainingPower) + "," + firstDeviceDeathTime + ","
-				+ remainingPower.toString().replace(",", "-") + "," + devicesDeathTime.toString().replace(",", "-"));
+				+ ";" + decimalFormat.format(cloudEnConsumption) + ";" + decimalFormat.format(averageCloudEnConsumption)
+				+ ";" + decimalFormat.format(edgeEnConsumption) + ";" + decimalFormat.format(averageEdgeEnConsumption)
+				+ ";" + decimalFormat.format(farEdgeEnConsumption) + ";" + decimalFormat.format(averageFarEdgeEnConsumption)
+				+ ";" + decimalFormat.format(mistEnConsumption) + ";" + decimalFormat.format(averageMistEnConsumption)
+				+ ";" + decimalFormat.format(wan) + ";" + decimalFormat.format(man) + ";" + decimalFormat.format(lan) + ";" + decimalFormat.format(fiber)
+				+ ";" + decimalFormat.format(wifi) + ";" + decimalFormat.format(fourG) + ";" + decimalFormat.format(eth)
+				+ ";" + decimalFormat.format(deadEdgeDevicesCount) + ";" + decimalFormat.format(averageRemainingPowerWh)
+				+ ";" + decimalFormat.format(averageRemainingPower) + ";" + firstDeviceDeathTime + ";"
+				+ remainingPower.toString().replace(",", "-") + ";" + devicesDeathTime.toString().replace(",", "-"));
 	}
 
 	public String padLeftSpaces(String str, int n) {
@@ -503,7 +521,33 @@ public class SimLog {
 		}
 	}
 
+	//funzione per scrivere nel CSV anche le latenze medie per APP
+	protected void writeAppsResults(){
+		//inizio mettendo una virgola
+		this.resultsList.set(0, this.resultsList.get(0) + ";");
+		//inserisco le APP nell'header CSV
+		for(Application app : SimulationParameters.applicationList){
+			if(app != SimulationParameters.applicationList.get(SimulationParameters.applicationList.size()-1))
+				resultsList.set(0, resultsList.get(0)+app.getName()+";");
+			else	
+				resultsList.set(0, resultsList.get(0)+app.getName());
+		}
+		//inizio mettendo una virgola
+		this.resultsList.set(1, this.resultsList.get(1) + ";");
+		//addesso inserisco i valori di latency
+		for(Application app : SimulationParameters.applicationList){
+			if(app != SimulationParameters.applicationList.get(SimulationParameters.applicationList.size()-1))
+				this.resultsList.set(1, this.resultsList.get(1) + String.valueOf(applicationLatencyMap.get(app.getName()).get(0)/applicationLatencyMap.get(app.getName()).get(1) + ";"));
+			else
+				this.resultsList.set(1, this.resultsList.get(1) + String.valueOf(applicationLatencyMap.get(app.getName()).get(0)/applicationLatencyMap.get(app.getName()).get(1)));
+			}
+	}
+
 	public void saveLog() {
+
+		//scrivo i risultati in termini di latenza delle APP
+		writeAppsResults();
+
 		// writing results in csv file
 		writeFile(getFileName(".csv"), getResultsList());
 
@@ -520,23 +564,39 @@ public class SimLog {
 		return this.resultsList;
 	}
 
+	private boolean existingFolder = false;
+
 	public void writeFile(String fileName, List<String> Lines) {
 		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName, true))) {
-			for (String str : Lines) {
+			//modifica mia per compilare il file excel in automatico
+			if(existingFolder){	
+				String str = Lines.get(1);
+				str = str.replace('.', ',');				//per modificare i punti dei numeri decimali con virgole, in modo che excel capisca
 				bufferedWriter.append(str);
 				bufferedWriter.newLine();
 			}
-			Lines.clear();
+			else{
+				for (String str : Lines) {
+					str = str.replace('.', ',');				//per modificare i punti dei numeri decimali con virgole, in modo che excel capisca
+					bufferedWriter.append(str);
+					bufferedWriter.newLine();
+				}
+				Lines.clear();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public String getFileName(String extension) {
-		String outputFilesName = SimulationParameters.outputFolder + "/" + simStartTime;
-		new File(outputFilesName).mkdirs();
+		//String outputFilesName = SimulationParameters.outputFolder + "/" + simStartTime;
+		String outputFilesName = SimulationParameters.settingspath + "/" + SimulationParameters.simName + "/Output";
+
+		if(!new File(outputFilesName).mkdirs()) existingFolder = true;				//modificato da me, se esiste già la cartella allora inposto questa variabile a true
+		else existingFolder = false;
+
 		if (SimulationParameters.parallelism_enabled)
-			outputFilesName += "/Parallel_simulation_" + simulationManager.getSimulationId();
+			outputFilesName += "/Parallel_simulation";
 		else
 			outputFilesName += "/Sequential_simulation";
 

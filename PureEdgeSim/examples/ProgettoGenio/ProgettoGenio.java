@@ -1,11 +1,13 @@
 package examples.ProgettoGenio;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
 
 import com.mechalikh.pureedgesim.simulationmanager.*;
-import com.mechalikh.pureedgesim.taskorchestrator.*;
-import com.mechalikh.pureedgesim.taskorchestrator.DQN.CustomOrchestrator;
 
 public class ProgettoGenio {
 
@@ -15,19 +17,70 @@ public class ProgettoGenio {
 	// The custom output folder is
 	private static String outputPath = "PureEdgeSim/examples/ProgettoGenio/ProgettoGenio_output/";
 
+	// cambio la modalità di esecuzione
+	private static String exampleMode = "SmartCity";
+
+	/*
+	Algoritmi container:
+		ROUND_ROBIN,TRADE_OFF,GREEDY,MULTI_OBIETTIVO,LATENCY_ROUND_ROBIN,LATENCY_TRADE_OFF,LATENCY_MULTI_OBIETTIVO,RATE_ROUND_ROBIN,RATE_TRADE_OFF,RATE_GREEDY,RATE_MULTI_OBIETTIVO
+	Algoritmi tasks:
+		ROUND_ROBIN,BEST_LATENCY,BEST_DELAY
+	Modalità:
+		static,dinamic
+	*/
+	public static void main(String[] args) {
+		new ProgettoGenio("ROUND_ROBIN", "ROUND_ROBIN");
+		//new ProgettoGenio();
+	}
+
 	public ProgettoGenio(){
 
 		// Create a PureEdgeSim simulation
 		Simulation sim = new Simulation();
+
+		startSim(sim);
+	}
+
+	public ProgettoGenio(String containerOrg, String taskOrg){
+
+		// Create a PureEdgeSim simulation
+		Simulation sim = new Simulation();
+
+		// setto gli algoritmi
+		String filePath = "PureEdgeSim/examples/ProgettoGenio/ProgettoGenio_settings/"; // Percorso al file da modificare
+		filePath += exampleMode + "/simulation_parameters_" + exampleMode + ".properties";
+
+		try{
+			List<String> lines = Files.readAllLines(Paths.get(filePath));
+
+			// Modifica le righe che corrispondono alle proprietà specificate
+			List<String> updatedLines = new ArrayList<>();
+			for (String line : lines) {
+				if (line.contains("task_orchestration_algorithm = ")) {
+					line = "task_orchestration_algorithm = " + taskOrg; // Sostituisci il valore
+				}
+				if (line.contains("container_orchestration_algorithms = ")) {
+					line = "container_orchestration_algorithms = " + containerOrg; // Sostituisci il valore
+				}
+				updatedLines.add(line);
+			}
+
+			// Riscrivi il file con le righe aggiornate
+			Files.write(Paths.get(filePath), updatedLines);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+		startSim(sim);
+	}
+
+	public void startSim(Simulation sim){
 
 		// changing the default output folder
 		sim.setCustomOutputFolder(outputPath);
 
 		// changing the simulation settings folder
 		sim.setCustomSettingsFolder(settingsPath);
-
-		// cambio la modalità di esecuzione
-		String exampleMode = "SmartCity";
 
 		switch (exampleMode) {
 			case "SmartCity":
@@ -83,14 +136,6 @@ public class ProgettoGenio {
 
 		//inizia la simulazione
 		sim.launchSimulation();
-		
-	}
-
-	public static void main(String[] args) {
-
-        new ProgettoGenio();
-		//System.out.println((double) (SimLog.tasksSent - SimLog.tasksFailed) * 100 / SimLog.tasksSent);
-			
 	}
 
 }
