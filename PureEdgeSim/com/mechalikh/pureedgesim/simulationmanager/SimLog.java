@@ -67,8 +67,8 @@ public class SimLog {
 
 	// Tasks execution results
 	protected int generatedTasksCount = 0;
-	public int tasksSent = 0;								//MODIFICA MIA, era protected
-	public int tasksFailed = 0;								//MODIFICA MIA, era protected
+	public double tasksSent = 0;								//MODIFICA MIA, era protected
+	public double tasksFailed = 0;								//MODIFICA MIA, era protected
 	protected int tasksFailedLatency = 0;
 	protected int tasksFailedMobility = 0;
 	protected int tasksFailedRessourcesUnavailable = 0;

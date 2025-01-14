@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <ONT>
 	<ONTDevice name="ONT">
-		<idleConsumption>200</idleConsumption>
-		<maxConsumption>450</maxConsumption>
+		<idleConsumption>24</idleConsumption>
+		<maxConsumption>192</maxConsumption>
 		<isOrchestrator>false</isOrchestrator>
 		<cores>4</cores>
-		<mips>6000</mips>
-		<ram>6400</ram> <!-- Valore in MB -->
+		<mips>12000</mips>
+		<ram>8000</ram> <!-- Valore in MB -->
 		<storage>100000</storage> <!-- Valore in MB -->
 	</ONTDevice>
 	<network_links>

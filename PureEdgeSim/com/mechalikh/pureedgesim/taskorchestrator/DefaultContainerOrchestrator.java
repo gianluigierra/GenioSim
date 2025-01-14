@@ -67,7 +67,6 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 		// Initialize the bigNodeHistoryMaps
 		for (int i = 0; i < bigNodeList.size(); i++) {
-			System.out.println(bigNodeList.get(i).getType());
 			bigNodeSharedHistoryMap.put(i, new ArrayList<Container>());
 			bigNodeHistoryMap.put(i, new ArrayList<Container>());
 		}
@@ -135,6 +134,8 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					// device, it results in an extremely low latency, but may // consume more
 					// energy.
 				}
+				double tasksLength = SimulationParameters.applicationList.get(container.getApplicationID()).getTaskLength();
+				//newMin = (historyMap.get(i) + 1) * weight * tasksLength/node.getMipsPerCore();
 				newMin = (historyMap.get(i) + 1) * weight * container.getContainerSizeInBits() / node.getMipsPerCore();
 				if (min == -1 || min > newMin) { // if it is the first
 					// iteration, or if this computing node has more // cpu mips and // less waiting
@@ -459,6 +460,8 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					// energy.
 				}
 				if(weight != 0.0){
+					double tasksLength = SimulationParameters.applicationList.get(container.getApplicationID()).getTaskLength();
+					//newMin = (historyMap.get(i) + 1) * weight * tasksLength/node.getMipsPerCore();
 					newMin = (historyMap.get(i) + 1) * weight * container.getContainerSizeInBits() / node.getMipsPerCore();
 					if (min == -1 || min > newMin) { // if it is the first
 						// iteration, or if this computing node has more // cpu mips and // less waiting
