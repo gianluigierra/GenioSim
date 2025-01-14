@@ -5,7 +5,7 @@
 		<maxConsumption>450</maxConsumption>
 		<isOrchestrator>false</isOrchestrator>
 		<cores>4</cores>
-		<mips>60000</mips>
+		<mips>6000</mips>
 		<ram>6400</ram> <!-- Valore in MB -->
 		<storage>100000</storage> <!-- Valore in MB -->
 	</ONTDevice>

@@ -37,7 +37,7 @@ import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
 
 public class DefaultContainerOrchestrator extends ContainerOrchestrator {
-	//questa lista contiene solo i nodi "grossi", ossia i DataCenter (Edge o Cloud) e gli ONT
+	//questa lista contiene solo i nodi "grossi", ossia i DataCenter (Edge o Cloud)
 	protected List<ComputingNode> bigNodeList = new ArrayList<>();
 	public Map<Integer, List<Container>> bigNodeSharedHistoryMap = new LinkedHashMap<>();			//usata per valutare quanti container shared sono istanziati su un DataCenter
 	public Map<Integer, List<Container>> bigNodeHistoryMap = new LinkedHashMap<>();  				//usata per valutare quanti container non shared sono istanziati su un DataCenter

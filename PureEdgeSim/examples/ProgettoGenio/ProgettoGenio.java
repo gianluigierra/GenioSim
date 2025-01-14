@@ -4,9 +4,6 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-import java.awt.Robot;
-import java.awt.event.KeyEvent;
-
 import com.mechalikh.pureedgesim.simulationmanager.*;
 
 public class ProgettoGenio {
@@ -18,7 +15,7 @@ public class ProgettoGenio {
 	private static String outputPath = "PureEdgeSim/examples/ProgettoGenio/ProgettoGenio_output/";
 
 	// cambio la modalità di esecuzione
-	private static String exampleMode = "SmartCity";
+	private static String exampleMode = "Scenario_Misto";
 
 	/*
 	Algoritmi container:
@@ -29,8 +26,49 @@ public class ProgettoGenio {
 		static,dinamic
 	*/
 	public static void main(String[] args) {
-		new ProgettoGenio("ROUND_ROBIN", "ROUND_ROBIN");
-		//new ProgettoGenio();
+		//Round Robin
+		//new ProgettoGenio("ROUND_ROBIN", "ROUND_ROBIN");
+		//new ProgettoGenio("TRADE_OFF", "ROUND_ROBIN");
+		//new ProgettoGenio("GREEDY", "ROUND_ROBIN");
+		//new ProgettoGenio("MULTI_OBIETTIVO", "ROUND_ROBIN");
+		//new ProgettoGenio("LATENCY_ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("LATENCY_TRADE_OFF", "ROUND_ROBIN");
+		//new ProgettoGenio("LATENCY_GREEDY", "ROUND_ROBIN");
+		//new ProgettoGenio("LATENCY_MULTI_OBIETTIVO", "ROUND_ROBIN");
+		//new ProgettoGenio("RATE_ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("RATE_TRADE_OFF", "ROUND_ROBIN");
+		//new ProgettoGenio("RATE_GREEDY", "ROUND_ROBIN");
+		//new ProgettoGenio("RATE_MULTI_OBIETTIVO", "ROUND_ROBIN");
+
+
+		//Best Latency
+		//new ProgettoGenio("ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("TRADE_OFF", "BEST_LATENCY");
+		//new ProgettoGenio("GREEDY", "BEST_LATENCY");
+		//new ProgettoGenio("MULTI_OBIETTIVO", "BEST_LATENCY");
+		//new ProgettoGenio("LATENCY_ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("LATENCY_TRADE_OFF", "BEST_LATENCY");
+		//new ProgettoGenio("LATENCY_GREEDY", "BEST_LATENCY");
+		//new ProgettoGenio("LATENCY_MULTI_OBIETTIVO", "BEST_LATENCY");
+		//new ProgettoGenio("RATE_ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("RATE_TRADE_OFF", "BEST_LATENCY");
+		//new ProgettoGenio("RATE_GREEDY", "BEST_LATENCY");
+		//new ProgettoGenio("RATE_MULTI_OBIETTIVO", "BEST_LATENCY");
+
+
+		//Best Delay
+		//new ProgettoGenio("ROUND_ROBIN", "BEST_DELAY");
+		//new ProgettoGenio("TRADE_OFF", "BEST_DELAY");
+		//new ProgettoGenio("GREEDY", "BEST_DELAY");
+		//new ProgettoGenio("MULTI_OBIETTIVO", "BEST_DELAY");
+		//new ProgettoGenio("LATENCY_ROUND_ROBIN", "BEST_DELAY");
+		//new ProgettoGenio("LATENCY_TRADE_OFF", "BEST_DELAY");
+		//new ProgettoGenio("LATENCY_GREEDY", "BEST_DELAY");
+		//new ProgettoGenio("LATENCY_MULTI_OBIETTIVO", "BEST_DELAY");
+		//new ProgettoGenio("RATE_ROUND_ROBIN", "BEST_DELAY");
+		//new ProgettoGenio("RATE_TRADE_OFF", "BEST_DELAY");
+		//new ProgettoGenio("RATE_GREEDY", "BEST_DELAY");
+		new ProgettoGenio("RATE_MULTI_OBIETTIVO", "BEST_DELAY");
 	}
 
 	public ProgettoGenio(){

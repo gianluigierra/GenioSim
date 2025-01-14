@@ -58,6 +58,62 @@
 						<ram>16000</ram>
 						<storage>250000</storage>
 					</VM>
+				</VMs>
+			</host>
+		</hosts>
+	</datacenter>
+	<datacenter name="EdgeDatacenter 2">
+		<periphery>true</periphery>
+		<idleConsumption>100</idleConsumption>
+		<maxConsumption>250</maxConsumption>
+		<isOrchestrator>false</isOrchestrator>
+		<location>
+			<x_pos>150</x_pos>
+			<y_pos>140</y_pos>
+		</location>
+		<hosts>
+			<host>
+				<cores>20</cores>
+				<mips>130000</mips>
+				<ram>128000</ram>
+				<storage>2000000</storage>
+				<VMs>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
 					<VM>
 						<cores>2</cores>
 						<mips>130000</mips>
@@ -67,7 +123,69 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>	
+	</datacenter>
+	<datacenter name="EdgeDatacenter 3">
+		<periphery>true</periphery>
+		<idleConsumption>100</idleConsumption>
+		<maxConsumption>250</maxConsumption>
+		<isOrchestrator>false</isOrchestrator>
+		<location>
+			<x_pos>100</x_pos>
+			<y_pos>60</y_pos>
+		</location>
+		<hosts>
+			<host>
+				<cores>20</cores>
+				<mips>130000</mips>
+				<ram>128000</ram>
+				<storage>2000000</storage>
+				<VMs>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+					<VM>
+						<cores>2</cores>
+						<mips>130000</mips>
+						<ram>16000</ram>
+						<storage>250000</storage>
+					</VM>
+				</VMs>
+			</host>
+		</hosts>
+	</datacenter>		
 	<network_links>
 		<!-- To create a topology add links here. See example 3 -->
 	</network_links>

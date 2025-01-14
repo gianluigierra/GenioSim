@@ -32,7 +32,7 @@ public class NetworkLinkHyperDown extends NetworkLink {
 
 	public NetworkLinkHyperDown(ComputingNode src, ComputingNode dst, SimulationManager simulationManager, NetworkLinkTypes type) {
 		super(src, dst, simulationManager, type);
-		setBandwidth(Integer.MAX_VALUE);
+		setBandwidth(1000000*6000);
 		setLatency(0);
 		setEnergyModel(new EnergyModelNetworkLink(0, this));
 	}
