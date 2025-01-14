@@ -29,6 +29,7 @@ import org.bytedeco.mkl.global.mkl_rt.iBRngPtr;
 import org.jgrapht.GraphPath;
 
 import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.DataCenter;
 import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.VM;
 import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
@@ -51,6 +52,11 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			if(cn.getType().equals(SimulationParameters.TYPES.VM_CLOUD) || cn.getType().equals(SimulationParameters.TYPES.VM_EDGE)){
 				DC = ((VM) cn).getHost().getDataCenter();
 			}
+			else if(cn.getType().equals(SimulationParameters.TYPES.ONT)){
+				for(DataCenter datacenter : simulationManager.getDataCentersManager().getComputingNodesGenerator().getEdgeOnlyList())
+					if(cn.getEdgeOrchestrator().equals(datacenter.getEdgeOrchestrator()))
+						DC = datacenter;
+			}
 
 			if(DC != null && !bigNodeList.contains(DC))
 				bigNodeList.add(DC);
@@ -61,6 +67,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 		// Initialize the bigNodeHistoryMaps
 		for (int i = 0; i < bigNodeList.size(); i++) {
+			System.out.println(bigNodeList.get(i).getType());
 			bigNodeSharedHistoryMap.put(i, new ArrayList<Container>());
 			bigNodeHistoryMap.put(i, new ArrayList<Container>());
 		}
