@@ -67,7 +67,6 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 		}
 		// Initialize the bigNodeHistoryMaps
 		for (int i = 0; i < bigNodeList.size(); i++) {
-			System.out.println(bigNodeList.get(i).getType());
 			bigNodeSharedHistoryMap.put(i, new ArrayList<Container>());
 			bigNodeHistoryMap.put(i, new ArrayList<Container>());
 		}
@@ -127,7 +126,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					// // this is an
 					// edge server 'cloudlet', the latency is slightly high then edge // devices
 				} else if (node.getType() == SimulationParameters.TYPES.VM_CLOUD) {
-					weight = 1.8; // this
+					weight = 8; // this
 					// is the cloud, it consumes more energy and results in high latency, so //
 					// better to avoid it
 				} else if (node.getType() == SimulationParameters.TYPES.ONT) {
@@ -135,7 +134,8 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					// device, it results in an extremely low latency, but may // consume more
 					// energy.
 				}
-				newMin = (historyMap.get(i) + 1) * weight * container.getContainerSizeInBits() / node.getMipsPerCore();
+				double tasksLength = SimulationParameters.applicationList.get(container.getApplicationID()).getTaskLength();
+				newMin = (2*historyMap.get(i) + 1) * weight * tasksLength/node.getMipsPerCore();
 				if (min == -1 || min > newMin) { // if it is the first
 					// iteration, or if this computing node has more // cpu mips and // less waiting
 					// tasks
@@ -203,7 +203,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 	protected int MultiObiettivo(String[] architecture, Container container){
 		int selected = -1;
 
-		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 1.5, latencyValue = 1.8;
+		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 8, latencyValue = 1.8;
 		double maxValue = Double.MAX_VALUE * (-1);
 		for(int i = 0; i < nodeList.size(); i++){
 
@@ -445,7 +445,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 				// suitable for offlaoding, you can change it as you want
 				double weight = 0.0;
 				if (node.getType() == SimulationParameters.TYPES.VM_EDGE && nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())) {
-					weight = 1;
+					weight = 1.2;
 					// // this is an
 					// edge server 'cloudlet', the latency is slightly high then edge // devices
 				} else if (node.getType() == SimulationParameters.TYPES.VM_CLOUD && nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())) {
@@ -453,13 +453,14 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 					// is the cloud, it consumes more energy and results in high latency, so //
 					// better to avoid it
 				} else if (nodeList.get(i).getType().equals(SimulationParameters.TYPES.ONT) && nodeList.get(i).getEdgeOrchestrator().equals(bestNode.getEdgeOrchestrator())) {
-					weight = 1;
+					weight = 1.3;
 					// this is an edge
 					// device, it results in an extremely low latency, but may // consume more
 					// energy.
 				}
 				if(weight != 0.0){
-					newMin = (historyMap.get(i) + 1) * weight * container.getContainerSizeInBits() / node.getMipsPerCore();
+					double tasksLength = SimulationParameters.applicationList.get(container.getApplicationID()).getTaskLength();
+					newMin = (2*historyMap.get(i) + 1) * weight * tasksLength/node.getMipsPerCore();
 					if (min == -1 || min > newMin) { // if it is the first
 						// iteration, or if this computing node has more // cpu mips and // less waiting
 						// tasks
@@ -508,7 +509,7 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 	protected int DataCenterMultiObiettivo(String[] architecture, Container container, ComputingNode bestNode){
 		int selected = -1;
 
-		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 1.5, latencyValue = 1.5;
+		double ramValue = 1.0, storageValue = 1.0, cpuValue = 1.3, mipsValue = 1.5, containerValue = 8, latencyValue = 1.8;
 		double maxValue = Double.MAX_VALUE * (-1);
 		for(int i = 0; i < nodeList.size(); i++){
 

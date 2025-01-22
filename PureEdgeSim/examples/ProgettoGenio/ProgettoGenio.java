@@ -31,11 +31,11 @@ public class ProgettoGenio {
 		//new ProgettoGenio("TRADE_OFF", "ROUND_ROBIN");
 		//new ProgettoGenio("GREEDY", "ROUND_ROBIN");
 		//new ProgettoGenio("MULTI_OBIETTIVO", "ROUND_ROBIN");
-		//new ProgettoGenio("LATENCY_ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("LATENCY_ROUND_ROBIN", "ROUND_ROBIN");
 		//new ProgettoGenio("LATENCY_TRADE_OFF", "ROUND_ROBIN");
 		//new ProgettoGenio("LATENCY_GREEDY", "ROUND_ROBIN");
 		//new ProgettoGenio("LATENCY_MULTI_OBIETTIVO", "ROUND_ROBIN");
-		//new ProgettoGenio("RATE_ROUND_ROBIN", "BEST_LATENCY");
+		//new ProgettoGenio("RATE_ROUND_ROBIN", "ROUND_ROBIN");
 		//new ProgettoGenio("RATE_TRADE_OFF", "ROUND_ROBIN");
 		//new ProgettoGenio("RATE_GREEDY", "ROUND_ROBIN");
 		//new ProgettoGenio("RATE_MULTI_OBIETTIVO", "ROUND_ROBIN");
@@ -154,7 +154,6 @@ public class ProgettoGenio {
 				sim.setUsersXML(settingsPath, "Scenario_Misto/users_Scenario_Misto.xml");
 				sim.setEdgeDatacentersXML(settingsPath, "Scenario_Misto/edge_datacenters_Scenario_Misto.xml");
 				sim.setCloudDatacentersXML(settingsPath, "Scenario_Misto/cloud_Scenario_Misto.xml");
-				sim.setONTsXML(settingsPath, "Scenario_Misto/ONT_Scenario_Misto.xml");
 				sim.setSimulationName(exampleMode);
 				break;	
 

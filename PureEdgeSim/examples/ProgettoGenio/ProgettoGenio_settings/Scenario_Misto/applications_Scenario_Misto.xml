@@ -6,7 +6,7 @@
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
-			<copies>6</copies>
+			<copies>5</copies>
 		</container>
         <users_type>[20,1]</users_type> <!--in this case 10 users "1" type-->
 		<task>
@@ -42,7 +42,7 @@
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
-			<copies>20</copies>
+			<copies>5</copies>
 		</container>
 		<users_type>[128,2]</users_type> <!--in this case 10 users "4" type-->
 		<task>
@@ -59,14 +59,30 @@
 			<container_size>500000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
 			<shared>true</shared> <!-- se il container deve essere usato da più edge device diversi -->
-			<copies>10</copies>
+			<copies>5</copies>
 		</container>
         <users_type>[60,3]</users_type> <!--in this case 10 users "1" type-->
 		<task>
-			<latency>1</latency> <!-- a great number represents no latency-sensitivity -->
+			<latency>0.5</latency> <!-- a great number represents no latency-sensitivity -->
 			<request_size>750</request_size> <!-- La size della request rappresentata in KB -->
 			<results_size>500</results_size> <!-- La size del risultato rappresentato in KB -->
 			<task_length>5000</task_length> <!-- la lunghezza del taks rappresentata in Million Istructions (MI) -->
+		</task>
+	</application>
+
+	<application name="Video Gaming">
+		<type>Normal</type>
+		<container>
+			<container_size>1000000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
+			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
+			<shared>false</shared> <!-- se il container deve essere usato da più edge device diversi -->
+		</container>
+        <users_type>[80,4]</users_type> <!--in this case 10 users "1" type-->
+		<task>
+			<latency>0.05</latency> <!-- a great number represents no latency-sensitivity -->
+			<request_size>10</request_size> <!-- La size della request rappresentata in KB -->
+			<results_size>10</results_size> <!-- La size del risultato rappresentato in KB -->
+			<task_length>100</task_length> <!-- la lunghezza del taks rappresentata in Million Istructions (MI) -->
 		</task>
 	</application>
 

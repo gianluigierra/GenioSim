@@ -18,10 +18,18 @@
 
     <user type="3">
 		<access_pattern>random</access_pattern>
-        <rate>10</rate> <!-- requests per minute -->
+        <rate>20</rate> <!-- requests per minute -->
         <start>5</start> <!--Time in minutes-->
         <duration>45</duration> <!--Time in minutes-->
         <interval>15</interval> <!--Time in minutes-->
+	</user>
+
+    <user type="4">
+		<access_pattern>random</access_pattern>
+        <rate>180</rate> <!-- requests per minute -->
+        <start>10</start> <!--Time in minutes-->
+        <duration>10</duration> <!--Time in minutes-->
+        <interval>20</interval> <!--Time in minutes-->
 	</user>
 
 </users>
