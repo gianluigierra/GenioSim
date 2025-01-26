@@ -195,7 +195,7 @@ public abstract class ContainerOrchestrator extends SimEntity {
 		return architectureLayers;
 	}
 
-	static public List<ComputingNode> getNodeList(){
+	public List<ComputingNode> getNodeList(){
 		return nodeList;
 	}
 

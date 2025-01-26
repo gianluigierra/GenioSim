@@ -19,7 +19,6 @@
 
 	<application name="E-Health">
 		<type>Normal</type>
-		<rate>10</rate>
 		<container>
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->
@@ -37,7 +36,6 @@
 
 	<application name="Smart City">
 		<type>Normal</type>
-		<rate>10</rate>
 		<container>
 			<container_size>100000</container_size> <!-- La size del container rappresentata in KB, 1.000.000 = 1GB -->
 			<container_request_size>1</container_request_size> <!-- La size della request rappresentata in KB -->

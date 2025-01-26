@@ -22,11 +22,9 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 //import di simulazione
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
-import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
-import com.mechalikh.pureedgesim.taskgenerator.Task;
-import com.mechalikh.pureedgesim.datacentersmanager.ComputingNode;
+import com.mechalikh.pureedgesim.taskgenerator.Container;
 
-public class DQNAgent3 extends DQNAgentAbstract{
+public class DQNAgent extends DQNAgentAbstract{
     
     // Oggetti DQN
     public MultiLayerNetwork qNetwork;
@@ -46,9 +44,8 @@ public class DQNAgent3 extends DQNAgentAbstract{
     //variabili per esecuzione
     private int epsilonUpdateCounter = 0;
     private int targetUpdateCounter = 0;
-    private CustomOrchestrator simOrchestrator;
-    private SimulationManager simulationManager;
     private String modelPath;
+    private DQNhelper DQNhelper;
 
     //questi servono solo per printare debug
     private boolean printNodeDestination = false;
@@ -57,20 +54,18 @@ public class DQNAgent3 extends DQNAgentAbstract{
     private int totalReward = 0;
 
     //per iniziare la simulazione da zero
-    public DQNAgent3(CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent(DQNhelper dqNhelper) {
         replayBuffer = new ReplayBuffer(replayMemory);
-        simOrchestrator = orch;
-        simulationManager = sm;
+        this.DQNhelper = dqNhelper;
         qNetwork = createNetwork();
         targetNetwork = createNetwork();
     }
 
     //per recuperare un agente
-    public DQNAgent3(String pathToNetwork, CustomOrchestrator orch, SimulationManager sm) {
+    public DQNAgent(DQNhelper dqNhelper, String pathToNetwork) {
         replayBuffer = new ReplayBuffer(replayMemory);
+        this.DQNhelper = dqNhelper;
         modelPath = pathToNetwork;
-        simOrchestrator = orch;
-        simulationManager = sm;
         loadModel(pathToNetwork);
     }
     
@@ -90,6 +85,10 @@ public class DQNAgent3 extends DQNAgentAbstract{
                     .activation(Activation.RELU)
                     .weightInit(WeightInit.XAVIER)
                     .build())
+            .layer(new DenseLayer.Builder().nIn(neuralNetworkSize).nOut(neuralNetworkSize)
+                    .activation(Activation.RELU)
+                    .weightInit(WeightInit.XAVIER)
+                    .build())
             .layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                     .activation(Activation.IDENTITY)
                     .nIn(neuralNetworkSize).nOut(outputSize)
@@ -102,28 +101,28 @@ public class DQNAgent3 extends DQNAgentAbstract{
 
     private int getActionSize() {
         // Il numero di azioni corrisponde al numero di nodi disponibili
-        return simOrchestrator.nodeList.size();  // Restituisce il numero di nodi di calcolo disponibili
+        return DQNhelper.simOrchestrator.getNodeList().size();  // Restituisce il numero di nodi di calcolo disponibili
     } 
 
     private int getStateSize() {
-         return 5*simOrchestrator.nodeList.size() + 2;           
+        return 6*DQNhelper.simOrchestrator.getNodeList().size() + 2;           
     }
 
-    public int chooseAction(double[] state, String[] architecture, Task task) {
+    public int chooseAction(double[] state, String[] architecture, Container container) {
         Random rand = new Random();
         if (rand.nextDouble() < epsilon) {
             //esplorazione
             if(printNodeDestination) System.out.println("Scelta random, epsilon = " + epsilon);
-            return randChoice(architecture, task);
+            return randChoice(architecture, container);
         } else {
             //exploitation
             if(printNodeDestination) System.out.print("Scelta dalla rete neurale, ");
             // Get the action index based on the Q-values
             int k = 0;
-            while(k < simOrchestrator.nodeList.size()){
+            while(k < DQNhelper.simOrchestrator.getNodeList().size()){
                 int choice = getKthBestQAction(state, k); // Change the 1 to 2, 3, etc., for second, third best, etc.
-                if (simOrchestrator.offloadingIsPossible(task, simOrchestrator.nodeList.get(choice), simOrchestrator.getArchitectureLayers())) {
-                    if(printNodeDestination) System.out.println("nodo: " + simOrchestrator.nodeList.get(choice).getName() + ", Dimensionequeue = " + simOrchestrator.nodeList.get(choice).getTasksQueue().size() + ", epsilon = " + epsilon);  
+                if (DQNhelper.simOrchestrator.placementIsPossible(container, DQNhelper.simOrchestrator.getNodeList().get(choice), DQNhelper.simOrchestrator.getArchitectureLayers())) {
+                    if(printNodeDestination) System.out.println("nodo: " + DQNhelper.simOrchestrator.getNodeList().get(choice).getName() + ", Dimensionequeue = " + DQNhelper.simOrchestrator.getNodeList().get(choice).getTasksQueue().size() + ", epsilon = " + epsilon);  
                     return choice;
                 }
                 k++;
@@ -132,11 +131,11 @@ public class DQNAgent3 extends DQNAgentAbstract{
         }
     }
 
-    private int randChoice(String[] architecture, Task task){
+    private int randChoice(String[] architecture, Container container){
         Random rand = new Random();
         while(true){
             int random = rand.nextInt(getActionSize());
-            if(simOrchestrator.offloadingIsPossible(task, simOrchestrator.nodeList.get(random), simOrchestrator.getArchitectureLayers()))
+            if(DQNhelper.simOrchestrator.placementIsPossible(container, DQNhelper.simOrchestrator.getNodeList().get(random), DQNhelper.simOrchestrator.getArchitectureLayers()))
                 return random;
         }
     }
@@ -193,6 +192,8 @@ public class DQNAgent3 extends DQNAgentAbstract{
             inputs.putRow(i, input);  // Aggiungi lo stato all'array di input
             targets.putRow(i, target); // Aggiungi il target all'array di target
 
+            //qNetwork.fit(input, target);
+
             i++;
         }
         
@@ -200,48 +201,34 @@ public class DQNAgent3 extends DQNAgentAbstract{
         qNetwork.fit(inputs, targets);
     }
 
-    private int getAvgHistoryMapTasks(){
-        int avgSentTasks = 0;
-        for(int i = 0; i < simOrchestrator.nodeList.size(); i++){
-            avgSentTasks += simOrchestrator.historyMap.get(i);
-        } 
-        return avgSentTasks/simOrchestrator.nodeList.size();
-    }
-
-    public double grantReward(Task task){
+    public double grantReward(Container container, int action){
         double reward = 0.0;
 
-        //penalizzo il nodo se ha più task assegnati della media
-        if(simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size() == 0) reward +=1;
-        else reward -= simOrchestrator.nodeList.get(task.getAction()).getTasksQueue().size();
+        //inserire funzione di reward
 
-        // //penalizzo il nodo se ha più task inviati rispetto ai suoi compari
-        // if(simOrchestrator.nodeList.get(task.getAction()).getSentTasks()>getAvgHistoryMapTasks()) reward -= 1;
-        // //lo rewardo se ne ha di meno
-        // else reward += 1;
+        if(printNodeDestination) System.out.println("Nodo: "+DQNhelper.simOrchestrator.getNodeList().get(action).getName()+", reward: " + reward);                                                            
 
-        if(printNodeDestination) System.out.println("Nodo: "+simOrchestrator.nodeList.get(task.getAction()).getName()+", reward: " + reward);
-        
         //aggiorno il counter della epsilon
         epsilonUpdateCounter++;
 
         this.totalReward += reward;
+
         return reward;
     }
 
-    public void DQN(Task task, boolean isDone){
+    public void DQN(Container container, double [] state, double [] nextState, int action, boolean isDone){
 
-        double reward = grantReward(task); 
+        double reward = grantReward(container); 
 
         // Aggiungi l'esperienza nel replay buffer
-        replayBuffer.add(new Experience(task.getCurrentState(), task.getAction(), reward, task.getNextState(), isDone));
+        replayBuffer.add(new Experience(state, action, reward, nextState, isDone));
 
         if (replayBuffer.size() > batchSize){
             updateNetwork(batchSize);
         }
      
         //printa la epsilon ogni 5% della simulazione
-        if(simulationManager.getSimulation().clock()>(SimulationParameters.simulationDuration/20*printEpsilon) && doPrintEpsilon) {
+        if(DQNhelper.simulationManager.getSimulation().clock()>(SimulationParameters.simulationDuration/20*printEpsilon) && doPrintEpsilon) {
             System.out.print("# Epsilon: " + (int) (epsilon*100) + "% #");
             printEpsilon++;
         }
@@ -309,11 +296,10 @@ public class DQNAgent3 extends DQNAgentAbstract{
     }
 
     public void IterationEnd() {
-        for(int i = 0; i < simOrchestrator.nodeList.size(); i++){
-            System.out.println("Nodo " + simOrchestrator.nodeList.get(i).getName());
-            System.out.println("    tasks offloaded: " + simOrchestrator.nodeList.get(i).getSentTasks());
-            System.out.println("    tasks orchestrated: " + simOrchestrator.historyMap.get(i));
-            System.out.println("    totalReward: " + totalReward);
+        for(int i = 0; i < DQNhelper.simOrchestrator.getNodeList().size(); i++){
+            System.out.println("Nodo " + DQNhelper.simOrchestrator.getNodeList().get(i).getName());
+            System.out.println("    tasks offloaded: " + DQNhelper.simOrchestrator.getNodeList().get(i).getSentTasks());
+            System.out.println("    tasks orchestrated: " + DQNhelper.simOrchestrator.getNodeList().get(i));
         }
 
     }

@@ -34,15 +34,20 @@ import com.mechalikh.pureedgesim.datacentersmanager.NuovaCartellaVM.VM;
 import com.mechalikh.pureedgesim.network.NetworkLink;
 import com.mechalikh.pureedgesim.scenariomanager.SimulationParameters;
 import com.mechalikh.pureedgesim.simulationengine.Event;
+import com.mechalikh.pureedgesim.simulationengine.OnSimulationEndListener;
 import com.mechalikh.pureedgesim.simulationmanager.SimulationManager;
 import com.mechalikh.pureedgesim.taskgenerator.Container;
+import com.mechalikh.pureedgesim.taskorchestrator.DQN.DQNhelper;
 
-public class DefaultContainerOrchestrator extends ContainerOrchestrator {
+public class DefaultContainerOrchestrator extends ContainerOrchestrator implements OnSimulationEndListener{
 	//questa lista contiene solo i nodi "grossi", ossia i DataCenter (Edge o Cloud)
 	protected List<ComputingNode> bigNodeList = new ArrayList<>();
 	public Map<Integer, List<Container>> bigNodeSharedHistoryMap = new LinkedHashMap<>();			//usata per valutare quanti container shared sono istanziati su un DataCenter
 	public Map<Integer, List<Container>> bigNodeHistoryMap = new LinkedHashMap<>();  				//usata per valutare quanti container non shared sono istanziati su un DataCenter
 	public Map<Integer, Integer> historyMap = new LinkedHashMap<>();								//usata per valutare quanti container sono istanziati su un nodo di nodeList
+
+	//DQNHelper
+	DQNhelper DQNhelper = null;
 
 	public DefaultContainerOrchestrator(SimulationManager simulationManager) {
 		super(simulationManager);
@@ -70,6 +75,9 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			bigNodeSharedHistoryMap.put(i, new ArrayList<Container>());
 			bigNodeHistoryMap.put(i, new ArrayList<Container>());
 		}
+		// If DQN is the selected algorithm then initialize the DQNHelper
+		if(algorithmName.equals("DQN"))
+			DQNhelper = new DQNhelper(this, simulationManager);
 	}
 
 	// rimuovo i container dalle historyMaps (historyMap, bigNodeHistoryMap)
@@ -83,6 +91,10 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			if(bigNodeHistoryMap.get(i).contains(container))
 				bigNodeHistoryMap.get(i).remove(container);
 		}
+		//rimuovo il container dalla historyamap del DQN Helper
+		if(algorithmName.equals("DQN"))
+			DQNhelper.removeContainerFromHistoryMap(container);
+
 		//System.out.println("Ho effettuato l'unplacement del container " + container.getId() + " relativo all'app " + container.getAssociatedAppName() 
 		//+ " piazzato sul nodo " + container.getPlacementDestination().getName());
 	}
@@ -99,6 +111,8 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 			return greedyChoice(architecture, container);
 		} else if ("MULTI_OBIETTIVO".equals(algorithmName)) {
 			return MultiObiettivo(architecture, container);
+		} else if ("DQN".equals(algorithmName)) {
+			return DQNhelper.DoDQN(architecture, container);
 		} else if (algorithmName.contains("LATENCY")) {
 			return selectBestLatencyDataCenter(architecture, container);
 		}else if (algorithmName.contains("RATE")) {
@@ -608,10 +622,17 @@ public class DefaultContainerOrchestrator extends ContainerOrchestrator {
 	@Override
 	public void notifyOrchestratorOfContainerExecution(Container container) {
 		// Arriva quando l'orchestratore viene notificato del placement del container
-
+		if(algorithmName.equals("DQN"))																	//notifico il DQNhelper dell'avvenuto placement
+			DQNhelper.notifyOrchestratorOfContainerExecution(container);												
 		// System.out.println("Sono l'orchestratore e sono stato notificato del download
 		// del container " + container.getId() + " da parte del nodo " +
 		// container.getPlacementDestination().getName());
+	}
+
+	@Override
+	public void onSimulationEnd() {
+		if(algorithmName.equals("DQN"))																	//notifico il DQNhelper della fine della simulazione
+			DQNhelper.simulationEnd();
 	}
 
 }

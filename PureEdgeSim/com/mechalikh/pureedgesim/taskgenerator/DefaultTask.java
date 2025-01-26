@@ -123,55 +123,6 @@ public class DefaultTask extends TaskAbstract {
 	}
 
 	/**
-	 * sets associated current state previous of execution
-	 */
-	@Override
-	public void setCurrentState(double[] currentState){
-		this.currentState = currentState;
-	}
-
-	/**
-	 * sets associated next state previous of execution
-	 */
-	@Override
-	public void setNextState(double[] nextState){
-		this.nextState = nextState;
-	}
-
-	/**
-	 * sets The associated action previous of execution
-	 */
-	@Override
-	public void setAction(int action){
-		this.action = action;
-	}
-	
-	/**
-	 * gets associated current state previous of execution
-	 */
-	@Override
-	public double[] getCurrentState(){
-		return this.currentState;
-	}
-	
-	/**
-	 * gets associated current state previous of execution
-	 */
-	@Override
-	public double[] getNextState(){
-		return this.nextState;
-	}
-
-	/**
-	 * gets The associated action previous of execution
-	 */
-	@Override
-	public int getAction(){
-		return this.action;
-	}
-
-
-	/**
 	 * Sets the associated application name
 	 *
 	 * @param the associated application name
