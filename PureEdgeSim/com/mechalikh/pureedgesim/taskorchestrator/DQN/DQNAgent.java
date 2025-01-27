@@ -48,7 +48,7 @@ public class DQNAgent extends DQNAgentAbstract{
     private DQNhelper DQNhelper;
 
     //questi servono solo per printare debug
-    private boolean printNodeDestination = false;
+    private boolean printNodeDestination = true;
     private int printEpsilon = 1;
     private boolean doPrintEpsilon = SimulationParameters.neuralTraining;
     private int totalReward = 0;
@@ -105,7 +105,7 @@ public class DQNAgent extends DQNAgentAbstract{
     } 
 
     private int getStateSize() {
-        return 6*DQNhelper.simOrchestrator.getNodeList().size() + 2;           
+        return DQNhelper.stateSize * DQNhelper.simOrchestrator.getNodeList().size() + 3;           
     }
 
     public int chooseAction(double[] state, String[] architecture, Container container) {
@@ -205,11 +205,16 @@ public class DQNAgent extends DQNAgentAbstract{
         double reward = 0.0;
 
         //inserire funzione di reward
+        if(DQNhelper.simOrchestrator.getNodeList().get(action).getType().equals(SimulationParameters.TYPES.VM_EDGE)) reward +=1;
+        else reward -= 1;
 
         if(printNodeDestination) System.out.println("Nodo: "+DQNhelper.simOrchestrator.getNodeList().get(action).getName()+", reward: " + reward);                                                            
 
         //aggiorno il counter della epsilon
         epsilonUpdateCounter++;
+
+        //aggiorno il contatore della print della epsilon
+        printEpsilon++;
 
         this.totalReward += reward;
 
@@ -227,10 +232,10 @@ public class DQNAgent extends DQNAgentAbstract{
             updateNetwork(batchSize);
         }
      
-        //printa la epsilon ogni 5% della simulazione
-        if(DQNhelper.simulationManager.getSimulation().clock()>(SimulationParameters.simulationDuration/20*printEpsilon) && doPrintEpsilon) {
+        //printa la epsilon ogni 20 container piazzati
+        if(printEpsilon%20==0 && doPrintEpsilon) {
             System.out.print("# Epsilon: " + (int) (epsilon*100) + "% #");
-            printEpsilon++;
+            printEpsilon = 0;
         }
 
         //aggiorna la epsilon
@@ -296,12 +301,6 @@ public class DQNAgent extends DQNAgentAbstract{
     }
 
     public void IterationEnd() {
-        for(int i = 0; i < DQNhelper.simOrchestrator.getNodeList().size(); i++){
-            System.out.println("Nodo " + DQNhelper.simOrchestrator.getNodeList().get(i).getName());
-            System.out.println("    tasks offloaded: " + DQNhelper.simOrchestrator.getNodeList().get(i).getSentTasks());
-            System.out.println("    tasks orchestrated: " + DQNhelper.simOrchestrator.getNodeList().get(i));
-        }
-
     }
     
 }

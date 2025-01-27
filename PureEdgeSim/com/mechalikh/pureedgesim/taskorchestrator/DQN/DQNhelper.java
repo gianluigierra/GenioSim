@@ -1,6 +1,7 @@
 package com.mechalikh.pureedgesim.taskorchestrator.DQN;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class DQNhelper {
     // Parametri DQN
     private DQNAgentAbstract m_agent = null;
     protected double [] stateVector;
-    protected int stateSize = 1;
+    protected int stateSize = 5;
 
     //variabili per esecuzione
     public boolean IsTrainingOn;
@@ -40,17 +41,26 @@ public class DQNhelper {
         algorithmName = SimulationParameters.taskOrchestrationAlgorithm;
         String modelPath = SimulationParameters.settingspath + SimulationParameters.simName + "/";
         m_agent = new DQNAgent(this, modelPath);
-        stateVector = new double[simOrchestrator.getNodeList().size()*stateSize];
-    }
 
+        //inizializzo il vettore di stato
+        stateVector = new double[simOrchestrator.getNodeList().size()*stateSize + 3];
+        for(int i = 0; i < this.simOrchestrator.getNodeList().size(); i++){
+            ComputingNode node = this.simOrchestrator.getNodeList().get(i);
+    
+            stateVector[i*stateSize] = node.getNumberOfCPUCores();                  // Ottieni il numero di cores
+            stateVector[i*stateSize+1] = node.getMipsPerCore();                     // Ottieni il numero di task orchestrati
+            stateVector[i*stateSize+2] = node.getAvailableRam();                    // Ottieni la ram del nodo
+            stateVector[i*stateSize+3] = node.getAvailableStorage();                // Ottieni lo storage del nodo
+            stateVector[i*stateSize+4] = 0;                                         // 0 container piazzati sul nodo
+        }
+    }
 
     public int DoDQN(String[] architecture, Container container) {
         // aggiungi il task alla lista dei task orchestrati
         containerList.add(container);
 
         // Ottiene lo stato attuale basato sui nodi disponibili
-        double[] state;
-        state = getCurrentState(simOrchestrator.getNodeList(), container);
+        double[] state = Arrays.copyOf(stateVector, stateVector.length);
     
         // Ciclo su tutte le possibili destinazioni per scegliere la migliore azione
         int action;
@@ -67,41 +77,34 @@ public class DQNhelper {
         // Esegui l'azione e avanza verso lo stato successivo
         PerformAction(action, container);
 
+        // Ottiene lo stato attuale basato sui nodi disponibili dopo l'azione eseguita
+        double[] nextState = Arrays.copyOf(stateVector, stateVector.length);
+
+        //effettuo DQN ed aggiorno l'Agent
+        m_agent.DQN(container, state, nextState, action, IsTrainingOn);
+
         return action;
-    
     }
     
-    private double[] getCurrentState(List<ComputingNode> nodeList, Container container) {
-        double[] state = new double[nodeList.size() * 6 + 2]; // 6 valori per nodo (CPU disponibili, FailureRate, mipspercore, CPU, RAM e Storage) + 2 variabili
+    private void getNextState(int action, Container container) {
+
+        double ram = stateVector[action * stateSize + 2] - container.getContainerSizeInMBytes();                        //modifico la ram disponibile del nodo
+        double storage = stateVector[action * stateSize + 3] - container.getContainerSizeInMBytes();                    //modifico lo storage disponibile sul nodo
+        double containersPlaced = stateVector[action * stateSize + 4]  + 1;                                             //modifico il numero di container piazzati sul nodo
     
-        // Aggiungi i valori per ogni nodo nella nodeList
-        for (int i = 0; i < nodeList.size(); i++) {
-            ComputingNode node = nodeList.get(i);
-    
-            double availableCores = node.getAvailableCores();           // Ottieni il carico CPU del nodo
-            double failureRate = node.getFailureRate();                 // Ottieni il failure rate del nodo
-            double mipsPerCore = node.getMipsPerCore();                 // Ottieni il numero di task orchestrati
-            double avgCpuUtilization = node.getAvgCpuUtilization();     // Ottieni l'utilizzo medio di CPU
-            double ram = node.getAvailableRam();                        //Ottieni la ram del nodo
-            double storage = node.getAvailableStorage();                //Ottieni lo storage del nodo
-    
-            state[i * 6] = availableCores;                              // Metti il valore di CPU load
-            state[i * 6 + 1] = mipsPerCore;                             // Metti il numero di sentTasks
-            state[i * 6 + 2] = ram;                                     // Metti la ram 
-            state[i * 6 + 3] = storage;                                 // Metti lo storage
-            state[i * 6 + 4] = avgCpuUtilization;                       // Metti il consumio medio di CPU
-            state[i * 6 + 5] = failureRate;                             // Metti il failure rate medio 
-        }
+        stateVector[action * stateSize + 2] = ram;                             // Metti il numero di sentTasks
+        stateVector[action * stateSize + 3] = storage;                         // Metti la ram 
+        stateVector[action * stateSize + 4] = containersPlaced;                // Metti i container piazzati
     
         // Aggiungi i valori globali
-        double containerSize = container.getContainerSizeInBits();                                                                                     // size del task in bytes
+        double containerSize = container.getContainerSizeInBits();                                                                     // size del task in bytes
         double maxLatency = SimulationParameters.applicationList.get(container.getApplicationID()).getLatency();                       //latency max del task
+        int appID = container.getApplicationID();                                                                                      //id dell'applicazione
     
-        int globalStartIndex = nodeList.size() * 6;                     // Indice di partenza per i valori globali
-        state[globalStartIndex] = maxLatency;                           // Aggiungi maxlatency del task
-        state[globalStartIndex + 1] = containerSize;                    // Aggiungi tasksize
-    
-        return state;
+        int globalStartIndex = this.simOrchestrator.getNodeList().size() * stateSize;                     // Indice di partenza per i valori globali
+        stateVector[globalStartIndex] = maxLatency;                                                       // Aggiungi maxlatency del task
+        stateVector[globalStartIndex + 1] = containerSize;                                                // Aggiungi tasksize
+        stateVector[globalStartIndex + 2] = appID;                                                        // Aggiungi IDApp
     }
 
     private void PerformAction(int action, Container container) {
@@ -111,23 +114,33 @@ public class DQNhelper {
         // Send this container to this computing node
 		container.setPlacementDestination(node);
 
+        //simula nello stateVector l'esito del placement
+        getNextState(action, container);
+
 		// Application has been deployed
 		simulationManager.getSimulationLogger().deepLog(simulationManager.getSimulation().clock() + ": " + this.getClass() + " Task: " + container.getId() + " assigned to " + node.getType() + " Computing Node: " + node.getId());
     }
 
     public void notifyOrchestratorOfContainerExecution(Container container) {
-        double[] nextstate = getCurrentState(simOrchestrator.getNodeList(), container);
+	}
+    
+    public void removeContainerFromHistoryMap(Container container){
+        //rimuove il container dalla historymap
+        containerStateHistoryMap.remove(container);
+        //aggiunge allo state vector i parametri del container
         int action = -1;
         for(int i = 0; i < simOrchestrator.getNodeList().size(); i++){
             for(Container cont : simOrchestrator.getNodeList().get(i).getContainerList())
                 if(cont.equals(container))
                     action = i;
         }
-        m_agent.DQN(container, containerStateHistoryMap.get(container), nextstate, action, true);
-	}
+        double ram = stateVector[action * stateSize + 2] + container.getContainerSizeInMBytes();                        //Ottieni la ram del nodo
+        double storage = stateVector[action * stateSize + 3] + container.getContainerSizeInMBytes();                    //Ottieni lo storage del nodo
+        double containersPlaced = stateVector[action * stateSize + 3] - 1;                                              //Ottieni container piazzati
     
-    public void removeContainerFromHistoryMap(Container container){
-        containerStateHistoryMap.remove(container);
+        stateVector[action * stateSize + 2] = ram;                             // Metti il numero di sentTasks
+        stateVector[action * stateSize + 3] = storage;                         // Metti la ram 
+        stateVector[action * stateSize + 4] = containersPlaced;                // Metti container piazazti
     }
 
     public void simulationEnd(){
