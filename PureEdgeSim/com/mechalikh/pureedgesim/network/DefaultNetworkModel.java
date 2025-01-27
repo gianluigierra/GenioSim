@@ -444,15 +444,7 @@ public class DefaultNetworkModel extends NetworkModel {
 	}
 
 	protected void executeTaskOrDownloadContainer(TransferProgress transfer) {
-		if (SimulationParameters.enableRegistry && "CLOUD".equals(SimulationParameters.registryMode)
-				&& !(transfer.getTask().getOffloadingDestination()).getType().equals(TYPES.CLOUD)) {
-			// If the registry is enabled and the task is offloaded to the edge data centers
-			// or the mist nodes (edge devices),
-			// then download the container
-			scheduleNow(this, DefaultNetworkModel.DOWNLOAD_CONTAINER, transfer.getTask());
-
-		} else// if the registry is disabled, execute directly the task
-			scheduleNow(simulationManager, DefaultSimulationManager.EXECUTE_TASK, transfer.getTask());
+		scheduleNow(simulationManager, DefaultSimulationManager.EXECUTE_TASK, transfer.getTask());
 	}
 
 	protected void offloadingRequestRecievedByOrchestrator(TransferProgress transfer) {

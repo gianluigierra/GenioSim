@@ -64,8 +64,6 @@ public class ParametersParser extends FileParserAbstract {
 			SimulationParameters.edgeDataCentersRange = (int) assertDouble(prop, "edge_datacenters_coverage",
 					value -> (value > 0), "> 0");
 
-			SimulationParameters.enableRegistry = Boolean.parseBoolean(prop.getProperty("enable_registry").trim());
-			SimulationParameters.registryMode = prop.getProperty("registry_mode").trim();
 			SimulationParameters.enableOrchestrators = Boolean
 					.parseBoolean(prop.getProperty("enable_orchestrators").trim());
 			SimulationParameters.deployOrchestrators = prop.getProperty("deploy_orchestrator").trim();

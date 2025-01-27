@@ -239,58 +239,7 @@ public abstract class Orchestrator extends SimEntity {
 	}
 
 	public boolean offloadingIsPossible(Task task, ComputingNode node, String[] architectureLayers) {					//modificato per visibilità degli agenti DQN, era protected
-		boolean offloadingpossible = true;
-		if(!offloadingpossible){
-			SimulationParameters.TYPES nodeType = node.getType();
-
-		
-			System.out.print("\n");
-			System.out.println("Nodo destinazione di offload = " + node.getName());
-			System.out.println("UpLink dell'edge device associato al task = " + task.getEdgeDevice().getCurrentLink(LinkOrientation.UP_LINK).getDst().getName());
-			System.out.print("\n\n");
-			System.out.println("Nodo destinazione di offload = " + node.getName());
-			System.out.println("UpLink dell'orchestrator associato al task = " + task.getOrchestrator().getCurrentLink(LinkOrientation.UP_LINK).getDst().getName());
-			System.out.print("\n\n");
-			System.out.println("Nodo destinazione di offload = " + node.getName());
-			System.out.println("Orchestrator associato al task = " + task.getOrchestrator().getType());
-			System.out.print("\n\n\n\n");
-
-			return (
-				
-					(arrayContains(architectureLayers, "Cloud") && nodeType == SimulationParameters.TYPES.VM_CLOUD) // cloud computing
-																
-																|| 
-					
-					(
-						arrayContains(architectureLayers, "Edge") && nodeType == SimulationParameters.TYPES.VM_EDGE // Edge computing. Compare destination (edge data server) and origin (edge device) locations, if they are in same area offload to this edge data server
-																	&& 
-						(
-							(node == task.getEdgeDevice().getCurrentLink(LinkOrientation.UP_LINK).getDst()) // or compare the location of the orchestrator
-																		|| 
-							(node == task.getOrchestrator().getCurrentLink(LinkOrientation.UP_LINK).getDst())
-						)
-					)
-
-																|| 
-
-					//Non prendiamo in considerazione scenari Mist quindi questo non si verifica mai.
-					(
-						arrayContains(architectureLayers, "Mist") && nodeType == SimulationParameters.TYPES.EDGE_DEVICE // Mist computing. Compare destination (edge device) location and origin (edge device) location, if they are in same area offload to this device
-																	&& 
-						(
-							sameLocation(node, task.getEdgeDevice(), SimulationParameters.edgeDevicesRange) // or compare the location of their orchestrators
-																		|| 
-							(SimulationParameters.enableOrchestrators && sameLocation(node, task.getOrchestrator(), SimulationParameters.edgeDevicesRange))
-						)
-																	&& 
-																!node.isDead() 
-																	&& 
-																!node.isSensor()
-					)
-				
-				);
-		}
-		else return offloadingpossible;
+		return true;
 	}
 
 	public void setContainerToVM(Container container){
